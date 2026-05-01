@@ -1,10 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
+import {View, Image,Text,TouchableOpacity,StyleSheet,SafeAreaView,
   StatusBar,
   ScrollView,
 } from 'react-native';
@@ -31,12 +26,12 @@ export default function WhereAreYouFromScreen({ navigation }:any) {
         <Text style={styles.title}>Where are you{'\n'}from?</Text>
 
         {/* Flags Grid — replace with actual image asset when ready */}
-        {/* <Image source={require('../assets/flags.png')} style={styles.flagsImage} /> */}
-        <View style={styles.flagsPlaceholder}>
+        <Image source={require('../../assets/images/flags.jpeg')} style={styles.flagsImage} />
+        {/* <View style={styles.flagsPlaceholder}>
           <Text style={styles.flagsGrid}>
             {'🇳🇬 🇬🇭 🇰🇪 🇿🇦 🇪🇹\n🇪🇬 🇨🇲 🇺🇬 🇸🇳 🇹🇿\n🇷🇼 🇨🇮 🇲🇦 🇩🇿 🇦🇴\n🇿🇲 🇿🇼 🇲🇿 🇹🇳 🇸🇩\n🇲🇱 🇧🇫 🇳🇪 🇹🇩 🇸🇴'}
           </Text>
-        </View>
+        </View> */}
 
         {/* Form */}
         <View style={styles.form}>
@@ -106,13 +101,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     letterSpacing: 4,
   },
-  // flagsImage: {
-  //   width: '100%',
-  //   height: 220,
-  //   borderRadius: 16,
-  //   resizeMode: 'cover',
-  //   marginBottom: 32,
-  // },
+  flagsImage: {
+    width: '100%',
+    height: 220,
+    borderRadius: 16,
+    resizeMode: 'cover',
+    marginBottom: 32,
+  },
   form: {
     width: '100%',
   },

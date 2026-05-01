@@ -8,6 +8,8 @@ import GetStartedScreen from './screens/GetStartedScreen';
 import WhereAreYouFromScreen from './screens/WhereAreYouFromScreen';
 import HomeScreen from './screens/HomeScreen';
 import YourCultureScreen from './screens/YourCultureScreen';
+import HistoryScreen from './screens/HistoryScreen';
+import LanguageScreen from './screens/LanguageScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -25,6 +27,8 @@ export default function AppNavigator() {
       <Stack.Screen name="WhereAreYouFrom" component={WhereAreYouFromScreen} />
       <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="YourCulture" component={YourCultureScreen} />
+      <Stack.Screen name="History" component={HistoryScreen} />
+      <Stack.Screen name="Language" component={LanguageScreen} />
     </Stack.Navigator>
   );
 }

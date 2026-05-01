@@ -1,12 +1,30 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 
-export default function CategoryCard({ title, imageSource, onDiscover, imageLeft = false }) {
+export default function CategoryCard({
+  title,
+  imageSource,
+  onDiscover,
+  imageLeft = false,
+  centered = false,
+}) {
+  // Centered style — title and button centered, no image (used in YourCulture)
+  if (centered) {
+    return (
+      <View style={styles.centeredCard}>
+        <Text style={styles.centeredTitle}>{title}</Text>
+        <TouchableOpacity style={styles.discoverBtn} activeOpacity={0.8} onPress={onDiscover}>
+          <Text style={styles.discoverText}>Discover</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  // Default style — image on left or right
   return (
     <View style={styles.card}>
       {imageLeft ? (
         <>
-          {/* Image on left */}
           <View style={styles.imageWrapper}>
             {imageSource ? (
               <Image source={imageSource} style={styles.image} />
@@ -23,7 +41,6 @@ export default function CategoryCard({ title, imageSource, onDiscover, imageLeft
         </>
       ) : (
         <>
-          {/* Title + button on left, image on right */}
           <View style={styles.contentLeft}>
             <Text style={styles.title}>{title}</Text>
             <TouchableOpacity style={styles.discoverBtn} activeOpacity={0.8} onPress={onDiscover}>
@@ -44,6 +61,7 @@ export default function CategoryCard({ title, imageSource, onDiscover, imageLeft
 }
 
 const styles = StyleSheet.create({
+  // Default card (with image)
   card: {
     backgroundColor: '#FFF3E0',
     borderRadius: 16,
@@ -74,18 +92,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     lineHeight: 21,
   },
-  discoverBtn: {
-    backgroundColor: '#F5A623',
-    paddingVertical: 7,
-    paddingHorizontal: 18,
-    borderRadius: 20,
-    alignSelf: 'flex-start',
-  },
-  discoverText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '700',
-  },
   imageWrapper: {
     width: 90,
     height: 90,
@@ -103,5 +109,38 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5C070',
     borderRadius: 12,
     opacity: 0.3,
+  },
+
+  // Centered card (no image)
+  centeredCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: '#F5A623',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  centeredTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#3B1F00',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+
+  // Shared
+  discoverBtn: {
+    backgroundColor: '#F5A623',
+    paddingVertical: 7,
+    paddingHorizontal: 24,
+    borderRadius: 20,
+    alignSelf: 'center',
+  },
+  discoverText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '700',
   },
 });

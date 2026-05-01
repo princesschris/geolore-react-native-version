@@ -19,29 +19,50 @@ const CULTURE_CATEGORIES = [
     key: 'history',
     title: 'History',
     screen: 'History',
-    imageLeft: false,
     // imageSource: require('../assets/history.png'),
   },
   {
     key: 'language',
     title: 'Language',
     screen: 'Language',
-    imageLeft: false,
     // imageSource: require('../assets/language.png'),
   },
   {
     key: 'food',
     title: 'Food',
     screen: 'Food',
-    imageLeft: false,
     // imageSource: require('../assets/food.png'),
   },
   {
     key: 'cultures',
     title: 'Cultures',
     screen: 'Cultures',
-    imageLeft: false,
     // imageSource: require('../assets/cultures.png'),
+  },
+  {
+    key: 'fashion',
+    title: 'Fashion',
+    screen: 'Fashion',
+    // imageSource: require('../assets/fashion.png'),
+  },
+  {
+    key: 'festivals',
+    title: 'Festivals',
+    screen: 'Festivals',
+    imageLeft: false,
+    imageSource: require('../../assets/images/deco_image.png'),
+  },
+  {
+    key: 'beliefs',
+    title: 'Beliefs',
+    screen: 'Beliefs',
+    // imageSource: require('../assets/beliefs.png'),
+  },
+  {
+    key: 'stories',
+    title: 'Stories',
+    screen: 'Stories',
+    // imageSource: require('../assets/stories.png'),
   },
 ];
 
@@ -97,7 +118,7 @@ export default function YourCultureScreen({ navigation, route }:any) {
             key={cat.key}
             title={cat.title}
             imageSource={cat.imageSource}
-            imageLeft={cat.imageLeft}
+            centered
             onDiscover={() => navigation?.navigate(cat.screen)}
           />
         ))}
@@ -174,3 +195,4 @@ const styles = StyleSheet.create({
     fontSize: 28,
   },
 });
+
