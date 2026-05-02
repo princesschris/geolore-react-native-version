@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
+import { Image, View, Text,
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
@@ -43,11 +41,9 @@ export default function RegisterScreen({ navigation }:any) {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Tiger Mascot */}
-        <View style={styles.mascotPlaceholder}>
-          <Text style={styles.mascotEmoji}>🐯</Text>
-        </View>
-
+        <Image source={require('../../assets/images/tiger.png')}
+  style={styles.mascot}
+/>
         <Text style={styles.title}>Register</Text>
 
         <View style={styles.form}>
@@ -150,9 +146,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 8,
   },
-  mascotEmoji: {
-    fontSize: 64,
-  },
+  mascot: {
+  width: 130,
+  height: 130,
+  resizeMode: 'contain',
+},
   title: {
     fontSize: 24,
     fontWeight: '800',

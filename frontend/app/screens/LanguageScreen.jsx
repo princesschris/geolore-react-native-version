@@ -89,11 +89,8 @@ export default function LanguagesScreen({ navigation, route }) {
             rating={teacher.rating}
             pricePerHr={teacher.pricePerHr}
             imageSource={teacher.imageSource}
-            onPress={() =>
-              navigation?.navigate('Teacher', {
-                teacher,
-              })
-            }
+            onPress={() => navigation?.navigate('Teacher', { teacher })}
+            onJoinClass={() => navigation?.navigate('IncomingClass', { teacher })}
           />
         ))}
 

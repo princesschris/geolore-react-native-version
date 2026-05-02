@@ -15,46 +15,60 @@ const StarRating = ({ rating = 3, max = 5 }) => (
   </View>
 );
 
-export default function TeacherCard({ name, location, rating, pricePerHr, imageSource, onPress }) {
+export default function TeacherCard({ name, location, rating, pricePerHr, imageSource, onPress, onJoinClass }) {
   return (
-    <TouchableOpacity style={styles.card} activeOpacity={0.85} onPress={onPress}>
-      <View style={styles.left}>
-        {/* Avatar */}
-        {imageSource ? (
-          <Image source={imageSource} style={styles.avatar} />
-        ) : (
-          <View style={styles.avatarPlaceholder}>
-            <Ionicons name="person" size={28} color="#C4A882" />
-          </View>
-        )}
-      </View>
-
-      <View style={styles.middle}>
-        <Text style={styles.meetText}>Meet</Text>
-        <Text style={styles.name}>{name}</Text>
-        <StarRating rating={rating} />
-        <Text style={styles.location}>Based in {location}</Text>
-      </View>
-
-      <View style={styles.right}>
-        <View style={styles.priceBadge}>
-          <Text style={styles.priceText}>${pricePerHr} PER/HR</Text>
+    <View style={styles.card}>
+      <TouchableOpacity style={styles.cardMain} activeOpacity={0.85} onPress={onPress}>
+        <View style={styles.left}>
+          {imageSource ? (
+            <Image source={imageSource} style={styles.avatar} />
+          ) : (
+            <View style={styles.avatarPlaceholder}>
+              <Ionicons name="person" size={28} color="#C4A882" />
+            </View>
+          )}
         </View>
-      </View>
-    </TouchableOpacity>
+
+        <View style={styles.middle}>
+          <Text style={styles.meetText}>Meet</Text>
+          <Text style={styles.name}>{name}</Text>
+          <StarRating rating={rating} />
+          <Text style={styles.location}>Based in {location}</Text>
+        </View>
+
+        <View style={styles.right}>
+          <View style={styles.priceBadge}>
+            <Text style={styles.priceText}>${pricePerHr} PER/HR</Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+
+      {/* Join Class Button */}
+      <TouchableOpacity
+        style={styles.joinButton}
+        activeOpacity={0.8}
+        onPress={onJoinClass}
+      >
+        <Ionicons name="videocam" size={15} color="#fff" />
+        <Text style={styles.joinButtonText}>Join Class</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: '#fff',
     borderRadius: 14,
     borderWidth: 1.5,
     borderColor: '#F5A623',
-    padding: 14,
     marginBottom: 14,
+    overflow: 'hidden',
+  },
+  cardMain: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 14,
     gap: 12,
   },
   left: {
@@ -113,5 +127,18 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '800',
     textAlign: 'center',
+  },
+  joinButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: '#2ECC71',
+    paddingVertical: 10,
+  },
+  joinButtonText: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '700',
   },
 });

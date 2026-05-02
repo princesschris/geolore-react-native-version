@@ -10,6 +10,10 @@ import HomeScreen from './screens/HomeScreen';
 import YourCultureScreen from './screens/YourCultureScreen';
 import HistoryScreen from './screens/HistoryScreen';
 import LanguageScreen from './screens/LanguageScreen';
+import TeacherScreen from './screens/TeacherScreen';
+import BookAppointmentScreen from './screens/BookAppointmentScreen';
+import IncomingClassScreen from './screens/IncomingClassScreen';
+import ClassSessionScreen from './screens/ClassSessionScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -29,6 +33,10 @@ export default function AppNavigator() {
       <Stack.Screen name="YourCulture" component={YourCultureScreen} />
       <Stack.Screen name="History" component={HistoryScreen} />
       <Stack.Screen name="Language" component={LanguageScreen} />
+      <Stack.Screen name="Teacher" component={TeacherScreen} />
+      <Stack.Screen name="BookAppointment" component={BookAppointmentScreen} />
+      <Stack.Screen name="IncomingClass" component={IncomingClassScreen} />
+      <Stack.Screen name="ClassSession" component={ClassSessionScreen} />
     </Stack.Navigator>
   );
 }

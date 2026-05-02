@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import {
+import { Image,
   View,
   Text,
   TouchableOpacity,
@@ -37,10 +37,9 @@ export default function LoginScreen({ navigation }:any) {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Tiger Mascot */}
-        <View style={styles.mascotPlaceholder}>
-          <Text style={styles.mascotEmoji}>🐯</Text>
-        </View>
+        <Image source={require('../../assets/images/tiger.png')}
+          style={styles.mascot}
+        />
 
         <Text style={styles.title}>Welcome Back</Text>
 
@@ -117,10 +116,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
-  },
-  mascotEmoji: {
-    fontSize: 68,
-  },
+  },mascot: {
+  width: 130,
+  height: 130,
+  resizeMode: 'contain',
+},
   title: {
     fontSize: 24,
     fontWeight: '800',
