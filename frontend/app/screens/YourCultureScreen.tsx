@@ -35,8 +35,8 @@ const CULTURE_CATEGORIES = [
   },
   {
     key: 'cultures',
-    title: 'Cultures',
-    screen: 'Cultures',
+    title: 'Traditions',
+    screen: 'Traditions',
     // imageSource: require('../assets/cultures.png'),
   },
   {
@@ -49,8 +49,7 @@ const CULTURE_CATEGORIES = [
     key: 'festivals',
     title: 'Festivals',
     screen: 'Festivals',
-    imageLeft: false,
-    imageSource: require('../../assets/images/deco_image.png'),
+    // imageSource: require('../assets/festivals.png'),
   },
   {
     key: 'beliefs',
@@ -68,7 +67,7 @@ const CULTURE_CATEGORIES = [
 
 export default function YourCultureScreen({ navigation, route }:any) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('Home');
+  
 
   // Culture name and flag can be passed via route params from WhereAreYouFrom
   // e.g. navigation.navigate('YourCulture', { culture: 'IGBO', flag: '🇳🇬' })
@@ -125,7 +124,7 @@ export default function YourCultureScreen({ navigation, route }:any) {
       </ScrollView>
 
       {/* Bottom Tab Bar */}
-      <BottomTabBar activeTab={activeTab} onTabPress={setActiveTab} />
+      <BottomTabBar />
     </SafeAreaView>
   );
 }
@@ -195,4 +194,3 @@ const styles = StyleSheet.create({
     fontSize: 28,
   },
 });
-

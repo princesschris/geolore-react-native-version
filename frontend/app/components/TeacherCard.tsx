@@ -15,7 +15,7 @@ const StarRating = ({ rating = 3, max = 5 }) => (
   </View>
 );
 
-export default function TeacherCard({ name, location, rating, pricePerHr, imageSource, onPress, onJoinClass }) {
+export default function TeacherCard({ name, location, rating, pricePerHr, imageSource, onPress, onJoinClass }:any) {
   return (
     <View style={styles.card}>
       <TouchableOpacity style={styles.cardMain} activeOpacity={0.85} onPress={onPress}>

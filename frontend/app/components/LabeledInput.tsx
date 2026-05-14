@@ -1,13 +1,7 @@
 import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 
-export default function LabeledInput({
-  label,
-  value,
-  onChangeText,
-  placeholder = '',
-  keyboardType = 'default',
-  autoCapitalize = 'none',
+export default function LabeledInput({label,value, onChangeText,placeholder = '',keyboardType = 'default', autoCapitalize = 'none',
   autoCorrect = false,
   secureTextEntry = false,
   showToggle = false,
@@ -65,8 +59,11 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   inputRow: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0D0B8',
+    backgroundColor:'#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E0D0B8',
+    paddingHorizontal: 12,
   },
   inputRowWithToggle: {
     flexDirection: 'row',

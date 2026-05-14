@@ -7,106 +7,72 @@ import {
   SafeAreaView,
   StatusBar,
   ScrollView,
+  Image,
 } from 'react-native';
-import Svg, {
-  Circle,
-  Ellipse,
-  Line,
-  Path,
-  Rect,
-  Polygon,
-} from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import SearchBar from '../components/SearchBar';
 import CategoryCard from '../components/CategoryCard';
 import BottomTabBar from '../components/BottomTabBar';
+import BuntingBanner from '../components/BuntingBanner';
 
-// Compact Globe + Tree for banner
-const GlobeWithTree = () => (
-  <Svg width="90" height="90" viewBox="0 0 70 70" fill="none">
-    <Circle cx="35" cy="35" r="32" stroke="#F5A623" strokeWidth="2" fill="none" />
-    <Ellipse cx="35" cy="35" rx="14" ry="32" stroke="#F5A623" strokeWidth="1.2" fill="none" />
-    <Line x1="3" y1="35" x2="67" y2="35" stroke="#F5A623" strokeWidth="1.2" />
-    <Line x1="7" y1="23" x2="63" y2="23" stroke="#F5A623" strokeWidth="0.8" />
-    <Line x1="7" y1="47" x2="63" y2="47" stroke="#F5A623" strokeWidth="0.8" />
-    <Path
-      d="M28 22 Q30 20 33 21 Q36 22 37 25 Q38 29 36 33 Q34 37 33 40 Q32 43 30 42 Q27 40 26 36 Q24 31 25 27 Z"
-      fill="#F5A623"
-      opacity="0.85"
-    />
-    <Rect x="33.5" y="15" width="2.5" height="10" rx="1.2" fill="#D97706" />
-    <Polygon points="34.5,4 40,13 29,13" fill="#F5A623" />
-    <Polygon points="34.5,8 41,17 28,17" fill="#F5A623" />
-    <Polygon points="34.5,12 42,21 27,21" fill="#D97706" opacity="0.75" />
-    <Path d="M34.5 25 Q30 29 26 29" stroke="#D97706" strokeWidth="1.2" fill="none" strokeLinecap="round" />
-    <Path d="M34.5 25 Q39 29 43 29" stroke="#D97706" strokeWidth="1.2" fill="none" strokeLinecap="round" />
-  </Svg>
-);
-
-// All home screen category cards
-// imageSource: replace require('../assets/...') with your actual images
 const CATEGORIES = [
   {
     key: 'culture',
     title: 'Learn About Your Culture',
     screen: 'YourCulture',
-    imageLeft: false,
     imageSource: require('../../assets/images/learn_about_your_culture_image.png'),
   },
   {
     key: 'aiTutor',
     title: 'AI Tutor',
     screen: 'AITutor',
-    imageLeft: false,
     imageSource: require('../../assets/images/ai_tutor_image.png'),
   },
   {
     key: 'community',
     title: 'Community',
     screen: 'Community',
-    imageLeft: false,
     imageSource: require('../../assets/images/community_image.png'),
   },
   {
     key: 'events',
     title: 'Events',
     screen: 'Events',
-    imageLeft: false,
     imageSource: require('../../assets/images/events_image.png'),
   },
   {
     key: 'language',
     title: 'Language',
     screen: 'Language',
-    imageLeft: false,
     imageSource: require('../../assets/images/language_image.png'),
   },
   {
     key: 'history',
     title: 'History',
     screen: 'History',
-    imageLeft: false,
     imageSource: require('../../assets/images/history_image.png'),
   },
   {
     key: 'food',
     title: 'Food',
     screen: 'Food',
-    imageLeft: false,
     imageSource: require('../../assets/images/food_image.png'),
   },
   {
     key: 'cultures',
-    title: 'Cultures',
-    screen: 'Cultures',
-    imageLeft: false,
+    title: 'Traditions',
+    screen: 'Traditions',
     imageSource: require('../../assets/images/culture_image.png'),
   },
 ];
 
-export default function HomeScreen({ navigation }:any) {
+export default function HomeScreen({ navigation }: any) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('Home');
+
+  // Filter categories based on search query
+  const filtered = CATEGORIES.filter((cat) =>
+    cat.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -128,7 +94,6 @@ export default function HomeScreen({ navigation }:any) {
         <TouchableOpacity style={styles.iconBtn}>
           <View>
             <Ionicons name="notifications-outline" size={20} color="#5C3A00" />
-            {/* Notification badge */}
             <View style={styles.badge}>
               <Text style={styles.badgeText}>5</Text>
             </View>
@@ -136,30 +101,43 @@ export default function HomeScreen({ navigation }:any) {
         </TouchableOpacity>
       </View>
 
+      {/* Bunting Banner */}
+      <BuntingBanner />
+
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         {/* Banner */}
         <View style={styles.banner}>
-          <Text style={styles.bannerText}>There&apos;s a whole world{'\n'}to discover</Text>
-          <GlobeWithTree />
+          <Text style={styles.bannerText}>There's a whole world{'\n'}to discover</Text>
+          <Image
+            source={require('../../assets/images/logo.png')}
+            style={styles.logo}
+          />
         </View>
 
         {/* Category Cards */}
-        {CATEGORIES.map((cat) => (
+        {filtered.map((cat) => (
           <CategoryCard
             key={cat.key}
             title={cat.title}
             imageSource={cat.imageSource}
-            imageLeft={cat.imageLeft}
             onDiscover={() => navigation?.navigate(cat.screen)}
           />
         ))}
+
+        {/* Empty search state */}
+        {filtered.length === 0 && (
+          <View style={styles.emptyState}>
+            <Ionicons name="search-outline" size={40} color="#C4A882" />
+            <Text style={styles.emptyText}>No results for "{searchQuery}"</Text>
+          </View>
+        )}
       </ScrollView>
 
-      {/* Bottom Tab Bar */}
-      <BottomTabBar activeTab={activeTab} onTabPress={setActiveTab} />
+      {/* Bottom Tab Bar — no props needed, uses useRoute internally */}
+      <BottomTabBar />
     </SafeAreaView>
   );
 }
@@ -207,9 +185,9 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   scrollContent: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 20,
+    paddingHorizontal: 20,
+    paddingTop: 6,
+    paddingBottom: 16,
   },
   banner: {
     backgroundColor: '#FFF3E0',
@@ -226,5 +204,19 @@ const styles = StyleSheet.create({
     color: '#5C3A00',
     lineHeight: 26,
     flex: 1,
+  },
+  logo: {
+    height: 100,
+    width: 100,
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingTop: 48,
+    gap: 12,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: '#A08060',
+    fontWeight: '600',
   },
 });

@@ -44,7 +44,7 @@ const TEACHERS = [
 
 export default function LanguagesScreen({ navigation, route }) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('Home');
+  const activeTab = 'Classes';
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -115,7 +115,7 @@ export default function LanguagesScreen({ navigation, route }) {
       </ScrollView>
 
       {/* Bottom Tab Bar */}
-      <BottomTabBar activeTab={activeTab} onTabPress={setActiveTab} />
+      <BottomTabBar activeTab={activeTab} />
     </SafeAreaView>
   );
 }

@@ -1,15 +1,15 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import SplashScreen from './screens/SplashScreen';
+import GeoLoreScreen from './screens/GeoLoreScreen';
 import RegisterScreen from './screens/RegisterScreen';
-import LoginScreen from './screens/LogInScreen';
-import GetStartedScreen from './screens/GetStartedScreen';
+import LoginScreen from './screens/LoginScreen';
+import WelcomeScreen from './screens/WelcomeScreen';
 import WhereAreYouFromScreen from './screens/WhereAreYouFromScreen';
 import HomeScreen from './screens/HomeScreen';
 import YourCultureScreen from './screens/YourCultureScreen';
 import HistoryScreen from './screens/HistoryScreen';
-import LanguageScreen from './screens/LanguageScreen';
+import LanguagesScreen from './screens/LanguagesScreen';
 import TeacherScreen from './screens/TeacherScreen';
 import BookAppointmentScreen from './screens/BookAppointmentScreen';
 import IncomingClassScreen from './screens/IncomingClassScreen';
@@ -19,28 +19,35 @@ import ClassesScreen from './screens/ClassesScreen';
 import ClassInfoScreen from './screens/ClassInfoScreen';
 import NoClassesScreen from './screens/NoClassesScreen';
 import FoodScreen from './screens/FoodScreen';
-import FoodDetailsScreen from './screens/FoodDetailsScreen'
-import TraditionScreen from './screens/TraditionsScreen';
-import TraditionDetailScreen from './screens/TraditionsDetailsScreen';
+import FoodDetailScreen from './screens/FoodDetailScreen';
+import TraditionsScreen from './screens/TraditionsScreen';
+import TraditionDetailScreen from './screens/TraditionDetailScreen';
+// import WelcomeBackScreen from './screens/WelcomeBackScreen';
 
 const Stack = createNativeStackNavigator();
 
-// Paste this Stack.Navigator inside your existing NavigationContainer in your root App.js
+// Use this inside your existing <NavigationContainer> in your root App.js
 export default function AppNavigator() {
   return (
     <Stack.Navigator
-      initialRouteName="Splash"
+      initialRouteName="GeoLore"
       screenOptions={{ headerShown: false }}
     >
-      <Stack.Screen name="Splash" component={SplashScreen} />
+      {/* Onboarding */}
+      <Stack.Screen name="GeoLore" component={GeoLoreScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="GetStarted" component={GetStartedScreen} />
+
+      {/* Post auth */}
+      <Stack.Screen name="Welcome" component={WelcomeScreen} />
+      <Stack.Screen name="WelcomeBack" component={WelcomeScreen} />
       <Stack.Screen name="WhereAreYouFrom" component={WhereAreYouFromScreen} />
+
+      {/* Main app */}
       <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="YourCulture" component={YourCultureScreen} />
       <Stack.Screen name="History" component={HistoryScreen} />
-      <Stack.Screen name="Language" component={LanguageScreen} />
+      <Stack.Screen name="Language" component={LanguagesScreen} />
       <Stack.Screen name="Teacher" component={TeacherScreen} />
       <Stack.Screen name="BookAppointment" component={BookAppointmentScreen} />
       <Stack.Screen name="IncomingClass" component={IncomingClassScreen} />
@@ -50,9 +57,17 @@ export default function AppNavigator() {
       <Stack.Screen name="ClassInfo" component={ClassInfoScreen} />
       <Stack.Screen name="NoClasses" component={NoClassesScreen} />
       <Stack.Screen name="Food" component={FoodScreen} />
-      <Stack.Screen name="FoodDetails" component={FoodDetailsScreen} />
-      <Stack.Screen name="Traditions" component={TraditionScreen} />
-      <Stack.Screen name="TraditionsDetail" component={TraditionDetailScreen} />
+      <Stack.Screen name="FoodDetail" component={FoodDetailScreen} />
+      <Stack.Screen name="Cultures" component={TraditionsScreen} />
+      <Stack.Screen name="CultureDetail" component={TraditionDetailScreen} />
+
+      {/* Tab screens — replace with real screens when built */}
+      <Stack.Screen name="Feed" component={HomeScreen} />
+      <Stack.Screen name="Profile" component={HomeScreen} />
+      <Stack.Screen name="Community" component={HomeScreen} />
+
+      {/* Uncomment as you build more screens: */}
+      {/* <Stack.Screen name="YourCulture" component={YourCultureScreen} /> */}
     </Stack.Navigator>
   );
 }

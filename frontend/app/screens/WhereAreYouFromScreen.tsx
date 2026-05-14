@@ -27,11 +27,7 @@ export default function WhereAreYouFromScreen({ navigation }:any) {
 
         {/* Flags Grid — replace with actual image asset when ready */}
         <Image source={require('../../assets/images/flags.jpeg')} style={styles.flagsImage} />
-        {/* <View style={styles.flagsPlaceholder}>
-          <Text style={styles.flagsGrid}>
-            {'🇳🇬 🇬🇭 🇰🇪 🇿🇦 🇪🇹\n🇪🇬 🇨🇲 🇺🇬 🇸🇳 🇹🇿\n🇷🇼 🇨🇮 🇲🇦 🇩🇿 🇦🇴\n🇿🇲 🇿🇼 🇲🇿 🇹🇳 🇸🇩\n🇲🇱 🇧🇫 🇳🇪 🇹🇩 🇸🇴'}
-          </Text>
-        </View> */}
+        
 
         {/* Form */}
         <View style={styles.form}>
@@ -53,15 +49,14 @@ export default function WhereAreYouFromScreen({ navigation }:any) {
             onChangeText={setCurrentLocation}
             autoCapitalize="words"
           />
-
-          <TouchableOpacity
+        </View>
+        <TouchableOpacity
             style={styles.doneButton}
             activeOpacity={0.8}
             onPress={handleDone}
           >
             <Text style={styles.doneButtonText}>Done</Text>
           </TouchableOpacity>
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -110,6 +105,10 @@ const styles = StyleSheet.create({
   },
   form: {
     width: '100%',
+    paddingVertical:10,
+    paddingHorizontal: 30,
+    borderWidth:0,
+
   },
   doneButton: {
     backgroundColor: '#F5A623',
