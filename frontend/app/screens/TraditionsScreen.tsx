@@ -57,7 +57,7 @@ export const TRADITIONS = [
   },
 ];
 
-export default function TraditionsScreen({ navigation }) {
+export default function TraditionsScreen({ navigation }:any) {
   const [searchQuery, setSearchQuery] = useState('');
   const [showAll, setShowAll] = useState(false);
 
@@ -91,7 +91,7 @@ export default function TraditionsScreen({ navigation }) {
               imageSource={tradition.imageSource}
               width={CARD_WIDTH}
               height={120}
-              onPress={() => navigation?.navigate('TraditionDetailsScreen', { tradition })}
+              onPress={() => navigation?.navigate('TraditionDetails', { tradition })}
             />
           ))}
         </View>

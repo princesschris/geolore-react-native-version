@@ -15,7 +15,7 @@ import BottomTabBar from '../components/BottomTabBar';
 import BuntingBanner from '../components/BuntingBanner';
 import SearchBar from '../components/SearchBar';
 
-export default function TraditionDetailScreen({ navigation, route }) {
+export default function TraditionDetailScreen({ navigation, route }:any) {
   
   const [searchQuery, setSearchQuery] = useState('');
 
