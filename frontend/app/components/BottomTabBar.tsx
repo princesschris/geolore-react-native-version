@@ -4,8 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
 const TABS = [
-  { key: 'Feed',      icon: 'book-outline',   activeIcon: 'book',   screen: 'Feed' },
-  { key: 'Learn',     icon: 'school-outline', activeIcon: 'school', screen: 'YourCulture' },
+  { key: 'Chat',      icon: 'chatbubble-outline',   activeIcon: 'chatbubble',   screen: 'AIChat' },
+  { key: 'Learn',     icon: 'book-outline', activeIcon: 'book', screen: 'YourCulture' },
   { key: 'Home',      icon: 'home-outline',   activeIcon: 'home',   screen: 'Home' },
   { key: 'Profile',   icon: 'person-outline', activeIcon: 'person', screen: 'Profile' },
   { key: 'Community', icon: 'people-outline', activeIcon: 'people', screen: 'Community' },
@@ -28,20 +28,21 @@ const SCREEN_TO_TAB = {
   Food:            'Learn',
   FoodDetails:     'Learn',
   Traditions:      'Learn',
-  TraditionDetail: 'Learn',
+  TraditionDetailsScreen: 'Learn',
   IncomingClass:   'Learn',
   ClassSession:    'Learn',
   ClassEnd:        'Learn',
+  AIChatBotScreen:'Chat',
 };
 
-export default function BottomTabBar({ onTabPress }) {
+export default function BottomTabBar({ onTabPress }:any) {
   const navigation = useNavigation();
   const route = useRoute();
 
   // Automatically derive active tab from current screen
   const activeTab = SCREEN_TO_TAB[route.name] ?? 'Home';
 
-  const handlePress = (key, screen) => {
+  const handlePress = (key, screen) :any=> {
     onTabPress?.(key);
     navigation.navigate(screen);
   };

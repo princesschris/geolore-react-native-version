@@ -21,7 +21,12 @@ import NoClassesScreen from './screens/NoClassesScreen';
 import FoodScreen from './screens/FoodScreen';
 import FoodDetailsScreen from './screens/FoodDetailsScreen'
 import TraditionScreen from './screens/TraditionsScreen';
-import TraditionDetailScreen from './screens/TraditionsDetailsScreen';
+import TraditionDetailsScreen from './screens/TraditionDetailsScreen';
+import FashionScreen from './screens/FashionScreen';
+import FashionDetailScreen from './screens/FashionDetailScreen';
+import FestivalsScreen from './screens/FestivalsScreen';
+import FestivalDetailScreen from './screens/FestivalDetailsScreen';
+import AIChatBotScreen from './screens/AIChatBotScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -52,7 +57,12 @@ export default function AppNavigator() {
       <Stack.Screen name="Food" component={FoodScreen} />
       <Stack.Screen name="FoodDetails" component={FoodDetailsScreen} />
       <Stack.Screen name="Traditions" component={TraditionScreen} />
-      <Stack.Screen name="TraditionsDetail" component={TraditionDetailScreen} />
+      <Stack.Screen name="TraditionDetails" component={TraditionDetailsScreen} />
+      <Stack.Screen name="Fashion" component={FashionScreen} />
+      <Stack.Screen name="FashionDetail" component={FashionDetailScreen} />
+      <Stack.Screen name="Festivals" component={FestivalsScreen} />
+      <Stack.Screen name="FestivalDetail" component={FestivalDetailScreen} />
+      <Stack.Screen name="AIChat" component={AIChatBotScreen}/>  
     </Stack.Navigator>
   );
 }

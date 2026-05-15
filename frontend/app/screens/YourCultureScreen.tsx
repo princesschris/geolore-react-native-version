@@ -8,10 +8,9 @@ import {
   StatusBar,
   ScrollView,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import SearchBar from '../components/SearchBar';
 import CategoryCard from '../components/CategoryCard';
 import BottomTabBar from '../components/BottomTabBar';
+import TopBar from '../components/TopBar';
 
 // Culture categories shown on this screen
 const CULTURE_CATEGORIES = [
@@ -65,7 +64,7 @@ const CULTURE_CATEGORIES = [
   },
 ];
 
-export default function YourCultureScreen({ navigation, route }:any) {
+export default function YourCultureScreen({ navigation, route }) {
   const [searchQuery, setSearchQuery] = useState('');
   
 
@@ -79,27 +78,8 @@ export default function YourCultureScreen({ navigation, route }:any) {
       <StatusBar barStyle="dark-content" backgroundColor="#FFFDF5" />
 
       {/* Top Bar */}
-      <View style={styles.topBar}>
-        <SearchBar
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholder="Search"
-        />
-        <TouchableOpacity
-          style={styles.iconBtn}
-          onPress={() => navigation?.navigate('Profile')}
-        >
-          <Ionicons name="person-outline" size={20} color="#5C3A00" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.iconBtn}>
-          <View>
-            <Ionicons name="notifications-outline" size={20} color="#5C3A00" />
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>5</Text>
-            </View>
-          </View>
-        </TouchableOpacity>
-      </View>
+      <TopBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+    
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -133,43 +113,9 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#FFFDF5',
-  },
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 10,
-    gap: 10,
-  },
-  iconBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.06,
     shadowRadius: 3,
     elevation: 2,
-  },
-  badge: {
-    position: 'absolute',
-    top: -4,
-    right: -6,
-    backgroundColor: '#F5A623',
-    borderRadius: 8,
-    width: 16,
-    height: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  badgeText: {
-    color: '#fff',
-    fontSize: 9,
-    fontWeight: '800',
   },
   scrollContent: {
     paddingHorizontal: 16,

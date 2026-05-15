@@ -15,13 +15,13 @@ import BottomTabBar from '../components/BottomTabBar';
 import BuntingBanner from '../components/BuntingBanner';
 import SearchBar from '../components/SearchBar';
 
-export default function TraditionDetailScreen({ navigation, route }:any) {
-  const [activeTab, setActiveTab] = useState('Home');
+export default function FashionDetailScreen({ navigation, route }) {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const tradition = route?.params?.tradition ?? {
-    title: 'Kolanut Presentation',
-    body: 'The Kolanut presentation is a deeply revered tradition among the Igbo people...',
+  const outfit = route?.params?.outfit ?? {
+    title: 'Iru & Buba',
+    description:
+      'The Iru and Buba is a classic Yoruba attire consisting of a wrapper (Iru) tied around the waist and a loose blouse (Buba) worn on top. It is elegant, comfortable, and deeply rooted in Yoruba culture.\n\nOften worn at celebrations, weddings, and cultural festivals, this outfit is adorned with beautiful patterns and rich Aso-oke fabric. The colours chosen carry deep cultural significance.\n\nA timeless piece of Yoruba fashion heritage. The Buba can be styled in various ways — with a gele (head tie) and ipele (shoulder sash) for a complete traditional look.',
   };
 
   return (
@@ -49,13 +49,13 @@ export default function TraditionDetailScreen({ navigation, route }:any) {
         showsVerticalScrollIndicator={false}
       >
         {/* Title */}
-        <Text style={styles.title}>{tradition.title.toUpperCase()}</Text>
+        <Text style={styles.title}>{outfit.title.toUpperCase()}</Text>
 
-        {/* Image with overlay */}
+        {/* Image */}
         <View style={styles.imageCard}>
-          {tradition.imageSource ? (
+          {outfit.imageSource ? (
             <ImageBackground
-              source={tradition.imageSource}
+              source={outfit.imageSource}
               style={styles.image}
               imageStyle={styles.imageRadius}
             >
@@ -63,14 +63,14 @@ export default function TraditionDetailScreen({ navigation, route }:any) {
             </ImageBackground>
           ) : (
             <View style={[styles.image, styles.imagePlaceholder]}>
-              <Ionicons name="image-outline" size={48} color="rgba(255,255,255,0.5)" />
+              <Ionicons name="shirt-outline" size={48} color="rgba(255,255,255,0.5)" />
             </View>
           )}
         </View>
 
-        {/* Body text */}
+        {/* Description */}
         <View style={styles.bodyCard}>
-          {tradition.body.split('\n\n').map((paragraph, i) => (
+          {outfit.description.split('\n\n').map((paragraph, i) => (
             <Text key={i} style={styles.bodyText}>{paragraph}</Text>
           ))}
         </View>
@@ -86,7 +86,7 @@ export default function TraditionDetailScreen({ navigation, route }:any) {
         </TouchableOpacity>
       </ScrollView>
 
-      <BottomTabBar activeTab={activeTab} onTabPress={setActiveTab} />
+      <BottomTabBar />
     </SafeAreaView>
   );
 }
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
   },
   imageCard: {
     width: '100%',
-    height: 200,
+    height: 220,
     borderRadius: 14,
     overflow: 'hidden',
     marginBottom: 16,
@@ -141,15 +141,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  imageRadius: {
-    borderRadius: 14,
-  },
+  imageRadius: { borderRadius: 14 },
   imagePlaceholder: {
     backgroundColor: '#C4A882',
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.35)',
+    backgroundColor: 'rgba(0,0,0,0.25)',
   },
   bodyCard: {
     backgroundColor: '#fff',

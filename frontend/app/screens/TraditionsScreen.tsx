@@ -9,10 +9,10 @@ import {
   ScrollView,
   Dimensions,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import SearchBar from '../components/SearchBar';
 import BottomTabBar from '../components/BottomTabBar';
 import BuntingBanner from '../components/BuntingBanner';
+import TopBar from '../components/TopBar';
+import { Ionicons } from '@expo/vector-icons';
 import ImageCard from '../components/ImageCard';
 
 const { width } = Dimensions.get('window');
@@ -57,7 +57,7 @@ export const TRADITIONS = [
   },
 ];
 
-export default function TraditionsScreen({ navigation }:any) {
+export default function TraditionsScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [showAll, setShowAll] = useState(false);
 
@@ -71,18 +71,8 @@ export default function TraditionsScreen({ navigation }:any) {
       <StatusBar barStyle="dark-content" backgroundColor="#FFFDF5" />
 
       {/* Top Bar */}
-      <View style={styles.topBar}>
-        <SearchBar value={searchQuery} onChangeText={setSearchQuery} placeholder="Search" />
-        <TouchableOpacity style={styles.iconBtn}>
-          <Ionicons name="person-outline" size={20} color="#5C3A00" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.iconBtn}>
-          <View>
-            <Ionicons name="notifications-outline" size={20} color="#5C3A00" />
-            <View style={styles.badge}><Text style={styles.badgeText}>5</Text></View>
-          </View>
-        </TouchableOpacity>
-      </View>
+      <TopBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+         
 
       <BuntingBanner />
 
@@ -101,7 +91,7 @@ export default function TraditionsScreen({ navigation }:any) {
               imageSource={tradition.imageSource}
               width={CARD_WIDTH}
               height={120}
-              onPress={() => navigation?.navigate('TraditionDetails', { tradition })}
+              onPress={() => navigation?.navigate('TraditionDetailsScreen', { tradition })}
             />
           ))}
         </View>
@@ -134,27 +124,9 @@ export default function TraditionsScreen({ navigation }:any) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#FFFDF5' },
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 10,
-    gap: 10,
-  },
-  iconBtn: {
-    width: 38, height: 38, borderRadius: 19,
-    backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
+  safeArea: { flex: 1, backgroundColor: '#FFFDF5' ,
     shadowOpacity: 0.06, shadowRadius: 3, elevation: 2,
   },
-  badge: {
-    position: 'absolute', top: -4, right: -6,
-    backgroundColor: '#F5A623', borderRadius: 8,
-    width: 16, height: 16, alignItems: 'center', justifyContent: 'center',
-  },
-  badgeText: { color: '#fff', fontSize: 9, fontWeight: '800' },
   scrollContent: {
     paddingHorizontal: 16,
     paddingTop: 8,

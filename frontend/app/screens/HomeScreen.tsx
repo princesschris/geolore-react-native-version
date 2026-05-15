@@ -10,10 +10,10 @@ import {
   Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import SearchBar from '../components/SearchBar';
 import CategoryCard from '../components/CategoryCard';
 import BottomTabBar from '../components/BottomTabBar';
 import BuntingBanner from '../components/BuntingBanner';
+import TopBar from '../components/TopBar';
 
 const CATEGORIES = [
   {
@@ -23,9 +23,9 @@ const CATEGORIES = [
     imageSource: require('../../assets/images/learn_about_your_culture_image.png'),
   },
   {
-    key: 'aiTutor',
-    title: 'AI Tutor',
-    screen: 'AITutor',
+    key: 'aiChat',
+    title: 'AI Chat',
+    screen: 'AIChat',
     imageSource: require('../../assets/images/ai_tutor_image.png'),
   },
   {
@@ -79,27 +79,7 @@ export default function HomeScreen({ navigation }: any) {
       <StatusBar barStyle="dark-content" backgroundColor="#FFFDF5" />
 
       {/* Top Bar */}
-      <View style={styles.topBar}>
-        <SearchBar
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholder="Search"
-        />
-        <TouchableOpacity
-          style={styles.iconBtn}
-          onPress={() => navigation?.navigate('Profile')}
-        >
-          <Ionicons name="person-outline" size={20} color="#5C3A00" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.iconBtn}>
-          <View>
-            <Ionicons name="notifications-outline" size={20} color="#5C3A00" />
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>5</Text>
-            </View>
-          </View>
-        </TouchableOpacity>
-      </View>
+      <TopBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
 
       {/* Bunting Banner */}
       <BuntingBanner />
@@ -110,7 +90,7 @@ export default function HomeScreen({ navigation }: any) {
       >
         {/* Banner */}
         <View style={styles.banner}>
-          <Text style={styles.bannerText}>There's a whole world{'\n'}to discover</Text>
+          <Text style={styles.bannerText}>There&apos;s a whole world{'\n'}to discover</Text>
           <Image
             source={require('../../assets/images/logo.png')}
             style={styles.logo}
@@ -146,43 +126,9 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#FFFDF5',
-  },
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 50,
-    paddingBottom: 12,
-    gap: 10,
-  },
-  iconBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.06,
     shadowRadius: 3,
     elevation: 2,
-  },
-  badge: {
-    position: 'absolute',
-    top: -4,
-    right: -6,
-    backgroundColor: '#F5A623',
-    borderRadius: 8,
-    width: 16,
-    height: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  badgeText: {
-    color: '#fff',
-    fontSize: 9,
-    fontWeight: '800',
   },
   scrollContent: {
     paddingHorizontal: 20,
