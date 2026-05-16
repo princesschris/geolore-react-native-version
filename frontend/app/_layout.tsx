@@ -27,10 +27,21 @@ import FashionDetailScreen from './screens/FashionDetailScreen';
 import FestivalsScreen from './screens/FestivalsScreen';
 import FestivalDetailScreen from './screens/FestivalDetailsScreen';
 import AIChatBotScreen from './screens/AIChatBotScreen';
+import ProfileScreen from './screens/ProfileScreen';
+import SideBarScreen from './screens/SideBarScreen';
+import EditProfileScreen from './screens/EditProfileScreen';
+import NotificationsScreen from './screens/NotificationsScreen';
+import CommunityChatsScreen from './screens/CommunityChatsScreen';
+import ChatScreen from './screens/ChatScreen';
+import CommunityGroupsScreen from './screens/CommunityGroupsScreen';
+import GroupChatScreen from './screens/GroupChatScreen';
+import CommunityAddScreen from './screens/CommunityAddScreen';
+import CommunityAddGroupsScreen from './screens/CommunityAddGroupsScreen';
+import NewGroupScreen from './screens/NewGroupScreen';
+import GroupInfoScreen from './screens/GroupInfoScreen';
 
 const Stack = createNativeStackNavigator();
 
-// Paste this Stack.Navigator inside your existing NavigationContainer in your root App.js
 export default function AppNavigator() {
   return (
     <Stack.Navigator
@@ -63,6 +74,18 @@ export default function AppNavigator() {
       <Stack.Screen name="Festivals" component={FestivalsScreen} />
       <Stack.Screen name="FestivalDetail" component={FestivalDetailScreen} />
       <Stack.Screen name="AIChat" component={AIChatBotScreen}/>  
+      <Stack.Screen name="Profile" component={ProfileScreen} />
+      <Stack.Screen name="SideBar" component={SideBarScreen} />
+      <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+      <Stack.Screen name="Notifications" component={NotificationsScreen} />
+      <Stack.Screen name="Community" component={CommunityChatsScreen} />
+      <Stack.Screen name="Chat" component={ChatScreen} />
+      <Stack.Screen name="CommunityGroups" component={CommunityGroupsScreen} />
+      <Stack.Screen name="GroupChat" component={GroupChatScreen} />
+      <Stack.Screen name="CommunityAdd" component={CommunityAddScreen} />
+      <Stack.Screen name="CommunityAddGroups" component={CommunityAddGroupsScreen} />
+      <Stack.Screen name="NewGroup" component={NewGroupScreen} />
+      <Stack.Screen name="GroupInfo" component={GroupInfoScreen} />
     </Stack.Navigator>
   );
 }
