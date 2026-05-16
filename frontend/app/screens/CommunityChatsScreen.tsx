@@ -81,7 +81,7 @@ export default function CommunityChatsScreen({ navigation }) {
             lastMessage={item.lastMessage}
             time={item.time}
             unreadCount={item.unread}
-            onPress={() => navigation?.navigate('Chat', { name: item.name })}
+            onPress={() => navigation?.navigate('UserInfo', { name: item.name })}
           />
         )}
         showsVerticalScrollIndicator={false}

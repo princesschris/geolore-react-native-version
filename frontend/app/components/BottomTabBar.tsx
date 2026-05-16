@@ -33,6 +33,9 @@ const SCREEN_TO_TAB = {
   ClassSession:    'Learn',
   ClassEnd:        'Learn',
   AIChatBotScreen:'Chat',
+  Events:   'Home',
+Map:      'Home',
+Settings: 'Profile',
 };
 
 export default function BottomTabBar({ onTabPress }:any) {

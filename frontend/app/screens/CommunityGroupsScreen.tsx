@@ -81,7 +81,7 @@ export default function CommunityGroupsScreen({ navigation }) {
             time={item.time}
             unreadCount={item.unread}
             isGroup
-            onPress={() => navigation?.navigate('Chat', { name: item.name })}
+            onPress={() => navigation?.navigate('GroupChat', { name: item.name })}
           />
         )}
         showsVerticalScrollIndicator={false}

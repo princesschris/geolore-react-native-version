@@ -39,6 +39,10 @@ import CommunityAddScreen from './screens/CommunityAddScreen';
 import CommunityAddGroupsScreen from './screens/CommunityAddGroupsScreen';
 import NewGroupScreen from './screens/NewGroupScreen';
 import GroupInfoScreen from './screens/GroupInfoScreen';
+import UserInfoScreen from './screens/UserInfoScreen';
+import EventsScreen from './screens/EventsScreen';
+import MapScreen from './screens/MapScreen';
+import SettingsScreen from './screens/SettingsScreen';  
 
 const Stack = createNativeStackNavigator();
 
@@ -86,6 +90,10 @@ export default function AppNavigator() {
       <Stack.Screen name="CommunityAddGroups" component={CommunityAddGroupsScreen} />
       <Stack.Screen name="NewGroup" component={NewGroupScreen} />
       <Stack.Screen name="GroupInfo" component={GroupInfoScreen} />
+      <Stack.Screen name="UserInfo" component={UserInfoScreen} />
+      <Stack.Screen name="Events" component={EventsScreen} />
+      <Stack.Screen name="Map" component={MapScreen} />
+      <Stack.Screen name="Settings" component={SettingsScreen} />
     </Stack.Navigator>
   );
 }
