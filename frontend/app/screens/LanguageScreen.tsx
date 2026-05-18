@@ -103,15 +103,7 @@ export default function LanguagesScreen({ navigation, route }) {
           <Text style={styles.classesButtonText}>Classes</Text>
         </TouchableOpacity>
 
-        {/* Back Button */}
-        <TouchableOpacity
-          style={styles.backButton}
-          activeOpacity={0.8}
-          onPress={() => navigation?.goBack()}
-        >
-          <Ionicons name="arrow-back-outline" size={16} color="#fff" />
-          <Text style={styles.backButtonText}>Back</Text>
-        </TouchableOpacity>
+        
       </ScrollView>
 
       {/* Bottom Tab Bar */}

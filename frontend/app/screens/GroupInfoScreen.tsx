@@ -57,10 +57,6 @@ export default function GroupInfoScreen({ navigation, route }) {
             <Ionicons name="person-add-outline" size={22} color="#F5A623" />
             <Text style={styles.actionBtnText}>Add+</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionBtn}>
-            <Ionicons name="calendar-outline" size={22} color="#F5A623" />
-            <Text style={styles.actionBtnText}>Events</Text>
-          </TouchableOpacity>
         </View>
 
         {/* Members Section */}

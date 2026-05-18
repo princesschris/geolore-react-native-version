@@ -43,6 +43,14 @@ import UserInfoScreen from './screens/UserInfoScreen';
 import EventsScreen from './screens/EventsScreen';
 import MapScreen from './screens/MapScreen';
 import SettingsScreen from './screens/SettingsScreen';  
+import EventDetailScreen from './screens/EventDetailScreen';
+import AddEventScreen from './screens/AddEventScreen';
+import BeliefsScreen from './screens/BeliefsScreen';
+import BeliefDetailScreen from './screens/BeliefDetailScreen';
+import StoriesScreen from './screens/StoriesScreen';
+import StoryDetailScreen from './screens/StoryDetailScreen';
+import AboutGeoLoreScreen from './screens/AboutGeoloreScreen';
+import TermsAndConditionsScreen from './screens/TermsAndConditionsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -94,6 +102,14 @@ export default function AppNavigator() {
       <Stack.Screen name="Events" component={EventsScreen} />
       <Stack.Screen name="Map" component={MapScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
+      <Stack.Screen name="EventDetail" component={EventDetailScreen} />
+      <Stack.Screen name="AddEvent" component={AddEventScreen} />
+      <Stack.Screen name="Beliefs" component={BeliefsScreen} />
+      <Stack.Screen name="BeliefDetail" component={BeliefDetailScreen} />
+      <Stack.Screen name="Stories" component={StoriesScreen} />
+      <Stack.Screen name="StoryDetail" component={StoryDetailScreen} />
+      <Stack.Screen name="AboutGeoLore" component={AboutGeoLoreScreen} />
+      <Stack.Screen name="TermsAndConditions" component={TermsAndConditionsScreen} />
     </Stack.Navigator>
   );
 }

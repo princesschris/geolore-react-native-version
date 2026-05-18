@@ -14,11 +14,11 @@ import BottomTabBar from '../components/BottomTabBar';
 import TopBar from '../components/TopBar';
 
 const SETTINGS = [
-  { key: 'location',  label: 'Location',       icon: 'location-outline' },
-  { key: 'language',  label: 'Language',        icon: 'globe-outline' },
-  { key: 'cache',     label: 'Clear cache',     icon: 'refresh-outline' },
-  { key: 'about',     label: 'About GeoLore',   icon: 'information-circle-outline' },
-  { key: 'tutor',     label: 'Language Tutor',  icon: 'school-outline' },
+  { key: 'location',  label: 'Location',        icon: 'location-outline',           screen: 'Location' },
+  { key: 'language',  label: 'Language',         icon: 'globe-outline',              screen: 'LanguageSelect' },
+  { key: 'cache',     label: 'Clear cache',      icon: 'refresh-outline',            screen: null },
+  { key: 'about',     label: 'About GeoLore',    icon: 'information-circle-outline', screen: 'AboutGeoLore' },
+  { key: 'tutor',     label: 'Language Tutor',   icon: 'school-outline',             screen: 'Language' },
 ];
 
 const SettingRow = ({ icon, label, onPress }) => (
@@ -87,7 +87,7 @@ export default function ProfileScreen({ navigation }) {
               key={s.key}
               icon={s.icon}
               label={s.label}
-              onPress={() => {}}
+              onPress={() => s.screen && navigation?.navigate(s.screen)}
             />
           ))}
 

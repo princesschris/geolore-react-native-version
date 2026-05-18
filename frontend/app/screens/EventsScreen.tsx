@@ -9,128 +9,50 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Calendar } from 'react-native-calendars';
 import BottomTabBar from '../components/BottomTabBar';
 import TopBar from '../components/TopBar';
 import BuntingBanner from '../components/BuntingBanner';
-import TopTabBar from '../components/TopTabBar';
-
-const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
 const UPCOMING_EVENTS = [
-  { id: '1', title: 'Outing with the girls', color: '#F5A623' },
-  { id: '2', title: 'Museum visit',          color: '#8B6F4E' },
-  { id: '3', title: 'Site Seeing',           color: '#F5A623' },
-  { id: '4', title: "Zomie's Birthday",      color: '#8B6F4E' },
-  { id: '5', title: 'Random event',          color: '#F5A623' },
-  { id: '6', title: 'yh yh',                 color: '#C4A882' },
+  { id: '1', title: 'Outing with the girls', color: '#F5A623', date: '2026-05-18' },
+  { id: '2', title: 'Museum visit',           color: '#8B6F4E', date: '2026-05-20' },
+  { id: '3', title: 'Site Seeing',            color: '#F5A623', date: '2026-05-22' },
+  { id: '4', title: "Zomie's Birthday",       color: '#8B6F4E', date: '2026-05-25' },
+  { id: '5', title: 'Random event',           color: '#F5A623', date: '2026-05-28' },
+  { id: '6', title: 'yh yh',                  color: '#C4A882', date: '2026-05-30' },
 ];
 
-// Simple calendar component
-const MiniCalendar = () => {
-  const [currentDate] = useState(new Date());
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
-  const today = currentDate.getDate();
+// Build marked dates from events
+const buildMarkedDates = (selectedDate) => {
+  const marked = {};
 
-  // Get days in month and first day offset
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const firstDay = new Date(year, month, 1).getDay();
+  UPCOMING_EVENTS.forEach((event) => {
+    marked[event.date] = {
+      marked: true,
+      dotColor: event.color,
+    };
+  });
 
-  const cells = [];
-  for (let i = 0; i < firstDay; i++) cells.push(null);
-  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+  if (selectedDate) {
+    marked[selectedDate] = {
+      ...(marked[selectedDate] || {}),
+      selected: true,
+      selectedColor: '#F5A623',
+    };
+  }
 
-  return (
-    <View style={calStyles.container}>
-      {/* Month header */}
-      <Text style={calStyles.monthTitle}>
-        {MONTHS[month].toUpperCase()} {year}
-      </Text>
-      {/* Day headers */}
-      <View style={calStyles.daysRow}>
-        {DAYS.map((d) => (
-          <Text key={d} style={calStyles.dayHeader}>{d}</Text>
-        ))}
-      </View>
-      {/* Date grid */}
-      <View style={calStyles.grid}>
-        {cells.map((cell, i) => (
-          <View key={i} style={calStyles.cell}>
-            {cell && (
-              <View style={[calStyles.dateCircle, cell === today && calStyles.todayCircle]}>
-                <Text style={[calStyles.dateText, cell === today && calStyles.todayText]}>
-                  {cell}
-                </Text>
-              </View>
-            )}
-          </View>
-        ))}
-      </View>
-    </View>
-  );
+  return marked;
 };
-
-const calStyles = StyleSheet.create({
-  container: {
-    backgroundColor: '#FFF3E0',
-    borderRadius: 16,
-    padding: 12,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#F5C070',
-  },
-  monthTitle: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#3B1F00',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  daysRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 4,
-  },
-  dayHeader: {
-    width: 32,
-    textAlign: 'center',
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#A08060',
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  cell: {
-    width: '14.28%',
-    alignItems: 'center',
-    paddingVertical: 2,
-  },
-  dateCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  todayCircle: {
-    backgroundColor: '#F5A623',
-  },
-  dateText: {
-    fontSize: 11,
-    color: '#3B1F00',
-    fontWeight: '500',
-  },
-  todayText: {
-    color: '#fff',
-    fontWeight: '800',
-  },
-});
 
 export default function EventsScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDate, setSelectedDate] = useState('');
+
+  // Filter events for selected date, or show all
+  const displayedEvents = selectedDate
+    ? UPCOMING_EVENTS.filter((e) => e.date === selectedDate)
+    : UPCOMING_EVENTS;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -138,29 +60,73 @@ export default function EventsScreen({ navigation }) {
 
       <TopBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
       <BuntingBanner />
-      <TopTabBar />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Calendar */}
-        <MiniCalendar />
+        {/* Interactive Calendar */}
+        <Calendar
+          onDayPress={(day) => {
+            setSelectedDate(day.dateString === selectedDate ? '' : day.dateString);
+          }}
+          markedDates={buildMarkedDates(selectedDate)}
+          theme={{
+            backgroundColor: '#FFF3E0',
+            calendarBackground: '#FFF3E0',
+            textSectionTitleColor: '#A08060',
+            selectedDayBackgroundColor: '#F5A623',
+            selectedDayTextColor: '#fff',
+            todayTextColor: '#F5A623',
+            dayTextColor: '#3B1F00',
+            textDisabledColor: '#C4A882',
+            dotColor: '#F5A623',
+            selectedDotColor: '#fff',
+            arrowColor: '#F5A623',
+            monthTextColor: '#3B1F00',
+            indicatorColor: '#F5A623',
+            textDayFontWeight: '500',
+            textMonthFontWeight: '800',
+            textDayHeaderFontWeight: '700',
+            textDayFontSize: 13,
+            textMonthFontSize: 15,
+            textDayHeaderFontSize: 12,
+          }}
+          style={styles.calendar}
+        />
 
-        {/* Upcoming Events */}
-        <Text style={styles.sectionTitle}>UPCOMING EVENTS</Text>
-        <View style={styles.eventsGrid}>
-          {UPCOMING_EVENTS.map((event) => (
-            <TouchableOpacity
-              key={event.id}
-              style={[styles.eventCard, { backgroundColor: event.color }]}
-              activeOpacity={0.85}
-              onPress={() => navigation?.navigate('EventDetail', { event })}
-            >
-              <Text style={styles.eventTitle}>{event.title}</Text>
+        {/* Section title */}
+        <View style={styles.sectionRow}>
+          <Text style={styles.sectionTitle}>
+            {selectedDate ? `EVENTS ON ${selectedDate}` : 'UPCOMING EVENTS'}
+          </Text>
+          {selectedDate && (
+            <TouchableOpacity onPress={() => setSelectedDate('')}>
+              <Text style={styles.clearFilter}>Show all</Text>
             </TouchableOpacity>
-          ))}
+          )}
         </View>
+
+        {/* Events grid */}
+        {displayedEvents.length > 0 ? (
+          <View style={styles.eventsGrid}>
+            {displayedEvents.map((event) => (
+              <TouchableOpacity
+                key={event.id}
+                style={[styles.eventCard, { backgroundColor: event.color }]}
+                activeOpacity={0.85}
+                onPress={() => navigation?.navigate('EventDetail', { event })}
+              >
+                <Text style={styles.eventTitle}>{event.title}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        ) : (
+          <View style={styles.emptyState}>
+            <Ionicons name="calendar-outline" size={40} color="#C4A882" />
+            <Text style={styles.emptyText}>No events on this day</Text>
+          </View>
+        )}
 
         {/* Add Event Button */}
         <TouchableOpacity
@@ -185,13 +151,29 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 32,
   },
+  calendar: {
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#F5C070',
+    marginBottom: 20,
+    overflow: 'hidden',
+  },
+  sectionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+  },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '800',
     color: '#3B1F00',
-    textAlign: 'center',
-    letterSpacing: 1.5,
-    marginBottom: 14,
+    letterSpacing: 1,
+  },
+  clearFilter: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#F5A623',
   },
   eventsGrid: {
     flexDirection: 'row',
@@ -211,6 +193,16 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#fff',
     lineHeight: 18,
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: 32,
+    gap: 10,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: '#A08060',
+    fontWeight: '600',
   },
   addEventBtn: {
     flexDirection: 'row',

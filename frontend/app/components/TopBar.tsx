@@ -28,15 +28,30 @@ export default function TopBar({
           placeholder="Search"
         />
       )}
+
+      {/* Calendar shortcut — quick access to Events */}
+      <TouchableOpacity
+        style={styles.iconBtn}
+        onPress={() => navigation.navigate('Events')}
+      >
+        <Ionicons name="calendar-outline" size={20} color="#5C3A00" />
+      </TouchableOpacity>
+
+      {/* Profile */}
       <TouchableOpacity
         style={styles.iconBtn}
         onPress={() => navigation.navigate('Profile')}
       >
         <Ionicons name="person-outline" size={20} color="#5C3A00" />
       </TouchableOpacity>
-      <TouchableOpacity style={styles.iconBtn} onPress={() => navigation.navigate('Notifications')}>
+
+      {/* Notifications */}
+      <TouchableOpacity
+        style={styles.iconBtn}
+        onPress={() => navigation.navigate('Notifications')}
+      >
         <View>
-          <Ionicons name="notifications-outline" size={20} color="#5C3A00"  />
+          <Ionicons name="notifications-outline" size={20} color="#5C3A00" />
           {notificationCount > 0 && (
             <View style={styles.badge}>
               <Text style={styles.badgeText}>{notificationCount}</Text>

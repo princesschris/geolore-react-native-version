@@ -48,7 +48,7 @@ export default function CategoryCard({
 }
 
 const styles = StyleSheet.create({
-  // ── Home card: 339x241 ───────────────────────────────────────────────────────
+  
   card: {
     backgroundColor: '#FFF3E0',
     borderRadius: 16,
@@ -109,7 +109,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#F5C070',
     marginBottom: 12,
-    aspectRatio: 339 / 138,
+    height:138,
+    width:339,
+    // aspectRatio: 339 / 138,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,

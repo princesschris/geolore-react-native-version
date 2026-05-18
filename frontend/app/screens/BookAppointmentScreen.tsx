@@ -182,16 +182,7 @@ export default function BookAppointmentScreen({ navigation, route }) {
           </TouchableOpacity>
         )}
 
-        {/* Back Button */}
-        <TouchableOpacity
-          style={styles.backButton}
-          activeOpacity={0.8}
-          onPress={() => navigation?.goBack()}
-        >
-          <Ionicons name="arrow-back-outline" size={16} color="#fff" />
-          <Text style={styles.backButtonText}>Back</Text>
-        </TouchableOpacity>
-      </ScrollView>
+        </ScrollView>
 
       {/* Bottom Tab Bar */}
       <BottomTabBar activeTab={activeTab} onTabPress={setActiveTab} />
