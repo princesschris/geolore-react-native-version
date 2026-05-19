@@ -53,6 +53,7 @@ import TermsAndConditionsScreen from './screens/TermsAndConditionsScreen';
 import PrivacyPolicyScreen from './screens/PrivacyPolicyScreen';
 import LanguageSelectScreen from './screens/LanguageSelectScreen';
 import LocationScreen from './screens/LocationSceen';
+import ClearCacheScreen from './screens/ClearCacheScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -114,6 +115,7 @@ export default function AppNavigator() {
       <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
       <Stack.Screen name="LanguageSelect" component={LanguageSelectScreen} />
       <Stack.Screen name="Location" component={LocationScreen} />
+      <Stack.Screen name="ClearCache" component={ClearCacheScreen} />
     </Stack.Navigator>
   );
 }

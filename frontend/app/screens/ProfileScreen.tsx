@@ -16,12 +16,12 @@ import TopBar from '../components/TopBar';
 const SETTINGS = [
   { key: 'location',  label: 'Location',        icon: 'location-outline',           screen: 'Location' },
   { key: 'language',  label: 'Language',         icon: 'globe-outline',              screen: 'LanguageSelect' },
-  { key: 'cache',     label: 'Clear cache',      icon: 'refresh-outline',            screen: null },
+  { key: 'cache',     label: 'Clear cache',      icon: 'refresh-outline',            screen: 'ClearCache' },
   { key: 'about',     label: 'About GeoLore',    icon: 'information-circle-outline', screen: 'AboutGeoLore' },
   { key: 'tutor',     label: 'Language Tutor',   icon: 'school-outline',             screen: 'Language' },
 ];
 
-const SettingRow = ({ icon, label, onPress }) => (
+const SettingRow = ({ icon, label, onPress }:any) => (
   <TouchableOpacity style={styles.settingRow} onPress={onPress} activeOpacity={0.7}>
     <View style={styles.settingLeft}>
       <Ionicons name={icon} size={20} color="#5C3A00" />
@@ -31,10 +31,10 @@ const SettingRow = ({ icon, label, onPress }) => (
   </TouchableOpacity>
 );
 
-export default function ProfileScreen({ navigation }) {
+export default function ProfileScreen({ navigation }:any) {
   // Replace with real user data from your auth context/state
   const user = {
-    name: 'Queen Barbs',
+    name: 'Princess Chris-Ugochukwu',
     email: 'chrisstam@gmail.com',
     // avatar: require('../../assets/images/avatar.png'),
   };

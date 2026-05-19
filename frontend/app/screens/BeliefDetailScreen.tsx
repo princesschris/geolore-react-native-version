@@ -13,7 +13,7 @@ import BottomTabBar from '../components/BottomTabBar';
 import BuntingBanner from '../components/BuntingBanner';
 import TopBar from '../components/TopBar';
 
-export default function BeliefDetailScreen({ navigation, route }) {
+export default function BeliefDetailScreen({ navigation, route }:any) {
   const belief = route?.params?.belief ?? {
     title: 'Life after death',
     color: '#F5A623',

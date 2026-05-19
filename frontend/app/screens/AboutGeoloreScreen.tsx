@@ -12,7 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import BottomTabBar from '../components/BottomTabBar';
 import BuntingBanner from '../components/BuntingBanner';
 
-export default function AboutGeoLoreScreen({ navigation }) {
+export default function AboutGeoLoreScreen({ navigation }:any) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFDF5" />

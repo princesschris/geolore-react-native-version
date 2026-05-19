@@ -61,7 +61,7 @@ const RadioOption = ({ label, selected, onPress }) => (
   </TouchableOpacity>
 );
 
-export default function AddEventScreen({ navigation }) {
+export default function AddEventScreen({ navigation }:any) {
   const [eventName, setEventName]   = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate]             = useState(null);
