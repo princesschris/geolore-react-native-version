@@ -41,7 +41,6 @@ import NewGroupScreen from './screens/NewGroupScreen';
 import GroupInfoScreen from './screens/GroupInfoScreen';
 import UserInfoScreen from './screens/UserInfoScreen';
 import EventsScreen from './screens/EventsScreen';
-import MapScreen from './screens/MapScreen';
 import SettingsScreen from './screens/SettingsScreen';  
 import EventDetailScreen from './screens/EventDetailScreen';
 import AddEventScreen from './screens/AddEventScreen';
@@ -51,6 +50,9 @@ import StoriesScreen from './screens/StoriesScreen';
 import StoryDetailScreen from './screens/StoryDetailScreen';
 import AboutGeoLoreScreen from './screens/AboutGeoloreScreen';
 import TermsAndConditionsScreen from './screens/TermsAndConditionsScreen';
+import PrivacyPolicyScreen from './screens/PrivacyPolicyScreen';
+import LanguageSelectScreen from './screens/LanguageSelectScreen';
+import LocationScreen from './screens/LocationSceen';
 
 const Stack = createNativeStackNavigator();
 
@@ -100,7 +102,6 @@ export default function AppNavigator() {
       <Stack.Screen name="GroupInfo" component={GroupInfoScreen} />
       <Stack.Screen name="UserInfo" component={UserInfoScreen} />
       <Stack.Screen name="Events" component={EventsScreen} />
-      <Stack.Screen name="Map" component={MapScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
       <Stack.Screen name="EventDetail" component={EventDetailScreen} />
       <Stack.Screen name="AddEvent" component={AddEventScreen} />
@@ -110,6 +111,9 @@ export default function AppNavigator() {
       <Stack.Screen name="StoryDetail" component={StoryDetailScreen} />
       <Stack.Screen name="AboutGeoLore" component={AboutGeoLoreScreen} />
       <Stack.Screen name="TermsAndConditions" component={TermsAndConditionsScreen} />
+      <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
+      <Stack.Screen name="LanguageSelect" component={LanguageSelectScreen} />
+      <Stack.Screen name="Location" component={LocationScreen} />
     </Stack.Navigator>
   );
 }
