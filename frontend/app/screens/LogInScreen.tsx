@@ -1,15 +1,12 @@
 import React, { useState } from 'react';
-import { Image,
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-  StatusBar,
-  ScrollView,
+import {
+  Image, View, Text, TouchableOpacity, StyleSheet,
+  SafeAreaView, StatusBar, ScrollView, ActivityIndicator, Alert,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import LabeledInput from '../components/LabeledInput';
+import { loginUser } from '../services/authService';
+import { useAuth } from '../context/AuthContext';
 
 const GoogleIcon = () => (
   <Svg width="18" height="18" viewBox="0 0 48 48">
@@ -20,34 +17,56 @@ const GoogleIcon = () => (
   </Svg>
 );
 
-export default function LoginScreen({ navigation }:any) {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+export default function LoginScreen({ navigation }: any) {
+  const [email,        setEmail]        = useState('');
+  const [password,     setPassword]     = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading,      setLoading]      = useState(false);
 
-  const handleLogin = () => {
-    navigation?.navigate('GetStarted');
+  const { setUser } = useAuth();
+
+  const handleLogin = async () => {
+    if (!email.trim() || !password.trim()) {
+      Alert.alert('Missing details', 'Please enter your email and password.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const userDoc = await loginUser(email.trim(), password);
+      setUser(userDoc);
+      if (userDoc.role === 'tutor' || userDoc.role === 'both') {
+        navigation?.navigate('Home');
+      } else {
+        navigation?.navigate('GetStarted');
+      }
+    } catch (err: any) {
+      let message = 'Something went wrong. Please try again.';
+      if (err.message?.includes('Invalid login credentials')) {
+        message = 'Incorrect email or password. Please try again.';
+      }
+      if (err.message?.includes('Email not confirmed')) {
+        message = 'Please check your email and confirm your account first.';
+      }
+      Alert.alert('Login failed', message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFDF5" />
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        <Image source={require('../../assets/images/tiger.png')}
-          style={styles.mascot}
-        />
-
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        <Image source={require('../../assets/images/tiger.png')} style={styles.mascot} />
         <Text style={styles.title}>Welcome Back</Text>
 
         <View style={styles.form}>
           <LabeledInput
-            label="Username"
-            value={username}
-            onChangeText={setUsername}
+            label="Email"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
           />
           <LabeledInput
             label="Password"
@@ -59,19 +78,20 @@ export default function LoginScreen({ navigation }:any) {
             onToggleShow={() => setShowPassword(!showPassword)}
           />
 
-          <TouchableOpacity
-            style={styles.forgotWrapper}
-            onPress={() => navigation?.navigate('ForgotPassword')}
-          >
+          <TouchableOpacity style={styles.forgotWrapper} onPress={() => navigation?.navigate('ForgotPassword')}>
             <Text style={styles.forgotText}>Forgot Password?</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.loginButton}
+            style={[styles.loginButton, loading && styles.loginButtonDisabled]}
             activeOpacity={0.8}
             onPress={handleLogin}
+            disabled={loading}
           >
-            <Text style={styles.loginButtonText}>Log In</Text>
+            {loading
+              ? <ActivityIndicator color="#fff" />
+              : <Text style={styles.loginButtonText}>Log In</Text>
+            }
           </TouchableOpacity>
 
           <View style={styles.dividerRow}>
@@ -86,7 +106,7 @@ export default function LoginScreen({ navigation }:any) {
           </TouchableOpacity>
 
           <View style={styles.registerRow}>
-            <Text style={styles.registerText}>Already have an account? </Text>
+            <Text style={styles.registerText}>Don't have an account? </Text>
             <TouchableOpacity onPress={() => navigation?.navigate('Register')}>
               <Text style={styles.registerLink}>Register</Text>
             </TouchableOpacity>
@@ -98,105 +118,22 @@ export default function LoginScreen({ navigation }:any) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#FFFDF5',
-  },
-  scrollContent: {
-    alignItems: 'center',
-    paddingHorizontal: 28,
-    paddingTop: 48,
-    paddingBottom: 48,
-  },
-  mascotPlaceholder: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#FFF3E0',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
-  },mascot: {
-  width: 130,
-  height: 130,
-  resizeMode: 'contain',
-},
-  title: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#F5A623',
-    marginBottom: 28,
-    marginTop: 6,
-  },
-  form: {
-    width: '100%',
-  },
-  forgotWrapper: {
-    alignSelf: 'flex-end',
-    marginBottom: 24,
-    marginTop: -8,
-  },
-  forgotText: {
-    fontSize: 12,
-    color: '#F5A623',
-    fontWeight: '600',
-  },
-  loginButton: {
-    backgroundColor: '#F5A623',
-    paddingVertical: 13,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  loginButtonText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  dividerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 14,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#E0D0B8',
-  },
-  dividerText: {
-    marginHorizontal: 10,
-    color: '#A08060',
-    fontSize: 12,
-  },
-  googleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    borderWidth: 1.5,
-    borderColor: '#E0D0B8',
-    borderRadius: 10,
-    paddingVertical: 11,
-    marginBottom: 24,
-    backgroundColor: '#fff',
-  },
-  googleButtonText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#555',
-  },
-  registerRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  registerText: {
-    fontSize: 12,
-    color: '#A08060',
-  },
-  registerLink: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#F5A623',
-  },
+  safeArea: { flex: 1, backgroundColor: '#FFFDF5' },
+  scrollContent: { alignItems: 'center', paddingHorizontal: 28, paddingTop: 48, paddingBottom: 48 },
+  mascot: { width: 130, height: 130, resizeMode: 'contain' },
+  title: { fontSize: 24, fontWeight: '800', color: '#F5A623', marginBottom: 28, marginTop: 6 },
+  form: { width: '100%' },
+  forgotWrapper: { alignSelf: 'flex-end', marginBottom: 24, marginTop: -8 },
+  forgotText: { fontSize: 12, color: '#F5A623', fontWeight: '600' },
+  loginButton: { backgroundColor: '#F5A623', paddingVertical: 13, borderRadius: 10, alignItems: 'center', marginBottom: 16 },
+  loginButtonDisabled: { backgroundColor: '#E0C49A' },
+  loginButtonText: { color: '#fff', fontSize: 15, fontWeight: '700' },
+  dividerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 14 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: '#E0D0B8' },
+  dividerText: { marginHorizontal: 10, color: '#A08060', fontSize: 12 },
+  googleButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, borderWidth: 1.5, borderColor: '#E0D0B8', borderRadius: 10, paddingVertical: 11, marginBottom: 24, backgroundColor: '#fff' },
+  googleButtonText: { fontSize: 13, fontWeight: '600', color: '#555' },
+  registerRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
+  registerText: { fontSize: 12, color: '#A08060' },
+  registerLink: { fontSize: 12, fontWeight: '700', color: '#F5A623' },
 });

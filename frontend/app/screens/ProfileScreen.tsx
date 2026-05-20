@@ -12,44 +12,43 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import BottomTabBar from '../components/BottomTabBar';
 import TopBar from '../components/TopBar';
+import { useRole, useAuth } from '../context/AuthContext';
 
-const SETTINGS = [
-  { key: 'location',  label: 'Location',        icon: 'location-outline',           screen: 'Location' },
-  { key: 'language',  label: 'Language',         icon: 'globe-outline',              screen: 'LanguageSelect' },
-  { key: 'cache',     label: 'Clear cache',      icon: 'refresh-outline',            screen: 'ClearCache' },
-  { key: 'about',     label: 'About GeoLore',    icon: 'information-circle-outline', screen: 'AboutGeoLore' },
-  { key: 'tutor',     label: 'Language Tutor',   icon: 'school-outline',             screen: 'Language' },
+// ── Static settings rows (same for every role) ───────────────────────────
+const STATIC_SETTINGS = [
+  { key: 'location', label: 'Location',      icon: 'location-outline',           screen: 'Location' },
+  { key: 'language', label: 'Language',      icon: 'globe-outline',              screen: 'LanguageSelect' },
+  { key: 'cache',    label: 'Clear cache',   icon: 'refresh-outline',            screen: 'ClearCache' },
+  { key: 'about',    label: 'About GeoLore', icon: 'information-circle-outline', screen: 'AboutGeoLore' },
 ];
 
-const SettingRow = ({ icon, label, onPress }:any) => (
+const SettingRow = ({ icon, label, onPress, iconColor = '#5C3A00', labelColor = '#3B1F00' }: any) => (
   <TouchableOpacity style={styles.settingRow} onPress={onPress} activeOpacity={0.7}>
     <View style={styles.settingLeft}>
-      <Ionicons name={icon} size={20} color="#5C3A00" />
-      <Text style={styles.settingLabel}>{label}</Text>
+      <Ionicons name={icon} size={20} color={iconColor} />
+      <Text style={[styles.settingLabel, { color: labelColor }]}>{label}</Text>
     </View>
     <Ionicons name="chevron-forward-outline" size={18} color="#C4A882" />
   </TouchableOpacity>
 );
 
-export default function ProfileScreen({ navigation }:any) {
-  // Replace with real user data from your auth context/state
+export default function ProfileScreen({ navigation }: any) {
+  const { isTutor } = useRole();
+  const { logout, user: authUser } = useAuth();
+
   const user = {
-    name: 'Princess Chris-Ugochukwu',
-    email: 'chrisstam@gmail.com',
-    // avatar: require('../../assets/images/avatar.png'),
+    name:  authUser ? `${authUser.firstName} ${authUser.lastName}` : 'Guest',
+    email: authUser?.email ?? '',
   };
 
-  const handleLogout = () => {
-    navigation?.reset({
-      index: 0,
-      routes: [{ name: 'Splash' }],
-    });
+  const handleLogout = async () => {
+    await logout();
+    navigation?.replace('Splash');
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFDF5" />
-
       <TopBar showSearch={false} />
 
       <ScrollView
@@ -58,19 +57,25 @@ export default function ProfileScreen({ navigation }:any) {
       >
         {/* Avatar */}
         <View style={styles.avatarSection}>
-          {user.avatar ? (
-            <Image source={user.avatar} style={styles.avatar} />
-          ) : (
-            <View style={styles.avatarPlaceholder}>
-              <Ionicons name="person" size={52} color="#C4A882" />
-            </View>
-          )}
+          <View style={styles.avatarPlaceholder}>
+            <Ionicons name="person" size={52} color="#C4A882" />
+          </View>
 
-          {/* Name & Email */}
           <Text style={styles.name}>{user.name}</Text>
           <Text style={styles.email}>{user.email}</Text>
 
-          {/* Edit Profile Button */}
+          {/* Role badge */}
+          <View style={[styles.roleBadge, isTutor ? styles.roleBadgeTutor : styles.roleBadgeStudent]}>
+            <Ionicons
+              name={isTutor ? 'school-outline' : 'book-outline'}
+              size={13}
+              color={isTutor ? '#3B1F00' : '#F5A623'}
+            />
+            <Text style={[styles.roleBadgeText, isTutor ? styles.roleBadgeTextTutor : styles.roleBadgeTextStudent]}>
+              {isTutor ? 'Tutor' : 'Student'}
+            </Text>
+          </View>
+
           <TouchableOpacity
             style={styles.editBtn}
             activeOpacity={0.8}
@@ -82,7 +87,7 @@ export default function ProfileScreen({ navigation }:any) {
 
         {/* Settings List */}
         <View style={styles.settingsList}>
-          {SETTINGS.map((s) => (
+          {STATIC_SETTINGS.map((s) => (
             <SettingRow
               key={s.key}
               icon={s.icon}
@@ -91,7 +96,24 @@ export default function ProfileScreen({ navigation }:any) {
             />
           ))}
 
-          {/* Divider */}
+          {/* Role-aware: Language Tutor row */}
+          <SettingRow
+            icon="school-outline"
+            label={isTutor ? 'My Appointments' : 'Language Tutor'}
+            onPress={() =>
+              navigation?.navigate(isTutor ? 'TutorAppointments' : 'Language')
+            }
+          />
+
+          {/* Only shown to students */}
+          {!isTutor && (
+            <SettingRow
+              icon="ribbon-outline"
+              label="Become a Language Tutor"
+              onPress={() => navigation?.navigate('Requirements')}
+            />
+          )}
+
           <View style={styles.divider} />
 
           {/* Log Out */}
@@ -115,90 +137,40 @@ export default function ProfileScreen({ navigation }:any) {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#FFFDF5' },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 32,
-  },
-
-  // Avatar section
-  avatarSection: {
-    alignItems: 'center',
-    paddingVertical: 24,
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    resizeMode: 'cover',
-    marginBottom: 12,
-  },
+  scrollContent: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 32 },
+  avatarSection: { alignItems: 'center', paddingVertical: 24 },
   avatarPlaceholder: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#F5E6CC',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-    borderWidth: 2,
-    borderColor: '#F5C070',
+    width: 100, height: 100, borderRadius: 50,
+    backgroundColor: '#F5E6CC', alignItems: 'center', justifyContent: 'center',
+    marginBottom: 12, borderWidth: 2, borderColor: '#F5C070',
   },
-  name: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#3B1F00',
-    marginBottom: 4,
+  name:  { fontSize: 20, fontWeight: '800', color: '#3B1F00', marginBottom: 4 },
+  email: { fontSize: 13, color: '#A08060', marginBottom: 10 },
+  roleBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    paddingHorizontal: 14, paddingVertical: 5, borderRadius: 20, marginBottom: 14,
   },
-  email: {
-    fontSize: 13,
-    color: '#A08060',
-    marginBottom: 16,
-  },
+  roleBadgeTutor:   { backgroundColor: '#F5A623' },
+  roleBadgeStudent: { backgroundColor: '#FFF3E0', borderWidth: 1, borderColor: '#F5A623' },
+  roleBadgeText:        { fontSize: 12, fontWeight: '700' },
+  roleBadgeTextTutor:   { color: '#3B1F00' },
+  roleBadgeTextStudent: { color: '#F5A623' },
   editBtn: {
-    backgroundColor: '#F5A623',
-    paddingVertical: 9,
-    paddingHorizontal: 32,
-    borderRadius: 20,
+    backgroundColor: '#F5A623', paddingVertical: 9,
+    paddingHorizontal: 32, borderRadius: 20,
   },
-  editBtnText: {
-    color: '#fff',
-    fontSize: 13,
-    fontWeight: '700',
-  },
-
-  // Settings list
+  editBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' },
   settingsList: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#E0D0B8',
-    paddingHorizontal: 16,
+    backgroundColor: '#fff', borderRadius: 16,
+    borderWidth: 1, borderColor: '#E0D0B8', paddingHorizontal: 16,
   },
   settingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0E6D6',
+    flexDirection: 'row', alignItems: 'center',
+    justifyContent: 'space-between', paddingVertical: 16,
+    borderBottomWidth: 1, borderBottomColor: '#F0E6D6',
   },
-  settingLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  settingLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#3B1F00',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#E0D0B8',
-    marginVertical: 4,
-  },
-  logoutText: {
-    color: '#E74C3C',
-  },
+  settingLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  settingLabel:  { fontSize: 14, fontWeight: '600', color: '#3B1F00' },
+  divider:    { height: 1, backgroundColor: '#E0D0B8', marginVertical: 4 },
+  logoutText: { color: '#E74C3C' },
 });
