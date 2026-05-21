@@ -1,31 +1,61 @@
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-  StatusBar,
-  ScrollView,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
+  View, Text, TouchableOpacity, StyleSheet, SafeAreaView,
+  StatusBar, ScrollView, KeyboardAvoidingView, Platform,
+  ActivityIndicator, Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import BottomTabBar from '../components/BottomTabBar';
 import LabeledInput from '../components/LabeledInput';
+import { supabase } from '../config/supabase';
+import { useAuth } from '../context/AuthContext';
 
-export default function EditProfileScreen({ navigation }) {
-  const [name, setName] = useState('Chinasom');
-  const [email, setEmail] = useState('chelotam@gmail.com');
-  const [username, setUsername] = useState('Ebootie');
-  const [password, setPassword] = useState('••••••••••');
-  const [showPassword, setShowPassword] = useState(false);
-  const [phone, setPhone] = useState('+234 9160 927 25');
+export default function EditProfileScreen({ navigation }: any) {
+  const { user, setUser } = useAuth();
 
-  const handleSave = () => {
-    // Add your save logic here
-    navigation?.goBack();
+  // Pre-populate fields with real data from AuthContext
+  const [firstName,    setFirstName]    = useState(user?.first_name  ?? '');
+  const [lastName,     setLastName]     = useState(user?.last_name   ?? '');
+  const [username,     setUsername]     = useState(user?.username    ?? '');
+  const [phone,        setPhone]        = useState(user?.phone       ?? '');
+  const [loading,      setLoading]      = useState(false);
+
+  // Email is read-only — changing email requires re-verification
+  const email = user?.email ?? '';
+
+  const handleSave = async () => {
+    if (!firstName.trim() || !lastName.trim()) {
+      Alert.alert('Required', 'Please enter your first and last name.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .update({
+          first_name: firstName.trim(),
+          last_name:  lastName.trim(),
+          username:   username.trim(),
+          phone:      phone.trim(),
+        })
+        .eq('id', user?.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Update AuthContext so changes reflect immediately everywhere
+      if (data) setUser(data);
+
+      Alert.alert('Saved!', 'Your profile has been updated.', [
+        { text: 'OK', onPress: () => navigation?.goBack() },
+      ]);
+    } catch (err: any) {
+      Alert.alert('Error', err.message || 'Could not save changes. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -34,10 +64,7 @@ export default function EditProfileScreen({ navigation }) {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backBtn}
-          onPress={() => navigation?.goBack()}
-        >
+        <TouchableOpacity style={styles.backBtn} onPress={() => navigation?.goBack()}>
           <Ionicons name="arrow-back-outline" size={22} color="#5C3A00" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Edit Profile</Text>
@@ -57,12 +84,9 @@ export default function EditProfileScreen({ navigation }) {
           {/* Avatar */}
           <View style={styles.avatarSection}>
             <View style={styles.avatarWrapper}>
-              {/* Replace with actual image:
-              <Image source={require('../../assets/images/avatar.png')} style={styles.avatar} /> */}
               <View style={styles.avatarPlaceholder}>
                 <Ionicons name="person" size={52} color="#C4A882" />
               </View>
-              {/* Edit icon */}
               <TouchableOpacity style={styles.editAvatarBtn}>
                 <Ionicons name="pencil" size={14} color="#fff" />
               </TouchableOpacity>
@@ -72,30 +96,30 @@ export default function EditProfileScreen({ navigation }) {
           {/* Form */}
           <View style={styles.form}>
             <LabeledInput
-              label="Name"
-              value={name}
-              onChangeText={setName}
+              label="First Name"
+              value={firstName}
+              onChangeText={setFirstName}
               autoCapitalize="words"
             />
             <LabeledInput
-              label="Email"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
+              label="Last Name"
+              value={lastName}
+              onChangeText={setLastName}
+              autoCapitalize="words"
             />
+            {/* Email is read-only */}
+            <View style={styles.readOnlyWrapper}>
+              <Text style={styles.readOnlyLabel}>Email</Text>
+              <View style={styles.readOnlyField}>
+                <Text style={styles.readOnlyText}>{email}</Text>
+                <Ionicons name="lock-closed-outline" size={16} color="#C4A882" />
+              </View>
+              <Text style={styles.readOnlyHint}>Email cannot be changed here.</Text>
+            </View>
             <LabeledInput
               label="Username"
               value={username}
               onChangeText={setUsername}
-            />
-            <LabeledInput
-              label="Password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              showToggle
-              isPasswordVisible={showPassword}
-              onToggleShow={() => setShowPassword(!showPassword)}
             />
             <LabeledInput
               label="Phone number"
@@ -107,12 +131,19 @@ export default function EditProfileScreen({ navigation }) {
 
           {/* Save Button */}
           <TouchableOpacity
-            style={styles.saveBtn}
+            style={[styles.saveBtn, loading && styles.saveBtnDisabled]}
             activeOpacity={0.8}
             onPress={handleSave}
+            disabled={loading}
           >
-            <Ionicons name="pencil-outline" size={16} color="#fff" />
-            <Text style={styles.saveBtnText}>Save Changes</Text>
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <>
+                <Ionicons name="pencil-outline" size={16} color="#fff" />
+                <Text style={styles.saveBtnText}>Save Changes</Text>
+              </>
+            )}
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -125,95 +156,22 @@ export default function EditProfileScreen({ navigation }) {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#FFFDF5' },
   flex: { flex: 1 },
-
-  // Header
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 12,
-  },
-  backBtn: {
-    width: 36,
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    flex: 1,
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#F5A623',
-    textAlign: 'center',
-  },
-  headerSpacer: {
-    width: 36,
-  },
-
-  // Avatar
-  avatarSection: {
-    alignItems: 'center',
-    marginBottom: 28,
-  },
-  avatarWrapper: {
-    position: 'relative',
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    resizeMode: 'cover',
-  },
-  avatarPlaceholder: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#F5E6CC',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#F5C070',
-  },
-  editAvatarBtn: {
-    position: 'absolute',
-    bottom: 2,
-    right: 2,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#F5A623',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#fff',
-  },
-
-  // Form
-  scrollContent: {
-    paddingHorizontal: 24,
-    paddingTop: 8,
-    paddingBottom: 32,
-  },
-  form: {
-    width: '100%',
-    marginBottom: 24,
-  },
-
-  // Save button
-  saveBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: '#F5A623',
-    paddingVertical: 13,
-    borderRadius: 10,
-    width: '100%',
-  },
-  saveBtnText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '700',
-  },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 20, paddingBottom: 12 },
+  backBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
+  headerTitle: { flex: 1, fontSize: 20, fontWeight: '800', color: '#F5A623', textAlign: 'center' },
+  headerSpacer: { width: 36 },
+  avatarSection: { alignItems: 'center', marginBottom: 28 },
+  avatarWrapper: { position: 'relative' },
+  avatarPlaceholder: { width: 100, height: 100, borderRadius: 50, backgroundColor: '#F5E6CC', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#F5C070' },
+  editAvatarBtn: { position: 'absolute', bottom: 2, right: 2, width: 28, height: 28, borderRadius: 14, backgroundColor: '#F5A623', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#fff' },
+  scrollContent: { paddingHorizontal: 24, paddingTop: 8, paddingBottom: 32 },
+  form: { width: '100%', marginBottom: 24 },
+  readOnlyWrapper: { marginBottom: 16 },
+  readOnlyLabel: { fontSize: 13, fontWeight: '700', color: '#3B1F00', marginBottom: 6 },
+  readOnlyField: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#F5F0E8', borderRadius: 10, borderWidth: 1, borderColor: '#E0D0B8', paddingVertical: 13, paddingHorizontal: 14 },
+  readOnlyText: { fontSize: 14, color: '#A08060' },
+  readOnlyHint: { fontSize: 11, color: '#C4A882', marginTop: 4, fontStyle: 'italic' },
+  saveBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#F5A623', paddingVertical: 13, borderRadius: 10, width: '100%' },
+  saveBtnDisabled: { backgroundColor: '#E0C49A' },
+  saveBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
 });

@@ -1,34 +1,29 @@
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-  StatusBar,
-  ScrollView,
+  View, Text, StyleSheet, SafeAreaView, StatusBar, ScrollView,
 } from 'react-native';
 import CategoryCard from '../components/CategoryCard';
 import BottomTabBar from '../components/BottomTabBar';
 import TopBar from '../components/TopBar';
-import { useRole } from '../context/AuthContext';
+import { useRole, useAuth } from '../context/AuthContext';
 
-export default function YourCultureScreen({ navigation, route }: any) {
+export default function YourCultureScreen({ navigation }: any) {
   const [searchQuery, setSearchQuery] = useState('');
-  const { isTutor } = useRole();
+  const { isTutor }  = useRole();
+  const { user }     = useAuth();
 
-  const cultureName = route?.params?.culture ?? 'IGBO';
-  const cultureFlag = route?.params?.flag    ?? '🇳🇬';
+  // ── Pull tribe + flag automatically from the logged-in user's profile ──
+  // These were saved to Supabase in WhereAreYouFromScreen and are now
+  // available in AuthContext without needing route params.
+  const cultureName = user?.tribe            ?? 'My Culture';
+  const cultureFlag = user?.country_flag     ?? '🌍';
 
-  // ── Culture categories ─────────────────────────────────────────────────
-  // The 'Language' card destination is role-aware:
-  //   • Tutor  → TutorAppointments  (their own session management)
-  //   • Student → Language          (book / browse tutors)
   const CULTURE_CATEGORIES = [
     { key: 'history',   title: 'History',    screen: 'History' },
     {
       key: 'language',
       title: 'Language',
+      // Tutors go to their appointments, students browse tutors
       screen: isTutor ? 'TutorAppointments' : 'Language',
     },
     { key: 'food',      title: 'Food',       screen: 'Food' },
@@ -38,6 +33,10 @@ export default function YourCultureScreen({ navigation, route }: any) {
     { key: 'beliefs',   title: 'Beliefs',    screen: 'Beliefs' },
     { key: 'stories',   title: 'Stories',    screen: 'Stories' },
   ];
+
+  const filtered = CULTURE_CATEGORIES.filter((cat) =>
+    cat.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -49,13 +48,13 @@ export default function YourCultureScreen({ navigation, route }: any) {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Culture Title + Flag */}
+        {/* Tribe name + country flag — auto-populated from profile */}
         <View style={styles.cultureHeader}>
-          <Text style={styles.cultureName}>{cultureName}</Text>
+          <Text style={styles.cultureName}>{cultureName.toUpperCase()}</Text>
           <Text style={styles.cultureFlag}>{cultureFlag}</Text>
         </View>
 
-        {CULTURE_CATEGORIES.map((cat) => (
+        {filtered.map((cat) => (
           <CategoryCard
             key={cat.key}
             title={cat.title}

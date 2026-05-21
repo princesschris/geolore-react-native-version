@@ -1,17 +1,55 @@
 import React, { useState } from 'react';
-import {View, Image,Text,TouchableOpacity,StyleSheet,SafeAreaView,
-  StatusBar,
-  ScrollView,
+import {
+  View, Image, Text, TouchableOpacity, StyleSheet,
+  SafeAreaView, StatusBar, ScrollView, ActivityIndicator, Alert,
 } from 'react-native';
 import LabeledInput from '../components/LabeledInput';
+import CountryPicker from '../components/CountryPicker';
+import { Country } from '../data/countries';
+import { supabase } from '../config/supabase';
+import { useAuth } from '../context/AuthContext';
 
-export default function WhereAreYouFromScreen({ navigation }:any) {
-  const [countryOfOrigin, setCountryOfOrigin] = useState('');
-  const [tribe, setTribe] = useState('');
-  const [currentLocation, setCurrentLocation] = useState('');
+export default function WhereAreYouFromScreen({ navigation }: any) {
+  const [countryOfOrigin, setCountryOfOrigin] = useState<Country | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<Country | null>(null);
+  const [tribe,           setTribe]           = useState('');
+  const [loading,         setLoading]         = useState(false);
 
-  const handleDone = () => {
-    navigation?.navigate('Home');
+  const { user, setUser } = useAuth();
+
+  const handleDone = async () => {
+    if (!countryOfOrigin) {
+      Alert.alert('Required', 'Please select your country of origin.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .update({
+          country_of_origin: countryOfOrigin.name,
+          country_flag:      countryOfOrigin.flag,
+          tribe:             tribe.trim(),
+          current_location:  currentLocation?.name ?? null,
+        })
+        .eq('id', user?.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Update AuthContext with new profile data
+      if (data) setUser(data);
+
+      // Navigate to Home — culture data is now in AuthContext,
+      // YourCultureScreen will read it directly from there
+      navigation?.navigate('Home');
+    } catch (err: any) {
+      Alert.alert('Error', err.message || 'Could not save your details. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -22,105 +60,61 @@ export default function WhereAreYouFromScreen({ navigation }:any) {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Title */}
         <Text style={styles.title}>Where are you{'\n'}from?</Text>
 
-        {/* Flags Grid — replace with actual image asset when ready */}
         <Image source={require('../../assets/images/flags.jpeg')} style={styles.flagsImage} />
-        
 
-        {/* Form */}
         <View style={styles.form}>
-          <LabeledInput
+          <CountryPicker
             label="Country of origin"
-            value={countryOfOrigin}
-            onChangeText={setCountryOfOrigin}
-            autoCapitalize="words"
+            selected={countryOfOrigin}
+            onSelect={setCountryOfOrigin}
           />
           <LabeledInput
-            label="Tribe"
+            label="Tribe / Ethnicity"
             value={tribe}
             onChangeText={setTribe}
             autoCapitalize="words"
           />
-          <LabeledInput
+          <CountryPicker
             label="Current Location"
-            value={currentLocation}
-            onChangeText={setCurrentLocation}
-            autoCapitalize="words"
+            selected={currentLocation}
+            onSelect={setCurrentLocation}
           />
         </View>
+
         <TouchableOpacity
-            style={styles.doneButton}
-            activeOpacity={0.8}
-            onPress={handleDone}
-          >
-            <Text style={styles.doneButtonText}>Done</Text>
-          </TouchableOpacity>
+          style={[styles.doneButton, loading && styles.doneButtonDisabled]}
+          activeOpacity={0.8}
+          onPress={handleDone}
+          disabled={loading}
+        >
+          {loading
+            ? <ActivityIndicator color="#fff" />
+            : <Text style={styles.doneButtonText}>Done</Text>
+          }
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#FFFDF5',
-  },
-  scrollContent: {
-    alignItems: 'center',
-    paddingHorizontal: 28,
-    paddingTop: 40,
-    paddingBottom: 48,
-  },
+  safeArea:      { flex: 1, backgroundColor: '#FFFDF5' },
+  scrollContent: { alignItems: 'center', paddingHorizontal: 28, paddingTop: 40, paddingBottom: 48 },
   title: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: '#E87D0D',
-    textAlign: 'center',
-    marginBottom: 24,
-    lineHeight: 34,
-  },
-  flagsPlaceholder: {
-    width: '100%',
-    backgroundColor: '#F5A623',
-    borderRadius: 16,
-    paddingVertical: 16,
-    paddingHorizontal: 12,
-    alignItems: 'center',
-    marginBottom: 32,
-  },
-  flagsGrid: {
-    fontSize: 26,
-    lineHeight: 40,
-    textAlign: 'center',
-    letterSpacing: 4,
+    fontSize: 26, fontWeight: '800', color: '#E87D0D',
+    textAlign: 'center', marginBottom: 24, lineHeight: 34,
   },
   flagsImage: {
-    width: '100%',
-    height: 220,
-    borderRadius: 16,
-    resizeMode: 'cover',
-    marginBottom: 32,
+    width: '100%', height: 220, borderRadius: 16,
+    resizeMode: 'cover', marginBottom: 32,
   },
-  form: {
-    width: '100%',
-    paddingVertical:10,
-    paddingHorizontal: 30,
-    borderWidth:0,
-
-  },
+  form:               { width: '100%' },
   doneButton: {
-    backgroundColor: '#F5A623',
-    paddingVertical: 13,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginTop: 8,
-    width: '100%',
+    backgroundColor: '#F5A623', paddingVertical: 13,
+    borderRadius: 10, alignItems: 'center', marginTop: 8, width: '100%',
   },
-  doneButtonText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '700',
-  },
+  doneButtonDisabled: { backgroundColor: '#E0C49A' },
+  doneButtonText:     { color: '#fff', fontSize: 15, fontWeight: '700' },
 });

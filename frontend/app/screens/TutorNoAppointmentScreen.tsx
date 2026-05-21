@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
-  StatusBar,
+  StatusBar, Image
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import BottomTabBar from '../components/BottomTabBar';
@@ -33,11 +33,11 @@ export default function TutorNoAppointmentScreen({ navigation }: any) {
 
         <View style={styles.content}>
           {/* Tiger / mascot placeholder */}
-          <View style={styles.mascotBox}>
-            <Text style={styles.mascotEmoji}>🐯</Text>
-          </View>
+          {/* <View style={styles.mascotBox}> */}
+            <Image source={require('../../assets/images/tiger.png')} style={styles.mascot} />
+          {/* </View> */}
 
-          <Text style={styles.message}>You're all caught up!</Text>
+          <Text style={styles.message}>You&apos;re all caught up!</Text>
           <Text style={styles.subMessage}>
             You have no upcoming appointments from students yet.{'\n'}
             Check your notifications to stay updated.
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF3E0', alignItems: 'center', justifyContent: 'center',
     borderWidth: 2, borderColor: '#F5C070', marginBottom: 8,
   },
-  mascotEmoji: { fontSize: 52 },
+  mascot: { height:160, width:130 },
   message: {
     fontSize: 18, fontWeight: '800', color: '#3B1F00', textAlign: 'center',
   },

@@ -34,11 +34,7 @@ export default function LoginScreen({ navigation }: any) {
     try {
       const userDoc = await loginUser(email.trim(), password);
       setUser(userDoc);
-      if (userDoc.role === 'tutor' || userDoc.role === 'both') {
-        navigation?.navigate('Home');
-      } else {
-        navigation?.navigate('GetStarted');
-      }
+      navigation?.navigate('Home');
     } catch (err: any) {
       let message = 'Something went wrong. Please try again.';
       if (err.message?.includes('Invalid login credentials')) {

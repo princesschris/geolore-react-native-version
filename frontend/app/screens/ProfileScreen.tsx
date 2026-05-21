@@ -37,9 +37,9 @@ export default function ProfileScreen({ navigation }: any) {
   const { logout, user: authUser } = useAuth();
 
   const user = {
-    name:  authUser ? `${authUser.firstName} ${authUser.lastName}` : 'Guest',
-    email: authUser?.email ?? '',
-  };
+  name:  authUser ? `${authUser.first_name} ${authUser.last_name}` : 'Guest',
+  email: authUser?.email ?? '',
+};
 
   const handleLogout = async () => {
     await logout();
