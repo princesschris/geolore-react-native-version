@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, SafeAreaView, StatusBar, ScrollView, ActivityIndicator,
+  View, Text, StyleSheet, SafeAreaView, StatusBar, ScrollView, ActivityIndicator, Image
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import BottomTabBar from '../components/BottomTabBar';
@@ -85,10 +85,8 @@ export default function NotificationsScreen({ navigation }: any) {
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {filtered.length === 0 ? (
             <View style={styles.emptyState}>
-              <View style={styles.bellCircle}>
-                <Text style={styles.bellEmoji}>🔔</Text>
-              </View>
-              <Text style={styles.emptyTitle}>You're all caught up</Text>
+              <Image source={require('../../assets/images/tiger.png')} style={styles.mascot} />
+              <Text style={styles.emptyTitle}>You&apos;re all caught up</Text>
               <Text style={styles.emptySubtitle}>Come back later for reminders</Text>
             </View>
           ) : (
@@ -118,8 +116,7 @@ const styles = StyleSheet.create({
   scrollContent: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 32, flexGrow: 1 },
   loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   emptyState: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 80, gap: 12 },
-  bellCircle: { width: 120, height: 120, borderRadius: 60, backgroundColor: '#FFF3E0', alignItems: 'center', justifyContent: 'center', marginBottom: 8, borderWidth: 1, borderColor: '#F5C070' },
-  bellEmoji: { fontSize: 52 },
+  mascot: { height: 160, width: 130 },
   emptyTitle: { fontSize: 20, fontWeight: '800', color: '#3B1F00', textAlign: 'center' },
   emptySubtitle: { fontSize: 13, color: '#A08060', textAlign: 'center' },
 });

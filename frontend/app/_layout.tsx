@@ -69,6 +69,7 @@ import AwaitResponseScreen from './screens/AwaitResponseScreen';
 import TutorAppointmentsScreen from './screens/TutorAppointmentsScreen';
 import TutorAppointmentDetailsScreen from './screens/TutorAppointmentDetailsScreen';
 import TutorNoAppointmentScreen from './screens/TutorNoAppointmentScreen';
+import { AlertProvider } from './components/CustomAlert';
 
 const Stack = createNativeStackNavigator();
 
@@ -187,7 +188,9 @@ function Navigator() {
 export default function AppNavigator() {
   return (
     <AuthProvider>
+      <AlertProvider>
       <Navigator />
+      </AlertProvider>
     </AuthProvider>
   );
 }

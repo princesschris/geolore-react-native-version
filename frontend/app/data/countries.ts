@@ -1,7 +1,4 @@
-// ─────────────────────────────────────────────────────────────────────────────
-//  data/countries.ts
-//  All 195 countries with flag emojis and dial codes
-// ─────────────────────────────────────────────────────────────────────────────
+
 
 export interface Country {
   name: string;
