@@ -1,41 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, SafeAreaView,
-  StatusBar, ScrollView, ActivityIndicator, Alert,
+  StatusBar, ScrollView, ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import BottomTabBar from '../components/BottomTabBar';
 import { supabase } from '../config/supabase';
 import { useAuth } from '../context/AuthContext';
+import { useAlert } from '../components/CustomAlert';
 
 export default function GroupInfoScreen({ navigation, route }: any) {
   const groupName = route?.params?.name ?? 'Group';
   const groupId   = route?.params?.id   ?? null;
 
-  const [members,  setMembers]  = useState<any[]>([]);
-  const [loading,  setLoading]  = useState(true);
+  const [members,   setMembers]   = useState<any[]>([]);
+  const [loading,   setLoading]   = useState(true);
   const [creatorId, setCreatorId] = useState<string | null>(null);
-  const { user } = useAuth();
+
+  const { user }               = useAuth();
+  const { showAlert, showConfirm } = useAlert();
 
   useEffect(() => {
     if (!groupId) { setLoading(false); return; }
     const fetch = async () => {
-      // Fetch group info + members
       const { data: groupData } = await supabase
         .from('groups')
         .select('created_by')
         .eq('id', groupId)
         .single();
-
       setCreatorId(groupData?.created_by ?? null);
 
       const { data: memberData } = await supabase
         .from('group_members')
         .select(`
           user_id,
-          user:users!group_members_user_id_fkey (
-            id, first_name, last_name
-          )
+          user:users!group_members_user_id_fkey (id, first_name, last_name)
         `)
         .eq('group_id', groupId);
 
@@ -45,27 +44,36 @@ export default function GroupInfoScreen({ navigation, route }: any) {
     fetch();
   }, [groupId]);
 
-  const handleExitGroup = async () => {
-    Alert.alert('Exit group', 'Are you sure you want to leave this group?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Exit',
-        style: 'destructive',
-        onPress: async () => {
+  const handleExitGroup = () => {
+    showConfirm(
+      'Exit group',
+      `Are you sure you want to leave "${groupName}"?`,
+      async () => {
+        try {
           await supabase
             .from('group_members')
             .delete()
             .eq('group_id', groupId)
             .eq('user_id', user?.id);
           navigation?.goBack();
-        },
+        } catch (err: any) {
+          showAlert('error', 'Could not exit', err.message || 'Something went wrong. Please try again.');
+        }
       },
-    ]);
+      () => {},
+      'Yes, exit',
+      'Cancel',
+    );
+  };
+
+  const handleReportGroup = () => {
+    showAlert('info', 'Report submitted', 'Thank you for your report. Our team will review it shortly.');
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFF3E0" />
+
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation?.goBack()}>
           <Ionicons name="arrow-back-outline" size={22} color="#5C3A00" />
@@ -73,6 +81,7 @@ export default function GroupInfoScreen({ navigation, route }: any) {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Group Avatar */}
         <View style={styles.avatarSection}>
           <View style={styles.groupAvatar}>
             <Ionicons name="people" size={52} color="#F5A623" />
@@ -80,17 +89,25 @@ export default function GroupInfoScreen({ navigation, route }: any) {
           <Text style={styles.groupName}>{groupName}</Text>
         </View>
 
+        {/* Action Buttons */}
         <View style={styles.actionButtons}>
-          <TouchableOpacity style={styles.actionBtn} onPress={() => navigation?.navigate('GroupChat', { name: groupName, id: groupId })}>
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={() => navigation?.navigate('GroupChat', { name: groupName, id: groupId })}
+          >
             <Ionicons name="chatbubble-outline" size={22} color="#F5A623" />
             <Text style={styles.actionBtnText}>Message</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionBtn} onPress={() => navigation?.navigate('CommunityAdd')}>
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={() => navigation?.navigate('CommunityAdd')}
+          >
             <Ionicons name="person-add-outline" size={22} color="#F5A623" />
             <Text style={styles.actionBtnText}>Add+</Text>
           </TouchableOpacity>
         </View>
 
+        {/* Members */}
         <View style={styles.membersSection}>
           <View style={styles.membersHeader}>
             <Text style={styles.membersCount}>
@@ -103,7 +120,7 @@ export default function GroupInfoScreen({ navigation, route }: any) {
             <ActivityIndicator color="#F5A623" style={{ marginVertical: 16 }} />
           ) : (
             members.map((member) => {
-              const name = `${member.first_name} ${member.last_name}`;
+              const name      = `${member.first_name} ${member.last_name}`;
               const isCreator = member.id === creatorId;
               return (
                 <View key={member.id} style={styles.memberRow}>
@@ -128,7 +145,7 @@ export default function GroupInfoScreen({ navigation, route }: any) {
             <Text style={styles.dangerText}>Exit group</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.dangerRow}>
+          <TouchableOpacity style={styles.dangerRow} onPress={handleReportGroup}>
             <Ionicons name="flag-outline" size={20} color="#E74C3C" />
             <Text style={styles.dangerText}>Report group</Text>
           </TouchableOpacity>

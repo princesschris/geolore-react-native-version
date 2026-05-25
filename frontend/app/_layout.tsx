@@ -70,6 +70,8 @@ import TutorAppointmentsScreen from './screens/TutorAppointmentsScreen';
 import TutorAppointmentDetailsScreen from './screens/TutorAppointmentDetailsScreen';
 import TutorNoAppointmentScreen from './screens/TutorNoAppointmentScreen';
 import { AlertProvider } from './components/CustomAlert';
+import ClassDetailScreen from './screens/ClassDetailScreen';
+import CreateClassScreen from './screens/CreateClassScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -179,6 +181,8 @@ function Navigator() {
       <Stack.Screen name="Events"      component={EventsScreen} />
       <Stack.Screen name="EventDetail" component={EventDetailScreen} />
       <Stack.Screen name="AddEvent"    component={AddEventScreen} />
+      <Stack.Screen name="ClassDetail" component={ClassDetailScreen} />
+      <Stack.Screen name="CreateClass" component={CreateClassScreen} />
 
     </Stack.Navigator>
   );

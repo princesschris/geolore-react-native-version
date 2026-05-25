@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import {
   Image, View, Text, TouchableOpacity, StyleSheet,
-  SafeAreaView, StatusBar, ScrollView, ActivityIndicator, Alert,
+  SafeAreaView, StatusBar, ScrollView, ActivityIndicator,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import LabeledInput from '../components/LabeledInput';
 import { registerUser } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
-import { UserRole } from '../types/roles';
+import { useAlert } from '../components/CustomAlert';
+import { UserRole } from '../types/Roles';
 
 const GoogleIcon = () => (
   <Svg width="18" height="18" viewBox="0 0 48 48">
@@ -26,7 +27,7 @@ const ROLE_OPTIONS: { role: UserRole; label: string; description: string; icon: 
 
 export default function RegisterScreen({ navigation }: any) {
   const [firstName,       setFirstName]       = useState('');
-  const [lastName,        setLastName]         = useState('');
+  const [lastName,        setLastName]        = useState('');
   const [email,           setEmail]           = useState('');
   const [confirmEmail,    setConfirmEmail]    = useState('');
   const [username,        setUsername]        = useState('');
@@ -38,7 +39,8 @@ export default function RegisterScreen({ navigation }: any) {
   const [selectedRole,    setSelectedRole]    = useState<UserRole | null>(null);
   const [loading,         setLoading]         = useState(false);
 
-  const { setUser } = useAuth();
+  const { setUser }              = useAuth();
+  const { showAlert, showConfirm } = useAlert();
 
   const validateStep1 = (): string | null => {
     if (!firstName.trim() || !lastName.trim()) return 'Please enter your full name.';
@@ -52,13 +54,13 @@ export default function RegisterScreen({ navigation }: any) {
 
   const handleNextStep = () => {
     const error = validateStep1();
-    if (error) { Alert.alert('Please check your details', error); return; }
+    if (error) { showAlert('warning', 'Check your details', error); return; }
     setStep(2);
   };
 
   const handleRegister = async () => {
     if (!selectedRole) {
-      Alert.alert('Pick a role', 'Please select how you want to use GeoLore.');
+      showAlert('warning', 'Pick a role', 'Please select how you want to use GeoLore.');
       return;
     }
     setLoading(true);
@@ -74,10 +76,8 @@ export default function RegisterScreen({ navigation }: any) {
       let message = 'Something went wrong. Please try again.';
       if (err.message?.includes('already registered')) message = 'That email is already registered. Try logging in.';
       if (err.message?.includes('invalid email'))      message = 'Please enter a valid email address.';
-      if (err.message?.includes('weak password') || err.message?.includes('at least 6')) {
-        message = 'Password must be at least 6 characters.';
-      }
-      Alert.alert('Registration failed', err.message || JSON.stringify(err));
+      if (err.message?.includes('at least 6'))         message = 'Password must be at least 6 characters.';
+      showAlert('error', 'Registration failed', message);
     } finally {
       setLoading(false);
     }
@@ -96,22 +96,18 @@ export default function RegisterScreen({ navigation }: any) {
       <LabeledInput label="Confirm Password" value={confirmPassword} onChangeText={setConfirmPassword}
         secureTextEntry showToggle isPasswordVisible={showConfirmPw}
         onToggleShow={() => setShowConfirmPw(!showConfirmPw)} />
-
       <TouchableOpacity style={styles.primaryBtn} activeOpacity={0.8} onPress={handleNextStep}>
         <Text style={styles.primaryBtnText}>Next</Text>
       </TouchableOpacity>
-
       <View style={styles.dividerRow}>
         <View style={styles.dividerLine} />
         <Text style={styles.dividerText}>or</Text>
         <View style={styles.dividerLine} />
       </View>
-
       <TouchableOpacity style={styles.googleButton} activeOpacity={0.8}>
         <GoogleIcon />
         <Text style={styles.googleButtonText}>Continue with Google</Text>
       </TouchableOpacity>
-
       <View style={styles.bottomRow}>
         <Text style={styles.bottomText}>Already have an account? </Text>
         <TouchableOpacity onPress={() => navigation?.navigate('Login')}>
@@ -125,7 +121,6 @@ export default function RegisterScreen({ navigation }: any) {
     <>
       <Text style={styles.roleHeading}>How will you use GeoLore?</Text>
       <Text style={styles.roleSubheading}>You can always change this later from your profile.</Text>
-
       {ROLE_OPTIONS.map(({ role, label, description, icon }) => {
         const isSelected = selectedRole === role;
         return (
@@ -146,19 +141,14 @@ export default function RegisterScreen({ navigation }: any) {
           </TouchableOpacity>
         );
       })}
-
       <TouchableOpacity
         style={[styles.primaryBtn, (!selectedRole || loading) && styles.primaryBtnDisabled]}
         activeOpacity={0.85}
         onPress={handleRegister}
         disabled={!selectedRole || loading}
       >
-        {loading
-          ? <ActivityIndicator color="#fff" />
-          : <Text style={styles.primaryBtnText}>Create account</Text>
-        }
+        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryBtnText}>Create account</Text>}
       </TouchableOpacity>
-
       <TouchableOpacity style={styles.backLink} onPress={() => setStep(1)}>
         <Text style={styles.backLinkText}>← Back</Text>
       </TouchableOpacity>
@@ -171,13 +161,11 @@ export default function RegisterScreen({ navigation }: any) {
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <Image source={require('../../assets/images/tiger.png')} style={styles.mascot} />
         <Text style={styles.title}>Register</Text>
-
         <View style={styles.stepRow}>
           <View style={[styles.stepDot, step >= 1 && styles.stepDotActive]} />
           <View style={styles.stepLine} />
           <View style={[styles.stepDot, step >= 2 && styles.stepDotActive]} />
         </View>
-
         <View style={styles.form}>
           {step === 1 ? renderStep1() : renderStep2()}
         </View>

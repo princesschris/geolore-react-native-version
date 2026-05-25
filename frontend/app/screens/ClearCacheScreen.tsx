@@ -12,6 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import BottomTabBar from '../components/BottomTabBar';
 import BuntingBanner from '../components/BuntingBanner';
+import { useAlert } from '../components/CustomAlert';
 
 const STORAGE_ITEMS = [
   {
@@ -50,7 +51,7 @@ const CACHE_GB = 2.5;
 export default function ClearCacheScreen({ navigation }) {
   const [cleared, setCleared] = useState(false);
   const [items, setItems] = useState(STORAGE_ITEMS);
-
+  const { showAlert, showConfirm } = useAlert();
   const usedPercent = (USED_GB / TOTAL_GB) * 100;
   const systemPercent = (SYSTEM_GB / TOTAL_GB) * 100;
   const appPercent = (APP_GB / TOTAL_GB) * 100;

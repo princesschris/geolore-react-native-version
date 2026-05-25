@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  SafeAreaView, StatusBar, ScrollView, ActivityIndicator, Alert,
+  SafeAreaView, StatusBar, ScrollView, ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import BottomTabBar from '../components/BottomTabBar';
 import BuntingBanner from '../components/BuntingBanner';
 import { DatePickerModal, TimePickerModal } from '../components/DateTimePicker';
 import { useRole } from '../context/AuthContext';
+import { useAlert } from '../components/CustomAlert';
 import { supabase } from '../config/supabase';
 
 export default function ClassInfoScreen({ navigation, route }: any) {
-  const { isTutor } = useRole();
+  const { isTutor }   = useRole();
+  const { showAlert } = useAlert();
 
   const tutorName     = route?.params?.tutorName     ?? 'Chinazom';
   const studentName   = route?.params?.studentName   ?? 'Student';
@@ -35,10 +37,9 @@ export default function ClassInfoScreen({ navigation, route }: any) {
   const formatDate = (d: any) => d ? `${d.day} ${d.month} ${d.year}` : '';
   const formatTime = (t: any) => t ? `${t.hour}:${t.minute} ${t.period}` : '';
 
-  // Save reschedule request to Supabase
   const handleSendReschedule = async () => {
     if (!rescheduleDate || !rescheduleTime) {
-      Alert.alert('Select date and time', 'Please select both a new date and time before sending.');
+      showAlert('warning', 'Select date & time', 'Please pick both a new date and time before sending.');
       return;
     }
     if (!appointmentId) return;
@@ -46,23 +47,22 @@ export default function ClassInfoScreen({ navigation, route }: any) {
     try {
       const { error } = await supabase
         .from('appointments')
-        .update({
-          reschedule_date: formatDate(rescheduleDate),
-          reschedule_time: formatTime(rescheduleTime),
-        })
+        .update({ reschedule_date: formatDate(rescheduleDate), reschedule_time: formatTime(rescheduleTime) })
         .eq('id', appointmentId);
       if (error) throw error;
-      Alert.alert('Request sent!', 'Your reschedule request has been submitted.');
+      showAlert('success', 'Request sent!', 'Your reschedule request has been submitted successfully.');
     } catch (err: any) {
-      Alert.alert('Error', err.message || 'Could not send request.');
+      showAlert('error', 'Request failed', err.message || 'Could not send reschedule request.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Cancel appointment in Supabase
   const handleSubmitCancel = async () => {
-    if (!cancelReason.trim()) return;
+    if (!cancelReason.trim()) {
+      showAlert('warning', 'Reason required', 'Please state the reason for cancellation.');
+      return;
+    }
     if (!appointmentId) { setSubmitted(true); return; }
     setLoading(true);
     try {
@@ -73,7 +73,7 @@ export default function ClassInfoScreen({ navigation, route }: any) {
       if (error) throw error;
       setSubmitted(true);
     } catch (err: any) {
-      Alert.alert('Error', err.message || 'Could not cancel appointment.');
+      showAlert('error', 'Cancellation failed', err.message || 'Could not cancel appointment.');
     } finally {
       setLoading(false);
     }
@@ -115,12 +115,14 @@ export default function ClassInfoScreen({ navigation, route }: any) {
           </View>
 
           <Text style={styles.sectionLabel}>Reschedule:</Text>
+
           <TouchableOpacity style={styles.pickerField} onPress={() => setShowDatePicker(true)} activeOpacity={0.8}>
             <Text style={[styles.pickerFieldText, !rescheduleDate && styles.pickerPlaceholder]}>
               {rescheduleDate ? formatDate(rescheduleDate) : 'Date'}
             </Text>
             <Ionicons name="calendar-outline" size={16} color="#F5A623" />
           </TouchableOpacity>
+
           <TouchableOpacity style={styles.pickerField} onPress={() => setShowTimePicker(true)} activeOpacity={0.8}>
             <Text style={[styles.pickerFieldText, !rescheduleTime && styles.pickerPlaceholder]}>
               {rescheduleTime ? formatTime(rescheduleTime) : 'Time'}
@@ -153,6 +155,7 @@ export default function ClassInfoScreen({ navigation, route }: any) {
           textAlignVertical="top"
           editable={!submitted}
         />
+
         <TouchableOpacity
           style={[styles.submitBtn, (submitted || loading) && styles.submitBtnDisabled]}
           activeOpacity={0.8}

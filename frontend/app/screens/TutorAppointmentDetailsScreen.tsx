@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  SafeAreaView, StatusBar, ScrollView, ActivityIndicator, Alert,
+  SafeAreaView, StatusBar, ScrollView, ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import BottomTabBar from '../components/BottomTabBar';
 import BuntingBanner from '../components/BuntingBanner';
 import RoleGate from '../components/RoleGate';
 import { DatePickerModal, TimePickerModal } from '../components/DateTimePicker';
+import { useAlert } from '../components/CustomAlert';
 import { supabase } from '../config/supabase';
 
 export default function TutorAppointmentDetailsScreen({ navigation, route }: any) {
@@ -25,12 +26,14 @@ export default function TutorAppointmentDetailsScreen({ navigation, route }: any
   const [submitted,      setSubmitted]      = useState(false);
   const [loading,        setLoading]        = useState(false);
 
+  const { showAlert } = useAlert();
+
   const formatDate = (d: any) => d ? `${d.day} ${d.month} ${d.year}` : '';
   const formatTime = (t: any) => t ? `${t.hour}:${t.minute} ${t.period}` : '';
 
   const handleSendReschedule = async () => {
     if (!rescheduleDate || !rescheduleTime) {
-      Alert.alert('Select date and time', 'Please select both a new date and time.');
+      showAlert('warning', 'Select date & time', 'Please pick both a new date and time before sending.');
       return;
     }
     if (!appointmentId) return;
@@ -38,22 +41,22 @@ export default function TutorAppointmentDetailsScreen({ navigation, route }: any
     try {
       const { error } = await supabase
         .from('appointments')
-        .update({
-          reschedule_date: formatDate(rescheduleDate),
-          reschedule_time: formatTime(rescheduleTime),
-        })
+        .update({ reschedule_date: formatDate(rescheduleDate), reschedule_time: formatTime(rescheduleTime) })
         .eq('id', appointmentId);
       if (error) throw error;
-      Alert.alert('Request sent!', 'Reschedule request sent to student.');
+      showAlert('success', 'Request sent!', 'Reschedule request sent to the student successfully.');
     } catch (err: any) {
-      Alert.alert('Error', err.message || 'Could not send request.');
+      showAlert('error', 'Request failed', err.message || 'Could not send reschedule request.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleSubmitCancel = async () => {
-    if (!cancelReason.trim()) return;
+    if (!cancelReason.trim()) {
+      showAlert('warning', 'Reason required', 'Please state the reason for cancellation.');
+      return;
+    }
     if (!appointmentId) { setSubmitted(true); return; }
     setLoading(true);
     try {
@@ -64,7 +67,7 @@ export default function TutorAppointmentDetailsScreen({ navigation, route }: any
       if (error) throw error;
       setSubmitted(true);
     } catch (err: any) {
-      Alert.alert('Error', err.message || 'Could not cancel appointment.');
+      showAlert('error', 'Cancellation failed', err.message || 'Could not cancel appointment.');
     } finally {
       setLoading(false);
     }
@@ -107,12 +110,14 @@ export default function TutorAppointmentDetailsScreen({ navigation, route }: any
             </View>
 
             <Text style={styles.sectionLabel}>Reschedule:</Text>
+
             <TouchableOpacity style={styles.pickerField} onPress={() => setShowDatePicker(true)} activeOpacity={0.8}>
               <Text style={[styles.pickerText, !rescheduleDate && styles.pickerPlaceholder]}>
                 {rescheduleDate ? formatDate(rescheduleDate) : 'Date'}
               </Text>
               <Ionicons name="calendar-outline" size={16} color="#F5A623" />
             </TouchableOpacity>
+
             <TouchableOpacity style={styles.pickerField} onPress={() => setShowTimePicker(true)} activeOpacity={0.8}>
               <Text style={[styles.pickerText, !rescheduleTime && styles.pickerPlaceholder]}>
                 {rescheduleTime ? formatTime(rescheduleTime) : 'Time'}
@@ -145,6 +150,7 @@ export default function TutorAppointmentDetailsScreen({ navigation, route }: any
             textAlignVertical="top"
             editable={!submitted}
           />
+
           <TouchableOpacity
             style={[styles.submitBtn, (submitted || loading) && styles.submitBtnDisabled]}
             activeOpacity={0.8}

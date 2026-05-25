@@ -1,48 +1,17 @@
-// ─────────────────────────────────────────────────────────────────────────────
-//  components/CustomAlert.tsx
-//
-//  A fully custom alert modal matching GeoLore's theme.
-//  Supports: success, error, warning, info, confirm
-//
-//  USAGE — wrap your root layout with <AlertProvider> then call useAlert():
-//
-//    const { showAlert, showConfirm } = useAlert();
-//
-//    // Simple alerts
-//    showAlert('success', 'Saved!', 'Your profile has been updated.');
-//    showAlert('error',   'Oops!',  'Something went wrong.');
-//    showAlert('warning', 'Warning', 'This action cannot be undone.');
-//    showAlert('info',    'Did you know?', 'You can switch roles from Profile.');
-//
-//    // Confirm dialog
-//    showConfirm(
-//      'Delete appointment',
-//      'Are you sure you want to cancel this appointment?',
-//      () => handleDelete(),   // onConfirm
-//      () => {},               // onCancel (optional)
-//    );
-// ─────────────────────────────────────────────────────────────────────────────
-
-import React, {
-  createContext, useContext, useState, useCallback, ReactNode,
-} from 'react';
-import {
-  Modal, View, Text, TouchableOpacity, StyleSheet,
-  Animated, useWindowDimensions,
-} from 'react-native';
+import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-// ── Types ─────────────────────────────────────────────────────────────────────
 type AlertType = 'success' | 'error' | 'warning' | 'info' | 'confirm';
 
 interface AlertConfig {
-  type:        AlertType;
-  title:       string;
-  message:     string;
+  type:         AlertType;
+  title:        string;
+  message:      string;
   confirmText?: string;
   cancelText?:  string;
-  onConfirm?:  () => void;
-  onCancel?:   () => void;
+  onConfirm?:   () => void;
+  onCancel?:    () => void;
 }
 
 interface AlertContextType {
@@ -50,22 +19,73 @@ interface AlertContextType {
   showConfirm: (title: string, message: string, onConfirm: () => void, onCancel?: () => void, confirmText?: string, cancelText?: string) => void;
 }
 
-// ── Theme per type ────────────────────────────────────────────────────────────
-const ALERT_THEME: Record<AlertType, { icon: string; color: string; bg: string; border: string }> = {
-  success: { icon: 'checkmark-circle',  color: '#27AE60', bg: '#F0FFF4', border: '#27AE60' },
-  error:   { icon: 'close-circle',      color: '#E74C3C', bg: '#FFF5F5', border: '#E74C3C' },
-  warning: { icon: 'warning',           color: '#F5A623', bg: '#FFFDF5', border: '#F5A623' },
-  info:    { icon: 'information-circle',color: '#3B8ED0', bg: '#EFF8FF', border: '#3B8ED0' },
-  confirm: { icon: 'help-circle',       color: '#5C3A00', bg: '#FFF3E0', border: '#F5A623' },
+// ── All types use the app's brown / orange palette ────────────────────────────
+const ALERT_THEME: Record<AlertType, {
+  icon:       string;
+  iconColor:  string;
+  iconBg:     string;
+  titleColor: string;
+  border:     string;
+  cardBg:     string;
+  confirmBg:  string;
+}> = {
+  // ✅ Success — deep brown icon on warm orange background
+  success: {
+    icon:       'checkmark-circle',
+    iconColor:  '#3B1F00',
+    iconBg:     '#F5A623',
+    titleColor: '#3B1F00',
+    border:     '#F5A623',
+    cardBg:     '#FFFDF5',
+    confirmBg:  '#F5A623',
+  },
+  // ❌ Error — white icon on dark brown background
+  error: {
+    icon:       'close-circle',
+    iconColor:  '#fff',
+    iconBg:     '#3B1F00',
+    titleColor: '#3B1F00',
+    border:     '#3B1F00',
+    cardBg:     '#FFFDF5',
+    confirmBg:  '#3B1F00',
+  },
+  // ⚠️ Warning — dark brown icon on light orange background
+  warning: {
+    icon:       'warning',
+    iconColor:  '#3B1F00',
+    iconBg:     '#F5C070',
+    titleColor: '#3B1F00',
+    border:     '#F5C070',
+    cardBg:     '#FFFDF5',
+    confirmBg:  '#F5A623',
+  },
+  // ℹ️ Info — orange icon on warm cream background
+  info: {
+    icon:       'information-circle',
+    iconColor:  '#F5A623',
+    iconBg:     '#FFF3E0',
+    titleColor: '#3B1F00',
+    border:     '#F5A623',
+    cardBg:     '#FFFDF5',
+    confirmBg:  '#F5A623',
+  },
+  // ❓ Confirm — dark brown icon on warm cream
+  confirm: {
+    icon:       'help-circle',
+    iconColor:  '#F5A623',
+    iconBg:     '#FFF3E0',
+    titleColor: '#3B1F00',
+    border:     '#F5A623',
+    cardBg:     '#FFFDF5',
+    confirmBg:  '#3B1F00',
+  },
 };
 
-// ── Context ───────────────────────────────────────────────────────────────────
 const AlertContext = createContext<AlertContextType>({
   showAlert:   () => {},
   showConfirm: () => {},
 });
 
-// ── Provider ──────────────────────────────────────────────────────────────────
 export function AlertProvider({ children }: { children: ReactNode }) {
   const [config,  setConfig]  = useState<AlertConfig | null>(null);
   const [visible, setVisible] = useState(false);
@@ -85,22 +105,14 @@ export function AlertProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const showConfirm = useCallback((
-    title:       string,
-    message:     string,
-    onConfirm:   () => void,
-    onCancel?:   () => void,
+    title:        string,
+    message:      string,
+    onConfirm:    () => void,
+    onCancel?:    () => void,
     confirmText?: string,
     cancelText?:  string,
   ) => {
-    setConfig({
-      type: 'confirm',
-      title,
-      message,
-      confirmText: confirmText ?? 'Yes',
-      cancelText:  cancelText  ?? 'No',
-      onConfirm,
-      onCancel,
-    });
+    setConfig({ type: 'confirm', title, message, confirmText, cancelText, onConfirm, onCancel });
     setVisible(true);
   }, []);
 
@@ -130,27 +142,19 @@ export function AlertProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// ── useAlert hook ─────────────────────────────────────────────────────────────
 export function useAlert(): AlertContextType {
   return useContext(AlertContext);
 }
 
-// ── Alert Modal UI ────────────────────────────────────────────────────────────
-function AlertModal({
-  visible,
-  config,
-  onDismiss,
-  onConfirm,
-  onCancel,
-}: {
+function AlertModal({ visible, config, onDismiss, onConfirm, onCancel }: {
   visible:   boolean;
   config:    AlertConfig;
   onDismiss: () => void;
   onConfirm: () => void;
   onCancel:  () => void;
 }) {
-  const theme      = ALERT_THEME[config.type];
-  const isConfirm  = config.type === 'confirm';
+  const theme     = ALERT_THEME[config.type];
+  const isConfirm = config.type === 'confirm';
 
   return (
     <Modal
@@ -158,25 +162,19 @@ function AlertModal({
       visible={visible}
       animationType="fade"
       statusBarTranslucent
-      onRequestClose={onDismiss}
+      onRequestClose={isConfirm ? undefined : onDismiss}
     >
-      {/* Backdrop */}
-      <TouchableOpacity
-        style={styles.backdrop}
-        activeOpacity={1}
-        onPress={isConfirm ? undefined : onDismiss}
-      >
-        {/* Card — stop propagation so tapping card doesn't dismiss */}
-        <TouchableOpacity activeOpacity={1} onPress={() => {}}>
-          <View style={[styles.card, { borderColor: theme.border, backgroundColor: theme.bg }]}>
+      <View style={styles.backdrop}>
+        <TouchableOpacity activeOpacity={1} onPress={() => {}} style={styles.cardWrapper}>
+          <View style={[styles.card, { borderColor: theme.border, backgroundColor: theme.cardBg }]}>
 
             {/* Icon circle */}
-            <View style={[styles.iconCircle, { backgroundColor: theme.color + '22' }]}>
-              <Ionicons name={theme.icon as any} size={36} color={theme.color} />
+            <View style={[styles.iconCircle, { backgroundColor: theme.iconBg }]}>
+              <Ionicons name={theme.icon as any} size={40} color={theme.iconColor} />
             </View>
 
             {/* Title */}
-            <Text style={[styles.title, { color: theme.color }]}>{config.title}</Text>
+            <Text style={[styles.title, { color: theme.titleColor }]}>{config.title}</Text>
 
             {/* Message */}
             <Text style={styles.message}>{config.message}</Text>
@@ -184,6 +182,7 @@ function AlertModal({
             {/* Buttons */}
             {isConfirm ? (
               <View style={styles.btnRow}>
+                {/* Cancel — cream background */}
                 <TouchableOpacity
                   style={[styles.btn, styles.cancelBtn]}
                   onPress={onCancel}
@@ -191,8 +190,9 @@ function AlertModal({
                 >
                   <Text style={styles.cancelBtnText}>{config.cancelText ?? 'No'}</Text>
                 </TouchableOpacity>
+                {/* Confirm — uses theme confirm background */}
                 <TouchableOpacity
-                  style={[styles.btn, styles.confirmBtn, { backgroundColor: theme.color }]}
+                  style={[styles.btn, { backgroundColor: theme.confirmBg }]}
                   onPress={onConfirm}
                   activeOpacity={0.8}
                 >
@@ -200,65 +200,86 @@ function AlertModal({
                 </TouchableOpacity>
               </View>
             ) : (
+              // Single full-width OK button
               <TouchableOpacity
-                style={[styles.btn, styles.singleBtn, { backgroundColor: theme.color }]}
+                style={[styles.okBtn, { backgroundColor: theme.confirmBg }]}
                 onPress={onDismiss}
                 activeOpacity={0.8}
               >
-                <Text style={styles.confirmBtnText}>OK</Text>
+                <Text style={styles.okBtnText}>OK</Text>
               </TouchableOpacity>
             )}
           </View>
         </TouchableOpacity>
-      </TouchableOpacity>
+      </View>
     </Modal>
   );
 }
 
-// ── Styles ────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: 'rgba(59, 31, 0, 0.55)', // dark brown tint instead of black
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 32,
+    paddingHorizontal: 28,
+  },
+  cardWrapper: {
+    width: '100%',
   },
   card: {
     width: '100%',
-    borderRadius: 20,
-    borderWidth: 1.5,
-    paddingVertical: 28,
+    borderRadius: 24,
+    borderWidth: 2,
+    paddingVertical: 32,
     paddingHorizontal: 24,
     alignItems: 'center',
-    gap: 12,
-    shadowColor: '#000',
+    gap: 14,
+    shadowColor: '#3B1F00',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    elevation: 10,
+    shadowOpacity: 0.18,
+    shadowRadius: 20,
+    elevation: 12,
   },
   iconCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 4,
   },
   title: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '800',
     textAlign: 'center',
-    letterSpacing: 0.3,
+    letterSpacing: 0.2,
   },
   message: {
     fontSize: 14,
     color: '#6B4E2A',
     textAlign: 'center',
-    lineHeight: 21,
-    marginBottom: 8,
+    lineHeight: 22,
+    marginBottom: 4,
   },
+
+  // ── Single OK button ──────────────────────────────────────────────────────
+  okBtn: {
+    width: '100%',
+    paddingVertical: 16,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 4,
+  },
+  okBtnText: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#fff',
+    letterSpacing: 0.5,
+  },
+
+  // ── Confirm two-button row ────────────────────────────────────────────────
   btnRow: {
     flexDirection: 'row',
     gap: 12,
@@ -266,31 +287,24 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   btn: {
-    borderRadius: 12,
-    paddingVertical: 12,
+    flex: 1,
+    paddingVertical: 15,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  singleBtn: {
-    width: '100%',
-    marginTop: 4,
-  },
   cancelBtn: {
-    flex: 1,
     backgroundColor: '#F5E6CC',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#E0D0B8',
   },
-  confirmBtn: {
-    flex: 1,
-  },
   cancelBtnText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '700',
     color: '#5C3A00',
   },
   confirmBtnText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '700',
     color: '#fff',
   },

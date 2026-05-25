@@ -1,40 +1,44 @@
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-  StatusBar,
-  ScrollView,
-  TextInput,
-  Switch,
-  KeyboardAvoidingView,
-  Platform,
+  View, Text, TouchableOpacity, StyleSheet, SafeAreaView,
+  StatusBar, ScrollView, TextInput, Switch,
+  KeyboardAvoidingView, Platform, ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import BottomTabBar from '../components/BottomTabBar';
 import TopBar from '../components/TopBar';
 import BuntingBanner from '../components/BuntingBanner';
 import { DatePickerModal, TimePickerModal } from '../components/DateTimePicker';
+import { supabase } from '../config/supabase';
+import { useAuth } from '../context/AuthContext';
+import { useAlert } from '../components/CustomAlert';
 
 const REMINDER_OPTIONS = [
-  { key: 'daily',      label: 'Daily' },
-  { key: '1hour',      label: '1 hour before' },
-  { key: '30min',      label: '30 minutes before' },
-  { key: '1day',       label: '1 day before' },
-  { key: 'never',      label: 'Never' },
+  { key: 'daily',  label: 'Daily' },
+  { key: '1hour',  label: '1 hour before' },
+  { key: '30min',  label: '30 minutes before' },
+  { key: '1day',   label: '1 day before' },
+  { key: 'never',  label: 'Never' },
 ];
 
-// Simple field row with bottom border
-const FieldRow = ({ label, sublabel, value, onChangeText, placeholder, onPress, isButton }) => (
+// Colour options for the event card
+const COLOR_OPTIONS = [
+  '#F5A623', // orange
+  '#3B1F00', // dark brown
+  '#8B6F4E', // mid brown
+  '#C4A882', // light brown
+  '#F5C070', // light orange
+  '#E67E22', // deep orange
+];
+
+const FieldRow = ({ label, sublabel, value, onChangeText, placeholder, onPress, isButton }: any) => (
   <View style={styles.fieldWrapper}>
     <Text style={styles.fieldLabel}>{label}</Text>
     {sublabel ? <Text style={styles.fieldSublabel}>{sublabel}</Text> : null}
     {isButton ? (
       <TouchableOpacity style={styles.fieldBtn} onPress={onPress} activeOpacity={0.8}>
         <Text style={[styles.fieldBtnText, !value && styles.fieldPlaceholder]}>
-          {value || ''}
+          {value || 'Tap to select'}
         </Text>
       </TouchableOpacity>
     ) : (
@@ -49,109 +53,143 @@ const FieldRow = ({ label, sublabel, value, onChangeText, placeholder, onPress, 
   </View>
 );
 
-// Radio button row
-const RadioOption = ({ label, selected, onPress }) => (
+const RadioOption = ({ label, selected, onPress }: any) => (
   <TouchableOpacity style={styles.radioRow} onPress={onPress} activeOpacity={0.7}>
     <View style={[styles.radioCircle, selected && styles.radioCircleSelected]}>
       {selected && <View style={styles.radioDot} />}
     </View>
-    <Text style={[styles.radioLabel, selected && styles.radioLabelSelected]}>
-      {label}
-    </Text>
+    <Text style={[styles.radioLabel, selected && styles.radioLabelSelected]}>{label}</Text>
   </TouchableOpacity>
 );
 
-export default function AddEventScreen({ navigation }:any) {
-  const [eventName, setEventName]   = useState('');
-  const [description, setDescription] = useState('');
-  const [date, setDate]             = useState(null);
-  const [startTime, setStartTime]   = useState(null);
-  const [endTime, setEndTime]       = useState(null);
-  const [location, setLocation]     = useState('');
-  const [reminder, setReminder]     = useState('daily');
-  const [allowGuests, setAllowGuests] = useState(false);
-  const [guestsNotified, setGuestsNotified] = useState(true);
+export default function AddEventScreen({ navigation }: any) {
+  const [eventName,       setEventName]       = useState('');
+  const [description,     setDescription]     = useState('');
+  const [date,            setDate]            = useState<any>(null);
+  const [startTime,       setStartTime]       = useState<any>(null);
+  const [endTime,         setEndTime]         = useState<any>(null);
+  const [location,        setLocation]        = useState('');
+  const [reminder,        setReminder]        = useState('never');
+  const [allowGuests,     setAllowGuests]     = useState(false);
+  const [guestsNotified,  setGuestsNotified]  = useState(false);
+  const [selectedColor,   setSelectedColor]   = useState('#F5A623');
+  const [loading,         setLoading]         = useState(false);
 
-  const [showDatePicker, setShowDatePicker]   = useState(false);
+  const [showDatePicker,  setShowDatePicker]  = useState(false);
   const [showStartPicker, setShowStartPicker] = useState(false);
-  const [showEndPicker, setShowEndPicker]     = useState(false);
+  const [showEndPicker,   setShowEndPicker]   = useState(false);
 
-  const formatDate = (d) => d ? `${d.day} ${d.month} ${d.year}` : '';
-  const formatTime = (t) => t ? `${t.hour}:${t.minute} ${t.period}` : '';
+  const { user }      = useAuth();
+  const { showAlert } = useAlert();
 
-  const handleSave = () => {
-    if (!eventName.trim()) return;
-    navigation?.goBack();
+  const formatDate = (d: any) => d ? `${d.day} ${d.month} ${d.year}` : '';
+  const formatTime = (t: any) => t ? `${t.hour}:${t.minute} ${t.period}` : '';
+
+  // Build a friendly date label e.g. "Monday, 20th April 2026"
+  const buildDateLabel = (d: any) => {
+    if (!d) return '';
+    const days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const dateObj = new Date(`${d.year}-${d.month}-${d.day}`);
+    const suffix  = ['th','st','nd','rd'];
+    const v = parseInt(d.day, 10) % 100;
+    const s = suffix[(v - 20) % 10] ?? suffix[v] ?? suffix[0];
+    return `${days[dateObj.getDay()]}, ${parseInt(d.day, 10)}${s} ${months[dateObj.getMonth()]} ${d.year}`;
+  };
+
+  const handleSave = async () => {
+    if (!eventName.trim()) {
+      showAlert('warning', 'Name required', 'Please enter a name for your event.');
+      return;
+    }
+    if (!date) {
+      showAlert('warning', 'Date required', 'Please select a date for your event.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.from('events').insert({
+        creator_id:      user?.id,
+        title:           eventName.trim(),
+        description:     description.trim(),
+        date:            `${date.year}-${String(date.month).padStart(2,'0')}-${String(date.day).padStart(2,'0')}`,
+        date_label:      buildDateLabel(date),
+        start_time:      formatTime(startTime),
+        end_time:        formatTime(endTime),
+        location:        location.trim(),
+        reminder,
+        allow_guests:    allowGuests,
+        guests_notified: guestsNotified,
+        color:           selectedColor,
+      });
+
+      if (error) throw error;
+
+      showAlert('success', 'Event saved!', `"${eventName}" has been added to your calendar.`);
+      setTimeout(() => navigation?.goBack(), 1500);
+    } catch (err: any) {
+      showAlert('error', 'Save failed', err.message || 'Could not save event. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFDF5" />
-
       <TopBar showSearch={false} />
       <BuntingBanner />
 
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={80}
-      >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
-          {/* Title Bar */}
+      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={80}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+
           <View style={styles.titleBar}>
             <Text style={styles.titleText}>ADD EVENT</Text>
           </View>
 
-          {/* Event Name */}
-          <FieldRow
-            label="Event name"
-            value={eventName}
-            onChangeText={setEventName}
-          />
+          {/* Event name */}
+          <FieldRow label="Event name" value={eventName} onChangeText={setEventName} placeholder="e.g. Birthday party" />
 
           {/* Description */}
-          <FieldRow
-            label="Description"
-            value={description}
-            onChangeText={setDescription}
-          />
+          <FieldRow label="Description" value={description} onChangeText={setDescription} placeholder="Add details..." />
 
           {/* Date */}
-          <FieldRow
-            label="Date"
-            value={formatDate(date)}
-            isButton
-            onPress={() => setShowDatePicker(true)}
-          />
+          <FieldRow label="Date" value={formatDate(date)} isButton onPress={() => setShowDatePicker(true)} />
 
-          {/* Time */}
-          <FieldRow
-            label="Time"
-            value={formatTime(startTime)}
-            isButton
-            onPress={() => setShowStartPicker(true)}
-          />
+          {/* Start time */}
+          <FieldRow label="Start time" value={formatTime(startTime)} isButton onPress={() => setShowStartPicker(true)} />
 
-          {/* Add end time */}
-          <FieldRow
-            label="Add end time"
-            value={formatTime(endTime)}
-            isButton
-            onPress={() => setShowEndPicker(true)}
-          />
+          {/* End time */}
+          <FieldRow label="End time" value={formatTime(endTime)} isButton onPress={() => setShowEndPicker(true)} />
 
           {/* Location */}
-          <FieldRow
-            label="Add location"
-            value={location}
-            onChangeText={setLocation}
-          />
+          <FieldRow label="Location" value={location} onChangeText={setLocation} placeholder="Add a venue or address" />
 
-          {/* Reminder Section */}
+          {/* Color picker */}
+          <View style={styles.fieldWrapper}>
+            <Text style={styles.fieldLabel}>Event colour</Text>
+            <View style={styles.colorRow}>
+              {COLOR_OPTIONS.map((color) => (
+                <TouchableOpacity
+                  key={color}
+                  style={[
+                    styles.colorDot,
+                    { backgroundColor: color },
+                    selectedColor === color && styles.colorDotSelected,
+                  ]}
+                  onPress={() => setSelectedColor(color)}
+                  activeOpacity={0.8}
+                >
+                  {selectedColor === color && (
+                    <Ionicons name="checkmark" size={16} color="#fff" />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          {/* Reminder */}
           <View style={styles.reminderSection}>
             <Text style={styles.fieldLabel}>Reminder</Text>
             {REMINDER_OPTIONS.map((opt) => (
@@ -164,7 +202,7 @@ export default function AddEventScreen({ navigation }:any) {
             ))}
           </View>
 
-          {/* Allow Guests */}
+          {/* Allow guests */}
           <View style={styles.switchRow}>
             <View style={styles.switchLeft}>
               <Text style={styles.fieldLabel}>Allow guests</Text>
@@ -178,7 +216,6 @@ export default function AddEventScreen({ navigation }:any) {
             />
           </View>
 
-          {/* Guests also get notified */}
           {allowGuests && (
             <View style={styles.switchRow}>
               <Text style={styles.fieldLabel}>Guests also get notified</Text>
@@ -191,38 +228,40 @@ export default function AddEventScreen({ navigation }:any) {
             </View>
           )}
 
-          {/* Save Button */}
+          {/* Save */}
           <TouchableOpacity
-            style={[styles.saveBtn, !eventName.trim() && styles.saveBtnDisabled]}
+            style={[styles.saveBtn, (!eventName.trim() || loading) && styles.saveBtnDisabled]}
             activeOpacity={0.8}
             onPress={handleSave}
-            disabled={!eventName.trim()}
+            disabled={!eventName.trim() || loading}
           >
-            <Text style={styles.saveBtnText}>Save</Text>
+            {loading
+              ? <ActivityIndicator color="#fff" />
+              : <Text style={styles.saveBtnText}>Save Event</Text>
+            }
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
 
       <BottomTabBar />
 
-      {/* Pickers */}
       <DatePickerModal
         visible={showDatePicker}
-        onConfirm={(val) => { setDate(val); setShowDatePicker(false); }}
+        onConfirm={(val: any) => { setDate(val); setShowDatePicker(false); }}
         onCancel={() => setShowDatePicker(false)}
         initialValue={date}
       />
       <TimePickerModal
         visible={showStartPicker}
         title="Start Time"
-        onConfirm={(val) => { setStartTime(val); setShowStartPicker(false); }}
+        onConfirm={(val: any) => { setStartTime(val); setShowStartPicker(false); }}
         onCancel={() => setShowStartPicker(false)}
         initialValue={startTime}
       />
       <TimePickerModal
         visible={showEndPicker}
         title="End Time"
-        onConfirm={(val) => { setEndTime(val); setShowEndPicker(false); }}
+        onConfirm={(val: any) => { setEndTime(val); setShowEndPicker(false); }}
         onCancel={() => setShowEndPicker(false)}
         initialValue={endTime}
       />
@@ -233,128 +272,29 @@ export default function AddEventScreen({ navigation }:any) {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#FFFDF5' },
   flex: { flex: 1 },
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 32,
-  },
-  titleBar: {
-    backgroundColor: '#3B1F00',
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  titleText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '800',
-    letterSpacing: 1.5,
-  },
-  fieldWrapper: {
-    marginBottom: 16,
-  },
-  fieldLabel: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#3B1F00',
-    marginBottom: 2,
-  },
-  fieldSublabel: {
-    fontSize: 11,
-    color: '#A08060',
-    marginBottom: 4,
-  },
-  fieldInput: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0D0B8',
-    paddingVertical: 8,
-    fontSize: 13,
-    color: '#3B1F00',
-  },
-  fieldBtn: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0D0B8',
-    paddingVertical: 8,
-  },
-  fieldBtnText: {
-    fontSize: 13,
-    color: '#3B1F00',
-    fontWeight: '500',
-  },
-  fieldPlaceholder: {
-    color: '#C4B49A',
-  },
-
-  // Reminder
-  reminderSection: {
-    marginBottom: 16,
-  },
-  radioRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0E6D6',
-  },
-  radioCircle: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 2,
-    borderColor: '#C4A882',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  radioCircleSelected: {
-    borderColor: '#F5A623',
-  },
-  radioDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#F5A623',
-  },
-  radioLabel: {
-    fontSize: 13,
-    color: '#5C4A30',
-    fontWeight: '500',
-  },
-  radioLabelSelected: {
-    color: '#F5A623',
-    fontWeight: '700',
-  },
-
-  // Switches
-  switchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0D0B8',
-    marginBottom: 8,
-  },
-  switchLeft: {
-    flex: 1,
-    paddingRight: 16,
-  },
-
-  // Save
-  saveBtn: {
-    backgroundColor: '#F5A623',
-    paddingVertical: 13,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginTop: 16,
-  },
-  saveBtnDisabled: {
-    backgroundColor: '#F5C070',
-  },
-  saveBtnText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '700',
-  },
+  scrollContent: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 32 },
+  titleBar: { backgroundColor: '#3B1F00', borderRadius: 12, paddingVertical: 14, alignItems: 'center', marginBottom: 20 },
+  titleText: { color: '#fff', fontSize: 16, fontWeight: '800', letterSpacing: 1.5 },
+  fieldWrapper: { marginBottom: 16 },
+  fieldLabel: { fontSize: 13, fontWeight: '700', color: '#3B1F00', marginBottom: 2 },
+  fieldSublabel: { fontSize: 11, color: '#A08060', marginBottom: 4 },
+  fieldInput: { borderBottomWidth: 1, borderBottomColor: '#E0D0B8', paddingVertical: 8, fontSize: 13, color: '#3B1F00' },
+  fieldBtn: { borderBottomWidth: 1, borderBottomColor: '#E0D0B8', paddingVertical: 8 },
+  fieldBtnText: { fontSize: 13, color: '#3B1F00', fontWeight: '500' },
+  fieldPlaceholder: { color: '#C4B49A' },
+  colorRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
+  colorDot: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  colorDotSelected: { borderWidth: 3, borderColor: '#3B1F00' },
+  reminderSection: { marginBottom: 16 },
+  radioRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#F0E6D6' },
+  radioCircle: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: '#C4A882', alignItems: 'center', justifyContent: 'center' },
+  radioCircleSelected: { borderColor: '#F5A623' },
+  radioDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#F5A623' },
+  radioLabel: { fontSize: 13, color: '#5C4A30', fontWeight: '500' },
+  radioLabelSelected: { color: '#F5A623', fontWeight: '700' },
+  switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#E0D0B8', marginBottom: 8 },
+  switchLeft: { flex: 1, paddingRight: 16 },
+  saveBtn: { backgroundColor: '#F5A623', paddingVertical: 13, borderRadius: 10, alignItems: 'center', marginTop: 16 },
+  saveBtnDisabled: { backgroundColor: '#E0C49A' },
+  saveBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
 });

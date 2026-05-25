@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import {
   Image, View, Text, TouchableOpacity, StyleSheet,
-  SafeAreaView, StatusBar, ScrollView, ActivityIndicator, Alert,
+  SafeAreaView, StatusBar, ScrollView, ActivityIndicator,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import LabeledInput from '../components/LabeledInput';
 import { loginUser } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
+import { useAlert } from '../components/CustomAlert';
 
 const GoogleIcon = () => (
   <Svg width="18" height="18" viewBox="0 0 48 48">
@@ -23,11 +24,16 @@ export default function LoginScreen({ navigation }: any) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading,      setLoading]      = useState(false);
 
-  const { setUser } = useAuth();
+  const { setUser }        = useAuth();
+  const { showAlert }      = useAlert();
 
   const handleLogin = async () => {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert('Missing details', 'Please enter your email and password.');
+    if (!email.trim()) {
+      showAlert('warning', 'Email required', 'Please enter your email address.');
+      return;
+    }
+    if (!password.trim()) {
+      showAlert('warning', 'Password required', 'Please enter your password.');
       return;
     }
     setLoading(true);
@@ -41,9 +47,9 @@ export default function LoginScreen({ navigation }: any) {
         message = 'Incorrect email or password. Please try again.';
       }
       if (err.message?.includes('Email not confirmed')) {
-        message = 'Please check your email and confirm your account first.';
+        message = 'Please confirm your email address before logging in.';
       }
-      Alert.alert('Login failed', message);
+      showAlert('error', 'Login failed', message);
     } finally {
       setLoading(false);
     }
@@ -52,7 +58,11 @@ export default function LoginScreen({ navigation }: any) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFDF5" />
-      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <Image source={require('../../assets/images/tiger.png')} style={styles.mascot} />
         <Text style={styles.title}>Welcome Back</Text>
 
@@ -74,7 +84,10 @@ export default function LoginScreen({ navigation }: any) {
             onToggleShow={() => setShowPassword(!showPassword)}
           />
 
-          <TouchableOpacity style={styles.forgotWrapper} onPress={() => navigation?.navigate('ForgotPassword')}>
+          <TouchableOpacity
+            style={styles.forgotWrapper}
+            onPress={() => navigation?.navigate('ForgotPassword')}
+          >
             <Text style={styles.forgotText}>Forgot Password?</Text>
           </TouchableOpacity>
 

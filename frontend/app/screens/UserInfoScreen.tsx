@@ -1,27 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, SafeAreaView,
-  StatusBar, ScrollView, TextInput, ActivityIndicator, Alert,
+  StatusBar, ScrollView, TextInput, ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import BottomTabBar from '../components/BottomTabBar';
 import { supabase } from '../config/supabase';
 import { useAuth } from '../context/AuthContext';
+import { useAlert } from '../components/CustomAlert';
 
 export default function UserInfoScreen({ navigation, route }: any) {
-  const userName   = route?.params?.name ?? 'User';
-  const friendId   = route?.params?.id   ?? null;
+  const userName = route?.params?.name ?? 'User';
+  const friendId = route?.params?.id   ?? null;
 
-  const [groupSearch,   setGroupSearch]   = useState('');
-  const [commonGroups,  setCommonGroups]  = useState<any[]>([]);
-  const [isFriend,      setIsFriend]      = useState(true);
-  const [loading,       setLoading]       = useState(true);
-  const { user } = useAuth();
+  const [groupSearch,  setGroupSearch]  = useState('');
+  const [commonGroups, setCommonGroups] = useState<any[]>([]);
+  const [loading,      setLoading]      = useState(true);
+
+  const { user }               = useAuth();
+  const { showAlert, showConfirm } = useAlert();
 
   useEffect(() => {
     if (!friendId || !user?.id) { setLoading(false); return; }
     const fetch = async () => {
-      // Fetch groups both users share
       const { data: myGroups } = await supabase
         .from('group_members')
         .select('group_id')
@@ -46,22 +47,26 @@ export default function UserInfoScreen({ navigation, route }: any) {
     fetch();
   }, [friendId, user?.id]);
 
-  const handleRemoveFriend = async () => {
-    Alert.alert('Remove friend', `Remove ${userName} from your friends?`, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Remove',
-        style: 'destructive',
-        onPress: async () => {
+  const handleRemoveFriend = () => {
+    showConfirm(
+      'Remove friend',
+      `Are you sure you want to remove ${userName} from your friends?`,
+      async () => {
+        try {
           await supabase
             .from('friends')
             .delete()
             .or(`and(user_id.eq.${user?.id},friend_id.eq.${friendId}),and(user_id.eq.${friendId},friend_id.eq.${user?.id})`);
-          setIsFriend(false);
-          navigation?.goBack();
-        },
+          showAlert('success', 'Friend removed', `${userName} has been removed from your friends.`);
+          setTimeout(() => navigation?.goBack(), 1500);
+        } catch (err: any) {
+          showAlert('error', 'Could not remove', err.message || 'Something went wrong. Please try again.');
+        }
       },
-    ]);
+      () => {},
+      'Yes, remove',
+      'Cancel',
+    );
   };
 
   const filtered = commonGroups.filter((g) =>
@@ -71,6 +76,7 @@ export default function UserInfoScreen({ navigation, route }: any) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFF3E0" />
+
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation?.goBack()}>
           <Ionicons name="arrow-back-outline" size={22} color="#5C3A00" />
@@ -78,6 +84,7 @@ export default function UserInfoScreen({ navigation, route }: any) {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Avatar */}
         <View style={styles.avatarSection}>
           <View style={styles.avatar}>
             <Ionicons name="person" size={64} color="#F5A623" />
@@ -85,6 +92,7 @@ export default function UserInfoScreen({ navigation, route }: any) {
           <Text style={styles.userName}>{userName}</Text>
         </View>
 
+        {/* Action Buttons */}
         <View style={styles.actionButtons}>
           <TouchableOpacity
             style={styles.actionBtn}
@@ -95,12 +103,17 @@ export default function UserInfoScreen({ navigation, route }: any) {
             <Text style={styles.actionBtnText}>Message</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionBtn} activeOpacity={0.8} onPress={handleRemoveFriend}>
+          <TouchableOpacity
+            style={styles.actionBtn}
+            activeOpacity={0.8}
+            onPress={handleRemoveFriend}
+          >
             <Ionicons name="person-remove-outline" size={22} color="#E74C3C" />
             <Text style={[styles.actionBtnText, { color: '#E74C3C' }]}>Unadd</Text>
           </TouchableOpacity>
         </View>
 
+        {/* Groups in common */}
         <View style={styles.groupsSection}>
           <View style={styles.groupsHeader}>
             <Text style={styles.groupsCount}>
@@ -139,6 +152,7 @@ export default function UserInfoScreen({ navigation, route }: any) {
           )}
         </View>
 
+        {/* Remove friend */}
         <TouchableOpacity style={styles.removeFriendRow} activeOpacity={0.7} onPress={handleRemoveFriend}>
           <Ionicons name="person-remove-outline" size={20} color="#E74C3C" />
           <Text style={styles.removeFriendText}>Remove friend</Text>

@@ -1,34 +1,32 @@
 import React, { useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, SafeAreaView,
-  StatusBar, ScrollView, KeyboardAvoidingView, Platform,
-  ActivityIndicator, Alert,
+  StatusBar, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import BottomTabBar from '../components/BottomTabBar';
 import LabeledInput from '../components/LabeledInput';
 import { supabase } from '../config/supabase';
 import { useAuth } from '../context/AuthContext';
+import { useAlert } from '../components/CustomAlert';
 
 export default function EditProfileScreen({ navigation }: any) {
   const { user, setUser } = useAuth();
+  const { showAlert }     = useAlert();
 
-  // Pre-populate fields with real data from AuthContext
-  const [firstName,    setFirstName]    = useState(user?.first_name  ?? '');
-  const [lastName,     setLastName]     = useState(user?.last_name   ?? '');
-  const [username,     setUsername]     = useState(user?.username    ?? '');
-  const [phone,        setPhone]        = useState(user?.phone       ?? '');
-  const [loading,      setLoading]      = useState(false);
+  const [firstName, setFirstName] = useState(user?.first_name ?? '');
+  const [lastName,  setLastName]  = useState(user?.last_name  ?? '');
+  const [username,  setUsername]  = useState(user?.username   ?? '');
+  const [phone,     setPhone]     = useState(user?.phone      ?? '');
+  const [loading,   setLoading]   = useState(false);
 
-  // Email is read-only — changing email requires re-verification
   const email = user?.email ?? '';
 
   const handleSave = async () => {
     if (!firstName.trim() || !lastName.trim()) {
-      Alert.alert('Required', 'Please enter your first and last name.');
+      showAlert('warning', 'Required fields', 'Please enter your first and last name.');
       return;
     }
-
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -44,15 +42,12 @@ export default function EditProfileScreen({ navigation }: any) {
         .single();
 
       if (error) throw error;
-
-      // Update AuthContext so changes reflect immediately everywhere
       if (data) setUser(data);
 
-      Alert.alert('Saved!', 'Your profile has been updated.', [
-        { text: 'OK', onPress: () => navigation?.goBack() },
-      ]);
+      showAlert('success', 'Profile updated!', 'Your changes have been saved successfully.');
+      setTimeout(() => navigation?.goBack(), 1500);
     } catch (err: any) {
-      Alert.alert('Error', err.message || 'Could not save changes. Please try again.');
+      showAlert('error', 'Save failed', err.message || 'Could not save changes. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -62,25 +57,17 @@ export default function EditProfileScreen({ navigation }: any) {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFDF5" />
 
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation?.goBack()}>
           <Ionicons name="arrow-back-outline" size={22} color="#5C3A00" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Edit Profile</Text>
-        <View style={styles.headerSpacer} />
+        <View style={{ width: 36 }} />
       </View>
 
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={80}
-      >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
+      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={80}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+
           {/* Avatar */}
           <View style={styles.avatarSection}>
             <View style={styles.avatarWrapper}>
@@ -95,19 +82,10 @@ export default function EditProfileScreen({ navigation }: any) {
 
           {/* Form */}
           <View style={styles.form}>
-            <LabeledInput
-              label="First Name"
-              value={firstName}
-              onChangeText={setFirstName}
-              autoCapitalize="words"
-            />
-            <LabeledInput
-              label="Last Name"
-              value={lastName}
-              onChangeText={setLastName}
-              autoCapitalize="words"
-            />
-            {/* Email is read-only */}
+            <LabeledInput label="First Name" value={firstName} onChangeText={setFirstName} autoCapitalize="words" />
+            <LabeledInput label="Last Name"  value={lastName}  onChangeText={setLastName}  autoCapitalize="words" />
+
+            {/* Email — read only */}
             <View style={styles.readOnlyWrapper}>
               <Text style={styles.readOnlyLabel}>Email</Text>
               <View style={styles.readOnlyField}>
@@ -116,20 +94,12 @@ export default function EditProfileScreen({ navigation }: any) {
               </View>
               <Text style={styles.readOnlyHint}>Email cannot be changed here.</Text>
             </View>
-            <LabeledInput
-              label="Username"
-              value={username}
-              onChangeText={setUsername}
-            />
-            <LabeledInput
-              label="Phone number"
-              value={phone}
-              onChangeText={setPhone}
-              keyboardType="phone-pad"
-            />
+
+            <LabeledInput label="Username"     value={username} onChangeText={setUsername} />
+            <LabeledInput label="Phone number" value={phone}    onChangeText={setPhone}    keyboardType="phone-pad" />
           </View>
 
-          {/* Save Button */}
+          {/* Save */}
           <TouchableOpacity
             style={[styles.saveBtn, loading && styles.saveBtnDisabled]}
             activeOpacity={0.8}
@@ -159,7 +129,6 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 20, paddingBottom: 12 },
   backBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
   headerTitle: { flex: 1, fontSize: 20, fontWeight: '800', color: '#F5A623', textAlign: 'center' },
-  headerSpacer: { width: 36 },
   avatarSection: { alignItems: 'center', marginBottom: 28 },
   avatarWrapper: { position: 'relative' },
   avatarPlaceholder: { width: 100, height: 100, borderRadius: 50, backgroundColor: '#F5E6CC', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#F5C070' },

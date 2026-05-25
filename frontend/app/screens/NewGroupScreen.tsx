@@ -7,15 +7,17 @@ import { Ionicons } from '@expo/vector-icons';
 import BottomTabBar from '../components/BottomTabBar';
 import { supabase } from '../config/supabase';
 import { useAuth } from '../context/AuthContext';
+import { useAlert } from '../components/CustomAlert';
 
 export default function NewGroupScreen({ navigation }: any) {
   const [groupName, setGroupName] = useState('');
   const [loading,   setLoading]   = useState(false);
   const { user } = useAuth();
+  const { showAlert, showConfirm } = useAlert();
 
   const handleCreate = async () => {
     if (!groupName.trim()) {
-      Alert.alert('Required', 'Please enter a group name.');
+      showAlert('Required', 'Please enter a group name.');
       return;
     }
     setLoading(true);
@@ -36,14 +38,14 @@ export default function NewGroupScreen({ navigation }: any) {
 
       if (memberError) throw memberError;
 
-      Alert.alert('Group created!', `"${groupName}" is ready.`, [
+      showConfirm('Group created!', `"${groupName}" is ready.`, [
         {
           text: 'Open chat',
           onPress: () => navigation?.replace('GroupChat', { name: newGroup.name, id: newGroup.id }),
         },
       ]);
     } catch (err: any) {
-      Alert.alert('Error', err.message || 'Could not create group.');
+      showAlert('Error', err.message || 'Could not create group.');
     } finally {
       setLoading(false);
     }
