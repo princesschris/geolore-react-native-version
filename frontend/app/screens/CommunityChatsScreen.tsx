@@ -3,6 +3,7 @@ import {
   View, Text, TouchableOpacity, StyleSheet, SafeAreaView,
   StatusBar, FlatList, ActivityIndicator,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import BottomTabBar from '../components/BottomTabBar';
 import BuntingBanner from '../components/BuntingBanner';
@@ -32,14 +33,8 @@ export default function CommunityChatsScreen({ navigation }: any) {
     try {
       const { data, error } = await supabase
         .from('friends')
-        .select(`
-          friend_id,
-          friend:users!friends_friend_id_fkey (
-            id, first_name, last_name
-          )
-        `)
+        .select(`friend_id, friend:users!friends_friend_id_fkey (id, first_name, last_name)`)
         .eq('user_id', user.id);
-
       if (error) throw error;
       setFriends(data ?? []);
     } catch {
@@ -93,10 +88,7 @@ export default function CommunityChatsScreen({ navigation }: any) {
                 lastMessage="Tap to start chatting"
                 time=""
                 unreadCount={0}
-                onPress={() => navigation?.navigate('Chat', {
-                  name,
-                  id: item.friend?.id,
-                })}
+                onPress={() => navigation?.navigate('Chat', { name, id: item.friend?.id })}
               />
             );
           }}
@@ -104,7 +96,9 @@ export default function CommunityChatsScreen({ navigation }: any) {
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={
             <View style={styles.emptyState}>
-              <Text style={styles.emptyEmoji}>👥</Text>
+              <View style={styles.emptyIconCircle}>
+                <Ionicons name="people-outline" size={40} color="#F5A623" />
+              </View>
               <Text style={styles.emptyTitle}>No friends yet</Text>
               <Text style={styles.emptySubtitle}>Tap "Add +" to connect with people</Text>
             </View>
@@ -126,8 +120,8 @@ const styles = StyleSheet.create({
   filterTabTextActive: { color: '#fff' },
   listContent: { paddingBottom: 20, flexGrow: 1 },
   loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  emptyState: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 80, gap: 10 },
-  emptyEmoji: { fontSize: 48 },
-  emptyTitle: { fontSize: 18, fontWeight: '800', color: '#3B1F00' },
+  emptyState: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 80, gap: 12 },
+  emptyIconCircle: { width: 100, height: 100, borderRadius: 50, backgroundColor: '#FFF3E0', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#F5C070' },
+  emptyTitle:    { fontSize: 18, fontWeight: '800', color: '#3B1F00' },
   emptySubtitle: { fontSize: 13, color: '#A08060' },
 });

@@ -107,7 +107,7 @@ export default function ClassDetailScreen({ navigation, route }: any) {
             <Text style={styles.typeBadgeText}>{isGroup ? 'Group Class' : 'One-on-One'}</Text>
           </View>
           <Text style={styles.classTitle}>{classItem.title}</Text>
-          <Text style={styles.language}>🗣 {classItem.language}</Text>
+          <Text style={styles.language}><Ionicons name="language" size={13} color="#A08060" /> {classItem.language}</Text>
 
           <View style={styles.detailsGrid}>
             <View style={styles.detailItem}>

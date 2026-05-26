@@ -3,7 +3,7 @@ import {
   View, Text, TouchableOpacity, StyleSheet, SafeAreaView,
   StatusBar, ScrollView, ActivityIndicator,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import SearchBar from '../components/SearchBar';
 import BottomTabBar from '../components/BottomTabBar';
@@ -45,7 +45,8 @@ const ClassCard = ({ item, onPress }: { item: ClassItem; onPress: () => void }) 
         <Text style={styles.classPrice}>${item.price}/session</Text>
       </View>
       <Text style={styles.classTitle}>{item.title}</Text>
-      <Text style={styles.classLanguage}>🗣 {item.language}</Text>
+      <Text><Ionicons name ="language" size ={13} color="#A08060"/>{item.language}</Text>
+      {/* <Text style={styles.classLanguage}>🗣 {item.language}</Text> */}
       <View style={styles.classRow}>
         <Ionicons name="person-outline" size={13} color="#A08060" />
         <Text style={styles.classMeta}>{item.tutor_name}</Text>
@@ -186,7 +187,7 @@ export default function LanguageScreen({ navigation }: any) {
           {activeTab === 'tutors' && (
             filteredTutors.length === 0 ? (
               <View style={styles.emptyState}>
-                <Text style={styles.emptyEmoji}>🎓</Text>
+                <Text style={styles.emptyEmoji}><FontAwesome name="graduation-cap" size={30} color="#A08060" /></Text>
                 <Text style={styles.emptyTitle}>No tutors found</Text>
                 <Text style={styles.emptySubtitle}>
                   {searchQuery ? `No results for "${searchQuery}"` : 'No tutors available yet.'}
@@ -198,7 +199,7 @@ export default function LanguageScreen({ navigation }: any) {
                   id:                 tutor.id,
                   name:               `${tutor.first_name} ${tutor.last_name}`,
                   location:           tutor.country_of_origin ?? 'Unknown',
-                  flag:               tutor.country_flag ?? '🌍',
+                  flag:               tutor.country_flag ,
                   rating:             tutor.avg_rating,
                   pricePerHr:         tutor.price_per_hr ?? 0,
                   registeredStudents: tutor.registered_students ?? 0,
@@ -223,7 +224,7 @@ export default function LanguageScreen({ navigation }: any) {
           {activeTab === 'classes' && (
             filteredClasses.length === 0 ? (
               <View style={styles.emptyState}>
-                <Text style={styles.emptyEmoji}>📚</Text>
+                <Text style={styles.emptyEmoji}><Ionicons name="book-outline" size={30} color="#A08060" /></Text>
                 <Text style={styles.emptyTitle}>No classes found</Text>
                 <Text style={styles.emptySubtitle}>
                   {searchQuery ? `No results for "${searchQuery}"` : 'No classes available yet. Check back soon!'}

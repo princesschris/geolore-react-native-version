@@ -141,7 +141,7 @@ export default function CommunityAddScreen({ navigation }: any) {
 
           {filtered.length === 0 && (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyEmoji}>🌍</Text>
+              <Text style={styles.emptyEmoji}><Ionicons name="globe-outline" size={48} color="#A08060" /></Text>
               <Text style={styles.emptyTitle}>No users found</Text>
             </View>
           )}

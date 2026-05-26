@@ -10,19 +10,6 @@ interface RoleGateProps {
   fallback?: string;
   children: React.ReactNode;
 }
-
-/**
- * Wrap any screen's content with <RoleGate allowedRoles={['tutor','both']}>
- * to silently redirect users whose role isn't in the list.
- *
- * Example usage inside a screen component:
- *
- *   return (
- *     <RoleGate allowedRoles={['tutor', 'both']} fallback="Home">
- *       <SafeAreaView>...</SafeAreaView>
- *     </RoleGate>
- *   );
- */
 export default function RoleGate({ allowedRoles, fallback = 'Home', children }: RoleGateProps) {
   const { role } = useRole();
   const navigation = useNavigation<any>();

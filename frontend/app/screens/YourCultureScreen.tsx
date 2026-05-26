@@ -12,9 +12,6 @@ export default function YourCultureScreen({ navigation }: any) {
   const { isTutor }  = useRole();
   const { user }     = useAuth();
 
-  // ── Pull tribe + flag automatically from the logged-in user's profile ──
-  // These were saved to Supabase in WhereAreYouFromScreen and are now
-  // available in AuthContext without needing route params.
   const cultureName = user?.tribe            ?? 'My Culture';
   const cultureFlag = user?.country_flag     ?? '🌍';
 
@@ -23,7 +20,6 @@ export default function YourCultureScreen({ navigation }: any) {
     {
       key: 'language',
       title: 'Language',
-      // Tutors go to their appointments, students browse tutors
       screen: isTutor ? 'TutorAppointments' : 'Language',
     },
     { key: 'food',      title: 'Food',       screen: 'Food' },
@@ -32,6 +28,7 @@ export default function YourCultureScreen({ navigation }: any) {
     { key: 'festivals', title: 'Festivals',  screen: 'Festivals' },
     { key: 'beliefs',   title: 'Beliefs',    screen: 'Beliefs' },
     { key: 'stories',   title: 'Stories',    screen: 'Stories' },
+    {key:'proverbs', title:'Proverbs', screen:'Proverbs'},
   ];
 
   const filtered = CULTURE_CATEGORIES.filter((cat) =>

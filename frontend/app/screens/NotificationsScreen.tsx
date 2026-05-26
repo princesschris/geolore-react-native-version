@@ -1,7 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, SafeAreaView, StatusBar, ScrollView, ActivityIndicator, Image
+  View, Text, StyleSheet, SafeAreaView, StatusBar, ScrollView, ActivityIndicator,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import BottomTabBar from '../components/BottomTabBar';
 import BuntingBanner from '../components/BuntingBanner';
@@ -19,16 +20,15 @@ interface Notification {
   is_done:    boolean;
 }
 
-// Helper: how long ago
 function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
+  const diff  = Date.now() - new Date(dateStr).getTime();
   const mins  = Math.floor(diff / 60000);
   const hours = Math.floor(diff / 3600000);
   const days  = Math.floor(diff / 86400000);
   const weeks = Math.floor(days / 7);
-  if (mins  < 60)  return `${mins}min`;
-  if (hours < 24)  return `${hours}hr`;
-  if (days  < 7)   return `${days}d`;
+  if (mins  < 60) return `${mins}min`;
+  if (hours < 24) return `${hours}hr`;
+  if (days  < 7)  return `${days}d`;
   return `${weeks}week`;
 }
 
@@ -48,7 +48,6 @@ export default function NotificationsScreen({ navigation }: any) {
         .eq('user_id', user.id)
         .eq('is_done', false)
         .order('created_at', { ascending: false });
-
       if (error) throw error;
       setNotifications(data ?? []);
     } catch {
@@ -61,7 +60,6 @@ export default function NotificationsScreen({ navigation }: any) {
   useFocusEffect(useCallback(() => { fetchNotifications(); }, [user?.id]));
 
   const handleMarkDone = async (id: string) => {
-    // Optimistic update
     setNotifications((prev) => prev.filter((n) => n.id !== id));
     await supabase.from('notifications').update({ is_done: true }).eq('id', id);
   };
@@ -85,8 +83,11 @@ export default function NotificationsScreen({ navigation }: any) {
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {filtered.length === 0 ? (
             <View style={styles.emptyState}>
-              <Image source={require('../../assets/images/tiger.png')} style={styles.mascot} />
-              <Text style={styles.emptyTitle}>You&apos;re all caught up</Text>
+              {/* Icon instead of emoji */}
+              <View style={styles.bellCircle}>
+                <Ionicons name="notifications-outline" size={52} color="#F5A623" />
+              </View>
+              <Text style={styles.emptyTitle}>You're all caught up</Text>
               <Text style={styles.emptySubtitle}>Come back later for reminders</Text>
             </View>
           ) : (
@@ -116,7 +117,11 @@ const styles = StyleSheet.create({
   scrollContent: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 32, flexGrow: 1 },
   loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   emptyState: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 80, gap: 12 },
-  mascot: { height: 160, width: 130 },
-  emptyTitle: { fontSize: 20, fontWeight: '800', color: '#3B1F00', textAlign: 'center' },
+  bellCircle: {
+    width: 120, height: 120, borderRadius: 60,
+    backgroundColor: '#FFF3E0', alignItems: 'center', justifyContent: 'center',
+    marginBottom: 8, borderWidth: 1, borderColor: '#F5C070',
+  },
+  emptyTitle:    { fontSize: 20, fontWeight: '800', color: '#3B1F00', textAlign: 'center' },
   emptySubtitle: { fontSize: 13, color: '#A08060', textAlign: 'center' },
 });

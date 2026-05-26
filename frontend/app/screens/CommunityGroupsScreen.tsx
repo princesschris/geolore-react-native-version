@@ -10,6 +10,7 @@ import TopBar from '../components/TopBar';
 import ChatItem from '../components/ChatItem';
 import { supabase } from '../config/supabase';
 import { useAuth } from '../context/AuthContext';
+import Ionicons from '@expo/vector-icons/build/Ionicons';
 
 const FILTER_TABS = [
   { label: 'All',      navigate: 'Community' },
@@ -98,7 +99,7 @@ export default function CommunityGroupsScreen({ navigation }: any) {
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={
             <View style={styles.emptyState}>
-              <Text style={styles.emptyEmoji}>👥</Text>
+              <Text style={styles.emptyEmoji}><Ionicons name="people-outline" size={48} color="#A08060" />  </Text>
               <Text style={styles.emptyTitle}>No groups yet</Text>
               <Text style={styles.emptySubtitle}>Tap "Groups +" to join or create a group</Text>
             </View>

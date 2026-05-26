@@ -1,18 +1,10 @@
 import React from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-  StatusBar,
-  Image,
+  View, Text, TouchableOpacity, StyleSheet,
+  SafeAreaView, StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import BuntingBanner from '../components/BuntingBanner';
-
-// Import your GeoLore tree logo – update path as needed
-// import Logo from '../assets/images/logo.png';
 
 export default function AwaitResponseScreen({ navigation }: any) {
   return (
@@ -33,12 +25,14 @@ export default function AwaitResponseScreen({ navigation }: any) {
       <BuntingBanner />
 
       <View style={styles.content}>
-        {/* Logo placeholder */}
+        {/* Logo placeholder — icon instead of emoji */}
         <View style={styles.logoPlaceholder}>
           <Ionicons name="leaf-outline" size={60} color="#F5A623" />
         </View>
 
-        <Text style={styles.title}>Thank you for sharing your interest in our tutor program.</Text>
+        <Text style={styles.title}>
+          Thank you for sharing your interest in our tutor program.
+        </Text>
 
         <Text style={styles.body}>
           We will get back to you on the day of your interview to begin.
@@ -79,10 +73,8 @@ const styles = StyleSheet.create({
   },
   logoPlaceholder: {
     width: 110, height: 110, borderRadius: 55,
-    backgroundColor: '#FFF3E0',
-    alignItems: 'center', justifyContent: 'center',
-    borderWidth: 2, borderColor: '#F5C070',
-    marginBottom: 8,
+    backgroundColor: '#FFF3E0', alignItems: 'center', justifyContent: 'center',
+    borderWidth: 2, borderColor: '#F5C070', marginBottom: 8,
   },
   title: {
     fontSize: 16, fontWeight: '800', color: '#3B1F00',

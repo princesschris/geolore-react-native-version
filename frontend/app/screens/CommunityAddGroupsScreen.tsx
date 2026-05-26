@@ -135,7 +135,7 @@ export default function CommunityAddGroupsScreen({ navigation }: any) {
 
           {filtered.length === 0 && (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyEmoji}>👥</Text>
+              <Text style={styles.emptyEmoji}><Ionicons name="people-outline" size={48} color="#A08060" /></Text>
               <Text style={styles.emptyTitle}>No groups found</Text>
               <Text style={styles.emptySubtitle}>Create the first one!</Text>
             </View>

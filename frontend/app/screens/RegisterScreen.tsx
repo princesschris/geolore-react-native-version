@@ -4,11 +4,12 @@ import {
   SafeAreaView, StatusBar, ScrollView, ActivityIndicator,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import { Ionicons } from '@expo/vector-icons';
 import LabeledInput from '../components/LabeledInput';
 import { registerUser } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
 import { useAlert } from '../components/CustomAlert';
-import { UserRole } from '../types/Roles';
+import { UserRole } from '../types/roles';
 
 const GoogleIcon = () => (
   <Svg width="18" height="18" viewBox="0 0 48 48">
@@ -19,10 +20,34 @@ const GoogleIcon = () => (
   </Svg>
 );
 
-const ROLE_OPTIONS: { role: UserRole; label: string; description: string; icon: string }[] = [
-  { role: 'student', label: 'Student',   icon: '🎓', description: 'I want to learn about cultures and book language tutors.' },
-  { role: 'tutor',   label: 'Tutor',     icon: '📚', description: 'I want to teach my language and manage student sessions.' },
-  { role: 'both',    label: 'Both',      icon: '🌍', description: 'I want to learn AND teach. Full access to all features.' },
+const ROLE_OPTIONS: {
+  role: UserRole; label: string; description: string;
+  icon: string; iconColor: string; iconBg: string;
+}[] = [
+  {
+    role:        'student',
+    label:       'Student',
+    description: 'I want to learn about cultures and book language tutors.',
+    icon:        'book-outline',
+    iconColor:   '#F5A623',
+    iconBg:      '#FFF3E0',
+  },
+  {
+    role:        'tutor',
+    label:       'Tutor',
+    description: 'I want to teach my language and manage student sessions.',
+    icon:        'school-outline',
+    iconColor:   '#fff',
+    iconBg:      '#3B1F00',
+  },
+  {
+    role:        'both',
+    label:       'Both',
+    description: 'I want to learn AND teach. Full access to all features.',
+    icon:        'globe-outline',
+    iconColor:   '#F5A623',
+    iconBg:      '#FFF3E0',
+  },
 ];
 
 export default function RegisterScreen({ navigation }: any) {
@@ -40,7 +65,7 @@ export default function RegisterScreen({ navigation }: any) {
   const [loading,         setLoading]         = useState(false);
 
   const { setUser }              = useAuth();
-  const { showAlert, showConfirm } = useAlert();
+  const { showAlert }            = useAlert();
 
   const validateStep1 = (): string | null => {
     if (!firstName.trim() || !lastName.trim()) return 'Please enter your full name.';
@@ -121,7 +146,8 @@ export default function RegisterScreen({ navigation }: any) {
     <>
       <Text style={styles.roleHeading}>How will you use GeoLore?</Text>
       <Text style={styles.roleSubheading}>You can always change this later from your profile.</Text>
-      {ROLE_OPTIONS.map(({ role, label, description, icon }) => {
+
+      {ROLE_OPTIONS.map(({ role, label, description, icon, iconColor, iconBg }) => {
         const isSelected = selectedRole === role;
         return (
           <TouchableOpacity
@@ -130,7 +156,10 @@ export default function RegisterScreen({ navigation }: any) {
             onPress={() => setSelectedRole(role)}
             activeOpacity={0.8}
           >
-            <Text style={styles.roleIcon}>{icon}</Text>
+            {/* Icon replaces emoji */}
+            <View style={[styles.roleIconCircle, { backgroundColor: isSelected ? '#F5A623' : iconBg }]}>
+              <Ionicons name={icon as any} size={24} color={isSelected ? '#fff' : iconColor} />
+            </View>
             <View style={styles.roleTextBlock}>
               <Text style={[styles.roleLabel, isSelected && styles.roleLabelSelected]}>{label}</Text>
               <Text style={styles.roleDescription}>{description}</Text>
@@ -141,6 +170,7 @@ export default function RegisterScreen({ navigation }: any) {
           </TouchableOpacity>
         );
       })}
+
       <TouchableOpacity
         style={[styles.primaryBtn, (!selectedRole || loading) && styles.primaryBtnDisabled]}
         activeOpacity={0.85}
@@ -199,7 +229,7 @@ const styles = StyleSheet.create({
   roleSubheading: { fontSize: 12, color: '#A08060', marginBottom: 20, alignSelf: 'flex-start' },
   roleCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF3E0', borderRadius: 14, borderWidth: 1.5, borderColor: '#E0D0B8', padding: 14, marginBottom: 12, gap: 12 },
   roleCardSelected: { borderColor: '#F5A623', backgroundColor: '#FEF6E8' },
-  roleIcon: { fontSize: 30 },
+  roleIconCircle: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
   roleTextBlock: { flex: 1 },
   roleLabel: { fontSize: 15, fontWeight: '800', color: '#3B1F00', marginBottom: 3 },
   roleLabelSelected: { color: '#E67E22' },

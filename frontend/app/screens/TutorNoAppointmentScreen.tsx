@@ -32,10 +32,7 @@ export default function TutorNoAppointmentScreen({ navigation }: any) {
         <BuntingBanner />
 
         <View style={styles.content}>
-          {/* Tiger / mascot placeholder */}
-          {/* <View style={styles.mascotBox}> */}
             <Image source={require('../../assets/images/tiger.png')} style={styles.mascot} />
-          {/* </View> */}
 
           <Text style={styles.message}>You&apos;re all caught up!</Text>
           <Text style={styles.subMessage}>
