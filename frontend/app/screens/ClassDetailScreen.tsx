@@ -161,7 +161,7 @@ export default function ClassDetailScreen({ navigation, route }: any) {
         ) : enrolled ? (
           <View style={styles.enrolledBanner}>
             <Ionicons name="checkmark-circle" size={22} color="#27AE60" />
-            <Text style={styles.enrolledText}>You're enrolled in this class</Text>
+            <Text style={styles.enrolledText}>You&apos;re enrolled in this class</Text>
           </View>
         ) : (
           <TouchableOpacity

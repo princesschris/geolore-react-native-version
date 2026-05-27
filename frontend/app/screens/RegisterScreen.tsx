@@ -9,7 +9,7 @@ import LabeledInput from '../components/LabeledInput';
 import { registerUser } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
 import { useAlert } from '../components/CustomAlert';
-import { UserRole } from '../types/roles';
+import { UserRole } from '../types/Roles';
 
 const GoogleIcon = () => (
   <Svg width="18" height="18" viewBox="0 0 48 48">

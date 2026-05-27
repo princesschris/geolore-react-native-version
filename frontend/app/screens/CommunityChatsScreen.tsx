@@ -100,7 +100,7 @@ export default function CommunityChatsScreen({ navigation }: any) {
                 <Ionicons name="people-outline" size={40} color="#F5A623" />
               </View>
               <Text style={styles.emptyTitle}>No friends yet</Text>
-              <Text style={styles.emptySubtitle}>Tap "Add +" to connect with people</Text>
+              <Text style={styles.emptySubtitle}>Tap &quot;Add +&quot; to connect with people</Text>
             </View>
           }
         />

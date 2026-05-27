@@ -87,7 +87,7 @@ export default function NotificationsScreen({ navigation }: any) {
               <View style={styles.bellCircle}>
                 <Ionicons name="notifications-outline" size={52} color="#F5A623" />
               </View>
-              <Text style={styles.emptyTitle}>You're all caught up</Text>
+              <Text style={styles.emptyTitle}>You&apos;re all caught up</Text>
               <Text style={styles.emptySubtitle}>Come back later for reminders</Text>
             </View>
           ) : (

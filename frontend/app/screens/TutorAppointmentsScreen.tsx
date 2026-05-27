@@ -205,7 +205,7 @@ export default function TutorAppointmentsScreen({ navigation }: any) {
 
             {myClasses.length === 0 ? (
               <View style={styles.emptySection}>
-                <Text style={styles.emptyText}>You haven't created any classes yet.</Text>
+                <Text style={styles.emptyText}>You haven&APOS;t created any classes yet.</Text>
               </View>
             ) : (
               myClasses.map((cls) => (

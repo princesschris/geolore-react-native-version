@@ -101,7 +101,7 @@ export default function CommunityGroupsScreen({ navigation }: any) {
             <View style={styles.emptyState}>
               <Text style={styles.emptyEmoji}><Ionicons name="people-outline" size={48} color="#A08060" />  </Text>
               <Text style={styles.emptyTitle}>No groups yet</Text>
-              <Text style={styles.emptySubtitle}>Tap "Groups +" to join or create a group</Text>
+              <Text style={styles.emptySubtitle}>Tap &quot;Groups + &qout; to join or create a group</Text>
             </View>
           }
         />
