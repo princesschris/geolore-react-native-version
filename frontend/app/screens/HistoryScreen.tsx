@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,97 +7,63 @@ import {
   SafeAreaView,
   StatusBar,
   ScrollView,
-  Image,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import SearchBar from '../components/SearchBar';
+import Markdown from 'react-native-markdown-display';
+import TopBar from '../components/TopBar';
 import BottomTabBar from '../components/BottomTabBar';
+import BuntingBanner from '../components/BuntingBanner';
+import { supabase } from '../config/supabase';
+import { useAuth } from '../context/AuthContext';
 
-// Decorative bunting banner component
-const BuntingBanner = () => {
-  const colors = ['#E74C3C', '#F5A623', '#2ECC71', '#3498DB', '#9B59B6', '#E74C3C', '#F5A623', '#2ECC71'];
-  return (
-    <View style={bunting.container}>
-      {/* String line */}
-      <View style={bunting.string} />
-      {/* Flags */}
-      <View style={bunting.flagsRow}>
-        {colors.map((color, i) => (
-          <View
-            key={i}
-            style={[
-              bunting.flag,
-              { backgroundColor: color, marginLeft: i === 0 ? 0 : -2 },
-            ]}
-          />
-        ))}
-      </View>
-    </View>
-  );
-};
-
-const bunting = StyleSheet.create({
-  container: {
-    width: '100%',
-    height: 32,
-    marginBottom: 8,
-    justifyContent: 'flex-start',
-  },
-  string: {
-    position: 'absolute',
-    top: 4,
-    left: 0,
-    right: 0,
-    height: 1.5,
-    backgroundColor: '#C4A882',
-  },
-  flagsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingHorizontal: 8,
-    top: 0,
-  },
-  flag: {
-    width: 14,
-    height: 20,
-    borderBottomLeftRadius: 3,
-    borderBottomRightRadius: 3,
-    transform: [{ rotate: '0deg' }],
-  },
-});
-
-export default function HistoryScreen({ navigation, route }) {
+export default function HistoryScreen({ navigation, route }:any) {
+  const { user } = useAuth();
+  console.log('tribe value:', user?.tribe);
+  console.log('tribe type:', typeof user?.tribe);
+  const [content, setContent] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('Home');
 
-  // Culture name can be passed via route params
-  const cultureName = route?.params?.culture ?? 'IGBO';
+  const tribe = route?.params?.tribe ?? user?.tribe ?? 'Igbo';
+
+  useEffect(() => {
+    fetchHistory();
+  }, [tribe]);
+
+  const fetchHistory = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const { data, error: supabaseError } = await supabase
+      .from('culture_content')
+      .select('title, content')
+      .eq('category', 'history')
+      .eq('culture', tribe)
+      .order('sort_order', { ascending: true });
+      if (supabaseError) throw supabaseError;
+      if (!data) throw new Error('No content found');
+      const combined = (data ?? [])
+      .map((row) => `## ${row.title}\n\n${row.content}`)
+      .join('\n\n');
+      setContent(combined);
+        console.log('data:', JSON.stringify(data));
+        console.log('error:', supabaseError);
+    
+    } catch (err: any) {
+      setError(err.message ?? 'Failed to load content');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFDF5" />
 
-      {/* Top Bar */}
-      <View style={styles.topBar}>
-        <SearchBar
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholder="Search"
-        />
-        <TouchableOpacity style={styles.iconBtn}>
-          <Ionicons name="person-outline" size={20} color="#5C3A00" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.iconBtn}>
-          <View>
-            <Ionicons name="notifications-outline" size={20} color="#5C3A00" />
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>5</Text>
-            </View>
-          </View>
-        </TouchableOpacity>
-      </View>
-
-      {/* Bunting Banner */}
+      <TopBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
       <BuntingBanner />
 
       <ScrollView
@@ -106,119 +72,187 @@ export default function HistoryScreen({ navigation, route }) {
       >
         {/* Title */}
         <Text style={styles.title}>HISTORY</Text>
+        <Text style={styles.subtitle}>{tribe} History</Text>
 
-        {/* History Image Card */}
-        <View style={styles.imageCard}>
-          {/* Replace with your actual history image */}
-          {/* <Image source={require('../assets/history-main.png')} style={styles.historyImage} /> */}
-          <View style={styles.imagePlaceholder}>
-            <Ionicons name="image-outline" size={48} color="#C4A882" />
+        {/* Loading state */}
+        {loading && (
+          <View style={styles.centeredState}>
+            <ActivityIndicator size="large" color="#F5A623" />
+            <Text style={styles.loadingText}>Loading history...</Text>
           </View>
-        </View>
+        )}
 
-        {/* History Body Text */}
-        <Text style={styles.bodyText}>
-          Lorem ipsum dolor sit amet consectetur adipiscing elit. Nla dolorem quis ipsa.
-          Consequatur odio ulam maxime aliquam qque, quaerat, ducimus, expedita dolores a
-          msque reiciendistus reprehenderit? Officia, repellat nihil cum corporis delectus minus
-          nostrum dolorum optio sunt soli quia a modi velit ex blanditiis libero atque, cumque.
-          T Nihil eus raque aspectores ipsam aperiam rem sequi nihil perferendis laborum quod
-          distinctio. Odio quod, deserunt aliquid totam nulla malesuada represendes eget
-          voluptas? Perspiciatis unde quisquam repettat okey minima. Laboriosam maxime fugiat
-          fugit quisquam, non iure cumque obcaecati aspernates excepteur distinctio alias numquam
-          similique ulam, tempora minus vitae eo pariatur libero praesum porro soluta. Foo ulam
-          dolor, sit amet consectetur adipiscing, elit.
-        </Text>
+        {/* Error state */}
+        {!loading && error && (
+          <View style={styles.centeredState}>
+            <Ionicons name="alert-circle-outline" size={48} color="#C4A882" />
+            <Text style={styles.errorText}>Could not load content</Text>
+            <TouchableOpacity style={styles.retryBtn} onPress={fetchHistory}>
+              <Text style={styles.retryBtnText}>Try again</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
-        </ScrollView>
+        {/* Content */}
+        {!loading && !error && content && (
+          <View style={styles.contentCard}>
+            <Markdown style={markdownStyles}>{content}</Markdown>
+          </View>
+        )}
 
-      {/* Bottom Tab Bar */}
-      <BottomTabBar activeTab={activeTab} onTabPress={setActiveTab} />
+        {/* Back Button */}
+        {!loading && (
+          <TouchableOpacity
+            style={styles.backButton}
+            activeOpacity={0.8}
+            onPress={() => navigation?.goBack()}
+          >
+            <Ionicons name="arrow-back-outline" size={16} color="#fff" />
+            <Text style={styles.backButtonText}>Back</Text>
+          </TouchableOpacity>
+        )}
+      </ScrollView>
+
+      <BottomTabBar />
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#FFFDF5',
+// Markdown styles matching the app theme
+const markdownStyles = {
+  body: {
+    fontSize: 13,
+    color: '#5C4A30',
+    lineHeight: 21,
   },
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 10,
-    gap: 10,
-  },
-  iconBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  badge: {
-    position: 'absolute',
-    top: -4,
-    right: -6,
-    backgroundColor: '#F5A623',
-    borderRadius: 8,
-    width: 16,
-    height: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  badgeText: {
-    color: '#fff',
-    fontSize: 9,
+  heading1: {
+    fontSize: 20,
     fontWeight: '800',
+    color: '#3B1F00',
+    marginTop: 16,
+    marginBottom: 8,
   },
+  heading2: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#3B1F00',
+    marginTop: 14,
+    marginBottom: 6,
+  },
+  heading3: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#F5A623',
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  paragraph: {
+    fontSize: 13,
+    color: '#5C4A30',
+    lineHeight: 21,
+    marginBottom: 10,
+    textAlign: 'justify' as const,
+  },
+  bullet_list: {
+    marginBottom: 10,
+  },
+  list_item: {
+    fontSize: 13,
+    color: '#5C4A30',
+    lineHeight: 21,
+  },
+  bullet_list_icon: {
+    color: '#F5A623',
+    fontSize: 16,
+    marginTop: 2,
+  },
+  strong: {
+    fontWeight: '800',
+    color: '#3B1F00',
+  },
+  em: {
+    fontStyle: 'italic',
+    color: '#A08060',
+  },
+  blockquote: {
+    backgroundColor: '#FFF3E0',
+    borderLeftWidth: 4,
+    borderLeftColor: '#F5A623',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 4,
+    marginBottom: 10,
+  },
+  code_inline: {
+    backgroundColor: '#FFF3E0',
+    color: '#F5A623',
+    borderRadius: 4,
+    paddingHorizontal: 4,
+    fontSize: 12,
+  },
+  hr: {
+    backgroundColor: '#E0D0B8',
+    height: 1,
+    marginVertical: 12,
+  },
+};
+
+const styles = StyleSheet.create({
+  safeArea: { flex: 1, backgroundColor: '#FFFDF5' },
   scrollContent: {
     paddingHorizontal: 16,
     paddingTop: 8,
-    paddingBottom: 28,
+    paddingBottom: 32,
   },
   title: {
     fontSize: 22,
     fontWeight: '800',
     color: '#3B1F00',
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: 4,
     letterSpacing: 1.5,
   },
-  imageCard: {
-    width: '100%',
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginBottom: 16,
+  subtitle: {
+    fontSize: 14,
+    color: '#A08060',
+    textAlign: 'center',
+    marginBottom: 20,
+    fontWeight: '600',
+  },
+  contentCard: {
+    backgroundColor: '#fff',
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: '#E0D0B8',
+    padding: 16,
+    marginBottom: 20,
   },
-  historyImage: {
-    width: '100%',
-    height: 180,
-    resizeMode: 'cover',
-  },
-  imagePlaceholder: {
-    width: '100%',
-    height: 180,
-    backgroundColor: '#F5E6CC',
+  centeredState: {
     alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: 48,
+    gap: 12,
   },
-  bodyText: {
+  loadingText: {
+    fontSize: 14,
+    color: '#A08060',
+    fontWeight: '500',
+  },
+  errorText: {
+    fontSize: 14,
+    color: '#A08060',
+    fontWeight: '500',
+  },
+  retryBtn: {
+    backgroundColor: '#F5A623',
+    paddingVertical: 10,
+    paddingHorizontal: 28,
+    borderRadius: 10,
+  },
+  retryBtnText: {
+    color: '#fff',
     fontSize: 13,
-    color: '#5C4A30',
-    lineHeight: 21,
-    marginBottom: 28,
-    textAlign: 'justify',
+    fontWeight: '700',
   },
   backButton: {
     flexDirection: 'row',
@@ -231,9 +265,5 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     paddingHorizontal: 32,
   },
-  backButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '700',
-  },
+  backButtonText: { color: '#fff', fontSize: 14, fontWeight: '700' },
 });

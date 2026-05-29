@@ -7,7 +7,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const CULTURES_DIR = path.join(__dirname, '..', 'app', 'data', 'cultures');
+const CULTURES_DIR = path.join(__dirname, '..', 'data', 'cultures');
 
 interface CultureContent {
   culture:    string;
@@ -271,7 +271,7 @@ async function main(): Promise<void> {
         key.includes('culture')   ||
         key.includes('festival')  ||
         key.includes('belief')    ||
-        key.includes('stor')      ||
+        key.includes('story')      ||
         key.includes('fashion')   ||
         key.includes('language')
       ) {

@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import LabeledInput from '../components/LabeledInput';
 import CountryPicker from '../components/CountryPicker';
-import { Country } from '../data/countries';
+import { Country } from '../../data/countries';
 import { supabase } from '../config/supabase';
 import { useAuth } from '../context/AuthContext';
 

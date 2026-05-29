@@ -65,7 +65,6 @@ const styles = StyleSheet.create({
     color: '#A08060',
     textAlign: 'center',
     lineHeight: 20,
-    // marginBottom: 30,
     maxWidth: 260,
   },
   buttonRow: {
