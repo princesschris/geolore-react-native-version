@@ -6,8 +6,8 @@ export default function CategoryCard({
   imageSource,
   onDiscover,
   centered = false,
-}) {
-  // 339x138 — centered, no image (YourCulture screen)
+}:any) {
+ 
   if (centered) {
     return (
       <View style={styles.centeredCard}>
@@ -57,6 +57,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     flexDirection: 'row',
     overflow: 'hidden',
+    width: '100%',
     aspectRatio: 339 / 241,
   },
   left: {

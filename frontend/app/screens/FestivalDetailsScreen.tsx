@@ -14,20 +14,37 @@ import BottomTabBar from '../components/BottomTabBar';
 import BuntingBanner from '../components/BuntingBanner';
 import TopBar from '../components/TopBar';
 
-export default function FestivalDetailScreen({ navigation, route }) {
-  const festival = route?.params?.festival ?? {
-    title: 'New Yam Festival',
-    body: 'The New Yam Festival is one of the most celebrated Igbo traditions...',
-  };
+export default function FestivalDetailScreen({ navigation, route }: any) {
+  const festival = route?.params?.festival;
+
+  // Guard — if no festival was passed navigate back
+  if (!festival) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <TopBar showSearch={false} />
+        <View style={styles.centeredState}>
+          <Ionicons name="alert-circle-outline" size={48} color="#C4A882" />
+          <Text style={styles.stateText}>No festival content found</Text>
+          <TouchableOpacity style={styles.retryBtn} onPress={() => navigation?.goBack()}>
+            <Text style={styles.retryBtnText}>Go back</Text>
+          </TouchableOpacity>
+        </View>
+        <BottomTabBar />
+      </SafeAreaView>
+    );
+  }
+
+  // `content` comes from Supabase — split by double newline into paragraphs
+  const paragraphs: string[] = (festival.content ?? festival.body ?? '')
+    .split('\n\n')
+    .map((p: string) => p.trim())
+    .filter(Boolean);
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFDF5" />
 
-      {/* Top bar — no search, just icons */}
       <TopBar showSearch={false} />
-
-      {/* Bunting Banner */}
       <BuntingBanner />
 
       <ScrollView
@@ -54,14 +71,27 @@ export default function FestivalDetailScreen({ navigation, route }) {
           )}
         </View>
 
-        {/* Body Text */}
+        {/* Body Text — rendered from Supabase content field */}
         <View style={styles.bodyCard}>
-          {festival.body.split('\n\n').map((paragraph, i) => (
-            <Text key={i} style={styles.bodyText}>{paragraph}</Text>
-          ))}
+          {paragraphs.length > 0 ? (
+            paragraphs.map((paragraph, i) => (
+              <Text key={i} style={styles.bodyText}>{paragraph}</Text>
+            ))
+          ) : (
+            <Text style={styles.stateText}>No content available</Text>
+          )}
         </View>
 
-        </ScrollView>
+        {/* Back Button */}
+        <TouchableOpacity
+          style={styles.backButton}
+          activeOpacity={0.8}
+          onPress={() => navigation?.goBack()}
+        >
+          <Ionicons name="arrow-back-outline" size={16} color="#fff" />
+          <Text style={styles.backButtonText}>Back</Text>
+        </TouchableOpacity>
+      </ScrollView>
 
       <BottomTabBar />
     </SafeAreaView>
@@ -69,10 +99,7 @@ export default function FestivalDetailScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#FFFDF5',
-  },
+  safeArea: { flex: 1, backgroundColor: '#FFFDF5' },
   scrollContent: {
     paddingHorizontal: 16,
     paddingTop: 4,
@@ -101,12 +128,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  imageRadius: {
-    borderRadius: 16,
-  },
-  imagePlaceholder: {
-    backgroundColor: '#C4A882',
-  },
+  imageRadius: { borderRadius: 16 },
+  imagePlaceholder: { backgroundColor: '#C4A882' },
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.25)',
@@ -126,6 +149,21 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     textAlign: 'justify',
   },
+  centeredState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    paddingVertical: 48,
+  },
+  stateText: { fontSize: 14, color: '#A08060', fontWeight: '500' },
+  retryBtn: {
+    backgroundColor: '#F5A623',
+    paddingVertical: 10,
+    paddingHorizontal: 28,
+    borderRadius: 10,
+  },
+  retryBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' },
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -137,9 +175,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     alignSelf: 'center',
   },
-  backButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '700',
-  },
+  backButtonText: { color: '#fff', fontSize: 14, fontWeight: '700' },
 });

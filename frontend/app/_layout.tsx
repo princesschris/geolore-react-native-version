@@ -57,7 +57,7 @@ import AboutGeoLoreScreen from './screens/AboutGeoloreScreen';
 import TermsAndConditionsScreen from './screens/TermsAndConditionsScreen';
 import PrivacyPolicyScreen from './screens/PrivacyPolicyScreen';
 import LanguageSelectScreen from './screens/LanguageSelectScreen';
-import LocationScreen from './screens/LocationSceen';
+import LocationScreen from './screens/LocationScreen';
 import ClearCacheScreen from './screens/ClearCacheScreen';
 
 // ── Tutor onboarding & management screens ─────────────────────────────────────
@@ -71,7 +71,10 @@ import TutorAppointmentDetailsScreen from './screens/TutorAppointmentDetailsScre
 import TutorNoAppointmentScreen from './screens/TutorNoAppointmentScreen';
 import { AlertProvider } from './components/CustomAlert';
 import ClassDetailScreen from './screens/ClassDetailScreen';
+import CultureScreen from './screens/CultureScreen';
+import CultureDetailScreen from './screens/CultureDetailScreen';
 import CreateClassScreen from './screens/CreateClassScreen';
+import AddGroupMembersScreen from './screens/AddGroupMembersScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -110,6 +113,7 @@ function Navigator() {
       <Stack.Screen name="Register"        component={RegisterScreen} />
       <Stack.Screen name="Login"           component={LoginScreen} />
       <Stack.Screen name="GetStarted"      component={GetStartedScreen} />
+      <Stack.Screen name="AddGroupMembers"        component={AddGroupMembersScreen} />
       <Stack.Screen name="WhereAreYouFrom" component={WhereAreYouFromScreen} />
 
       {/* Core app */}
@@ -146,6 +150,8 @@ function Navigator() {
       <Stack.Screen name="ScheduleInterview"   component={ScheduleInterviewScreen} />
       <Stack.Screen name="InterviewIncoming"   component={InterviewIncomingScreen} />
       <Stack.Screen name="AwaitResponse"       component={AwaitResponseScreen} />
+      <Stack.Screen name ="Culture" component={CultureScreen}/>
+      <Stack.Screen name = "CultureDetail" component ={CultureDetailScreen}/>
 
       {/* Tutor management (RoleGate enforced inside each screen) */}
       <Stack.Screen name="TutorAppointments"       component={TutorAppointmentsScreen} />

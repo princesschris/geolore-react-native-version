@@ -31,12 +31,30 @@ export default function CommunityChatsScreen({ navigation }: any) {
     if (!user?.id) return;
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('friends')
-        .select(`friend_id, friend:users!friends_friend_id_fkey (id, first_name, last_name)`)
-        .eq('user_id', user.id);
-      if (error) throw error;
-      setFriends(data ?? []);
+      // Fetch both directions — user may appear on either side of the friendship row
+      const [{ data: asUser }, { data: asFriend }] = await Promise.all([
+        supabase
+          .from('friends')
+          .select('friend:users!friends_friend_id_fkey (id, first_name, last_name)')
+          .eq('user_id', user.id),
+        supabase
+          .from('friends')
+          .select('friend:users!friends_user_id_fkey (id, first_name, last_name)')
+          .eq('friend_id', user.id),
+      ]);
+
+      // Merge and deduplicate by friend id
+      const map = new Map<string, any>();
+      for (const row of (asUser ?? [])) {
+        const f = row.friend as any;
+        if (f) map.set(f.id, { friend_id: f.id, friend: f });
+      }
+      for (const row of (asFriend ?? [])) {
+        const f = row.friend as any;
+        if (f) map.set(f.id, { friend_id: f.id, friend: f });
+      }
+
+      setFriends(Array.from(map.values()));
     } catch {
       setFriends([]);
     } finally {

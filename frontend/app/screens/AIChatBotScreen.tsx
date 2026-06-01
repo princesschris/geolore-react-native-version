@@ -10,74 +10,122 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import BottomTabBar from '../components/BottomTabBar';
 import BuntingBanner from '../components/BuntingBanner';
+import { CULTURAL_DATA } from '../../data/cultures/culturalData';
+
+const GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
 
 const SUGGESTIONS = [
-  { id: '1', label: 'What is this' },
-  { id: '2', label: 'Who is ...' },
-  { id: '3', label: 'What happened in ...' },
-  { id: '4', label: 'Fun facts' },
-];
-
-const INITIAL_HISTORY = [
-  { id: '1', text: 'War stories' },
-  { id: '2', text: 'Igbo History' },
-  { id: '3', text: 'War stories' },
-  { id: '4', text: 'The diaspora rules' },
-  { id: '5', text: 'New Yam Festival date 20...' },
-  { id: '6', text: 'Igbo History' },
-  { id: '7', text: 'War stories' },
-  { id: '8', text: 'The diaspora rules' },
-  { id: '9', text: 'New Yam Festival date 20' },
+  { id: '1', label: 'What are popular cultural festivals?' },
+  { id: '2', label: 'What traditional foods exist?' },
+  { id: '3', label: 'Tell me about cultural traditions' },
 ];
 
 const MessageBubble = ({ message }) => (
   <View style={[styles.bubble, message.isUser ? styles.userBubble : styles.botBubble]}>
-    <Text style={[styles.bubbleText, message.isUser ? styles.userBubbleText : styles.botBubbleText]}>
-      {message.text}
-    </Text>
+    {message.isLoading ? (
+      <ActivityIndicator size="small" color="#A08060" />
+    ) : (
+      <Text style={[styles.bubbleText, message.isUser ? styles.userBubbleText : styles.botBubbleText]}>
+        {message.text}
+      </Text>
+    )}
   </View>
 );
 
-const HistoryItem = ({ text, onPress }) => (
-  <TouchableOpacity style={styles.historyItem} onPress={onPress} activeOpacity={0.7}>
-    <Ionicons name="time-outline" size={16} color="#A08060" />
-    <Text style={styles.historyText} numberOfLines={1}>{text}</Text>
-    <Ionicons name="chevron-forward-outline" size={16} color="#C4A882" />
-  </TouchableOpacity>
-);
-
-export default function AIChatBotScreen({ navigation }:any) {
+export default function AIChatBotScreen({ navigation }: any) {
   const [inputText, setInputText] = useState('');
   const [messages, setMessages] = useState([]);
   const [showChat, setShowChat] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef(null);
 
-  const handleSend = (text) => {
+  const handleSend = async (text?: string) => {
     const msg = text || inputText;
-    if (!msg.trim()) return;
+    if (!msg.trim() || isLoading) return;
 
     setShowChat(true);
+    setIsLoading(true);
+
     const userMsg = { id: Date.now().toString(), text: msg, isUser: true };
-    const botMsg = {
+    const loadingMsg = {
       id: (Date.now() + 1).toString(),
-      text: `Here's what I found about "${msg}"...`,
+      text: '',
       isUser: false,
+      isLoading: true,
     };
 
-    setMessages((prev) => [...prev, userMsg, botMsg]);
+    setMessages((prev) => [...prev, userMsg, loadingMsg]);
     setInputText('');
     setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
+
+    try {
+      const trimmedData = CULTURAL_DATA.slice(0, 10000);
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            system_instruction: {
+              parts: [
+                {
+                  text: `You are a cultural knowledge assistant. Answer questions ONLY based on the cultural data provided. 
+If the answer is not found in the data, respond with: "I don't have information on that in my cultural database."
+Keep answers clear, friendly, and informative.`,
+                },
+              ],
+            },
+            contents: [
+              {
+                parts: [
+                  {
+                    text: `CULTURAL DATA:\n\n${trimmedData}\n\n---\n\nUser question: ${msg}`,
+                  },
+                ],
+              },
+            ],
+          }),
+        }
+      );
+
+      const data = await response.json();
+      console.log('API Response:', JSON.stringify(data, null, 2));
+
+      const botReply =
+        data.candidates?.[0]?.content?.parts?.[0]?.text ||
+        "I couldn't find an answer. Please try rephrasing your question.";
+
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === loadingMsg.id ? { ...m, text: botReply, isLoading: false } : m
+        )
+      );
+    } catch (error) {
+      console.log('API Error:', error);
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === loadingMsg.id
+            ? { ...m, text: 'Something went wrong. Please check your connection and try again.', isLoading: false }
+            : m
+        )
+      );
+    } finally {
+      setIsLoading(false);
+      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
+    }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFDF5" />
 
-      {/* Top bar with hamburger + icons */}
+      {/* Top bar */}
       <View style={styles.topBar}>
         <TouchableOpacity
           style={styles.menuBtn}
@@ -122,22 +170,11 @@ export default function AIChatBotScreen({ navigation }:any) {
                   key={s.id}
                   style={styles.chip}
                   activeOpacity={0.8}
-                  onPress={() => setInputText(s.label)}
+                  onPress={() => handleSend(s.label)}
                 >
                   <Ionicons name="chatbubble-outline" size={13} color="#F5A623" />
                   <Text style={styles.chipText}>{s.label}</Text>
                 </TouchableOpacity>
-              ))}
-            </View>
-
-            {/* Chat history */}
-            <View style={styles.historyList}>
-              {INITIAL_HISTORY.map((item) => (
-                <HistoryItem
-                  key={item.id}
-                  text={item.text}
-                  onPress={() => handleSend(item.text)}
-                />
               ))}
             </View>
           </ScrollView>
@@ -167,10 +204,21 @@ export default function AIChatBotScreen({ navigation }:any) {
             onSubmitEditing={() => handleSend()}
             returnKeyType="send"
             multiline
+            editable={!isLoading}
           />
-          <TouchableOpacity style={styles.micBtn} onPress={() => handleSend()}>
-            <Ionicons name="mic-outline" size={18} color="#fff" />
-            <Text style={styles.micLines}>||||</Text>
+          <TouchableOpacity
+            style={[styles.micBtn, isLoading && styles.micBtnDisabled]}
+            onPress={() => handleSend()}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <>
+                <Ionicons name="mic-outline" size={18} color="#fff" />
+                <Text style={styles.micLines}>||||</Text>
+              </>
+            )}
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -184,7 +232,6 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#FFFDF5' },
   flex: { flex: 1 },
 
-  // Top bar
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -229,7 +276,6 @@ const styles = StyleSheet.create({
   },
   badgeText: { color: '#fff', fontSize: 9, fontWeight: '800' },
 
-  // Content
   scrollContent: {
     paddingHorizontal: 16,
     paddingTop: 16,
@@ -270,29 +316,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#5C3A00',
   },
-  historyList: { gap: 2 },
-  historyItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0E6D6',
-  },
-  historyText: {
-    flex: 1,
-    fontSize: 13,
-    color: '#5C4A30',
-    fontWeight: '500',
-  },
 
-  // Bubbles
   bubble: {
     maxWidth: '78%',
     borderRadius: 16,
     padding: 12,
     marginBottom: 10,
+    minWidth: 60,
+    minHeight: 40,
+    justifyContent: 'center',
   },
   userBubble: {
     backgroundColor: '#F5A623',
@@ -310,7 +342,6 @@ const styles = StyleSheet.create({
   userBubbleText: { color: '#fff' },
   botBubbleText: { color: '#3B1F00' },
 
-  // Input bar
   inputBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -347,6 +378,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 12,
     paddingVertical: 8,
+  },
+  micBtnDisabled: {
+    backgroundColor: '#C4A882',
   },
   micLines: {
     color: '#fff',

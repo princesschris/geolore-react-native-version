@@ -35,8 +35,8 @@ export default function CommunityGroupsScreen({ navigation }: any) {
         .from('group_members')
         .select(`
           group_id,
-          group:groups!group_members_group_id_fkey (
-            id, name, created_by
+          group:groups (
+            id, name, creator_id
           )
         `)
         .eq('user_id', user.id);

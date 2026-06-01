@@ -106,6 +106,17 @@ export default function UserInfoScreen({ navigation, route }: any) {
           <TouchableOpacity
             style={styles.actionBtn}
             activeOpacity={0.8}
+            onPress={() => navigation?.navigate('AddEvent', {
+              invitee: { id: friendId, name: userName, type: 'user' },
+            })}
+          >
+            <Ionicons name="calendar-outline" size={22} color="#F5A623" />
+            <Text style={styles.actionBtnText}>Add Event</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionBtn}
+            activeOpacity={0.8}
             onPress={handleRemoveFriend}
           >
             <Ionicons name="person-remove-outline" size={22} color="#E74C3C" />

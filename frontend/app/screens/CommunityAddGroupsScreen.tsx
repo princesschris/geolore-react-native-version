@@ -42,7 +42,7 @@ export default function CommunityAddGroupsScreen({ navigation }: any) {
       // All groups
       const { data: allGroups } = await supabase
         .from('groups')
-        .select('id, name, created_by');
+        .select('id, name, creator_id');
 
       // Groups user already joined
       const { data: myMemberships } = await supabase

@@ -49,7 +49,7 @@ export default function HistoryScreen({ navigation, route }:any) {
       .map((row) => `## ${row.title}\n\n${row.content}`)
       .join('\n\n');
       setContent(combined);
-        console.log('data:', JSON.stringify(data));
+        // console.log('data:', JSON.stringify(data));
         console.log('error:', supabaseError);
     
     } catch (err: any) {

@@ -100,7 +100,7 @@ export default function GroupInfoScreen({ navigation, route }: any) {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.actionBtn}
-            onPress={() => navigation?.navigate('CommunityAdd')}
+            onPress={() => navigation?.navigate('AddGroupMembers', { id: groupId, name: groupName })}
           >
             <Ionicons name="person-add-outline" size={22} color="#F5A623" />
             <Text style={styles.actionBtnText}>Add+</Text>

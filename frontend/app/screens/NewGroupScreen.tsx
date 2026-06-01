@@ -1,51 +1,92 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  SafeAreaView, StatusBar, ScrollView, ActivityIndicator, Alert,
+  SafeAreaView, StatusBar, ScrollView, ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import BottomTabBar from '../components/BottomTabBar';
 import { supabase } from '../config/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useAlert } from '../components/CustomAlert';
 
 export default function NewGroupScreen({ navigation }: any) {
-  const [groupName, setGroupName] = useState('');
-  const [loading,   setLoading]   = useState(false);
+  const [groupName,  setGroupName]  = useState('');
+  const [loading,    setLoading]    = useState(false);
+  const [users,      setUsers]      = useState<any[]>([]);
+  const [usersLoading, setUsersLoading] = useState(true);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
   const { user } = useAuth();
   const { showAlert, showConfirm } = useAlert();
 
+  // Fetch all users except self — same pattern as CommunityAddScreen
+  const fetchUsers = async () => {
+    if (!user?.id) return;
+    setUsersLoading(true);
+    try {
+      const { data } = await supabase
+        .from('users')
+        .select('id, first_name, last_name')
+        .neq('id', user.id);
+      setUsers(data ?? []);
+    } catch {
+      setUsers([]);
+    } finally {
+      setUsersLoading(false);
+    }
+  };
+
+  useFocusEffect(useCallback(() => { fetchUsers(); }, [user?.id]));
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
   const handleCreate = async () => {
     if (!groupName.trim()) {
-      showAlert('Required', 'Please enter a group name.');
+      showAlert('warning', 'Required', 'Please enter a group name.');
       return;
     }
     setLoading(true);
     try {
-      // Create the group
+      // 1. Create the group
       const { data: newGroup, error: groupError } = await supabase
         .from('groups')
-        .insert({ name: groupName.trim(), created_by: user?.id })
+        .insert({ name: groupName.trim(), creator_id: user?.id })
         .select()
         .single();
 
       if (groupError) throw groupError;
 
-      // Add creator as first member
+      // 2. Add creator + all selected members in one insert
+      const memberRows = [
+        { group_id: newGroup.id, user_id: user?.id },
+        ...[...selectedIds].map((uid) => ({ group_id: newGroup.id, user_id: uid })),
+      ];
+
       const { error: memberError } = await supabase
         .from('group_members')
-        .insert({ group_id: newGroup.id, user_id: user?.id });
+        .insert(memberRows);
 
       if (memberError) throw memberError;
 
-      showConfirm('Group created!', `"${groupName}" is ready.`, [
-        {
-          text: 'Open chat',
-          onPress: () => navigation?.replace('GroupChat', { name: newGroup.name, id: newGroup.id }),
-        },
-      ]);
+      const createdName = newGroup.name;
+      const createdId   = newGroup.id;
+      showConfirm(
+        'Group created!',
+        `"${createdName}" is ready with ${memberRows.length} member${memberRows.length > 1 ? 's' : ''}. Open the chat now?`,
+        () => navigation?.replace('GroupChat', { name: createdName, id: createdId }),
+        () => navigation?.goBack(),
+        'Open chat',
+        'Later',
+      );
     } catch (err: any) {
-      showAlert('Error', err.message || 'Could not create group.');
+      showAlert('error', 'Error', err.message || 'Could not create group.');
     } finally {
       setLoading(false);
     }
@@ -64,14 +105,16 @@ export default function NewGroupScreen({ navigation }: any) {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-        {/* Group avatar placeholder */}
+
+        {/* Avatar */}
         <View style={styles.avatarSection}>
-          <View style={styles.groupAvatar}>
+          <TouchableOpacity style={styles.groupAvatar} activeOpacity={0.75}>
             <Ionicons name="people" size={52} color="#F5A623" />
-          </View>
+          </TouchableOpacity>
           <Text style={styles.hint}>Tap to add a group photo</Text>
         </View>
 
+        {/* Group name */}
         <Text style={styles.label}>Group name</Text>
         <TextInput
           style={styles.input}
@@ -84,6 +127,42 @@ export default function NewGroupScreen({ navigation }: any) {
         />
         <Text style={styles.charCount}>{groupName.length}/50</Text>
 
+        {/* Member picker */}
+        <Text style={styles.label}>
+          Add members{selectedIds.size > 0 ? ` (${selectedIds.size} selected)` : ''}
+        </Text>
+
+        {usersLoading ? (
+          <ActivityIndicator color="#F5A623" style={{ marginVertical: 16 }} />
+        ) : users.length === 0 ? (
+          <Text style={styles.emptyText}>No other users found.</Text>
+        ) : (
+          <View style={styles.memberGrid}>
+            {users.map((u) => {
+              const selected = selectedIds.has(u.id);
+              return (
+                <TouchableOpacity
+                  key={u.id}
+                  style={[styles.memberCard, selected && styles.memberCardSelected]}
+                  onPress={() => toggleSelect(u.id)}
+                  activeOpacity={0.75}
+                >
+                  <View style={[styles.memberAvatar, selected && styles.memberAvatarSelected]}>
+                    {selected
+                      ? <Ionicons name="checkmark" size={22} color="#fff" />
+                      : <Ionicons name="person" size={22} color="#C4A882" />
+                    }
+                  </View>
+                  <Text style={[styles.memberName, selected && styles.memberNameSelected]} numberOfLines={1}>
+                    {u.first_name} {u.last_name}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
+
+        {/* Create button */}
         <TouchableOpacity
           style={[styles.createBtn, (!groupName.trim() || loading) && styles.createBtnDisabled]}
           activeOpacity={0.85}
@@ -92,7 +171,9 @@ export default function NewGroupScreen({ navigation }: any) {
         >
           {loading
             ? <ActivityIndicator color="#fff" />
-            : <Text style={styles.createBtnText}>Create Group</Text>
+            : <Text style={styles.createBtnText}>
+                Create Group{selectedIds.size > 0 ? ` · ${selectedIds.size + 1} members` : ''}
+              </Text>
           }
         </TouchableOpacity>
       </ScrollView>
@@ -108,13 +189,21 @@ const styles = StyleSheet.create({
   backBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
   headerTitle: { flex: 1, fontSize: 20, fontWeight: '800', color: '#F5A623', textAlign: 'center' },
   scrollContent: { paddingHorizontal: 24, paddingTop: 16, paddingBottom: 40 },
-  avatarSection: { alignItems: 'center', marginBottom: 32, gap: 10 },
+  avatarSection: { alignItems: 'center', marginBottom: 28, gap: 10 },
   groupAvatar: { width: 100, height: 100, borderRadius: 50, backgroundColor: '#FFF3E0', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#F5C070' },
   hint: { fontSize: 12, color: '#A08060' },
   label: { fontSize: 13, fontWeight: '700', color: '#3B1F00', marginBottom: 8 },
   input: { backgroundColor: '#FFF3E0', borderRadius: 12, borderWidth: 1, borderColor: '#E0D0B8', paddingHorizontal: 16, paddingVertical: 13, fontSize: 15, color: '#3B1F00', marginBottom: 4 },
-  charCount: { fontSize: 11, color: '#C4A882', alignSelf: 'flex-end', marginBottom: 24 },
-  createBtn: { backgroundColor: '#F5A623', paddingVertical: 14, borderRadius: 12, alignItems: 'center' },
+  charCount: { fontSize: 11, color: '#C4A882', alignSelf: 'flex-end', marginBottom: 20 },
+  emptyText: { fontSize: 13, color: '#A08060', fontStyle: 'italic', marginBottom: 20 },
+  memberGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 24 },
+  memberCard: { width: '30%', alignItems: 'center', gap: 6, padding: 8, borderRadius: 12, borderWidth: 1.5, borderColor: '#E0D0B8', backgroundColor: '#fff' },
+  memberCardSelected: { borderColor: '#F5A623', backgroundColor: '#FFF3E0' },
+  memberAvatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: '#F5E6CC', alignItems: 'center', justifyContent: 'center' },
+  memberAvatarSelected: { backgroundColor: '#F5A623' },
+  memberName: { fontSize: 11, fontWeight: '600', color: '#3B1F00', textAlign: 'center' },
+  memberNameSelected: { color: '#F5A623' },
+  createBtn: { backgroundColor: '#F5A623', paddingVertical: 14, borderRadius: 12, alignItems: 'center', marginTop: 4 },
   createBtnDisabled: { backgroundColor: '#E0C49A' },
   createBtnText: { color: '#fff', fontSize: 15, fontWeight: '800' },
 });

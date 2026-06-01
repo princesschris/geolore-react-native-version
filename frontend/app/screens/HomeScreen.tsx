@@ -59,7 +59,7 @@ const CATEGORIES = [
     imageSource: require('../../assets/images/food_image.png'),
   },
   {
-    key: 'cultures',
+    key: 'traditions',
     title: 'Traditions',
     screen: 'Traditions',
     imageSource: require('../../assets/images/culture_image.png'),

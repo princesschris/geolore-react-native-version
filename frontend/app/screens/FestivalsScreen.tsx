@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,60 +8,65 @@ import {
   StatusBar,
   ScrollView,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import BottomTabBar from '../components/BottomTabBar';
 import BuntingBanner from '../components/BuntingBanner';
 import TopBar from '../components/TopBar';
 import ImageCard from '../components/ImageCard';
+import { supabase } from '../config/supabase';
+import { useAuth } from '../context/AuthContext';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - 48) / 2;
 
-export const FESTIVALS = [
-  {
-    id: '1',
-    title: 'New Yam Festival',
-    // imageSource: require('../../assets/images/new_yam_festival.png'),
-    body: `The New Yam Festival (Iri Ji) is one of the most celebrated Igbo traditions. It marks the end of the farming season and the beginning of harvest time.\n\nBefore anyone eats from the new harvest, the first yams are offered to the gods and ancestors in thanksgiving. The festival is filled with music, masquerades, traditional dances, and feasting.\n\nYam is considered the "king of crops" in Igbo culture — a symbol of strength, prosperity, and identity.`,
-  },
-  {
-    id: '2',
-    title: 'Ofala Festival',
-    // imageSource: require('../../assets/images/ofala_festival.png'),
-    body: `The Ofala Festival is an annual royal celebration held by Igbo monarchs (Obis and Ezes) to mark their coronation anniversary and reaffirm their authority.\n\nDuring Ofala, the king emerges from seclusion in full regalia to greet his subjects. It is a time of pomp, pageantry, traditional dances, and cultural displays.\n\nThe festival strengthens the bond between the ruler and the community, and serves as a reminder of Igbo royal heritage.`,
-  },
-  {
-    id: '3',
-    title: 'New Yam Festival',
-    // imageSource: require('../../assets/images/new_yam_festival_2.png'),
-    body: `Communities across Igboland celebrate the New Yam Festival at different times, but the spirit remains the same — gratitude, unity, and cultural pride.\n\nElders lead prayers, masquerades perform, and families gather for feasting. It is one of the few times when the entire community comes together as one.`,
-  },
-  {
-    id: '4',
-    title: 'Ivo Ji Festival',
-    // imageSource: require('../../assets/images/ivo_ji.png'),
-    body: `The Ivo Ji Festival is a harvest celebration marking the end of the yam farming season in parts of Igboland. Communities gather to give thanks for a successful harvest.\n\nThe festival features traditional music, masquerade performances, and communal feasting. It reinforces values of hard work, gratitude, and communal solidarity.`,
-  },
-  {
-    id: '5',
-    title: 'Mmanwu Festival',
-    // imageSource: require('../../assets/images/mmanwu_festival.png'),
-    body: `The Mmanwu Festival celebrates the Igbo masquerade tradition. Masquerades representing ancestral spirits emerge to bless the community, entertain, and enforce cultural norms.\n\nEach masquerade has its own identity, costume, and purpose. Some are fierce enforcers, others are graceful dancers. Together they represent the living connection between the physical and spiritual worlds.`,
-  },
-  {
-    id: '6',
-    title: 'Ikaji Festival',
-    // imageSource: require('../../assets/images/ikaji_festival.png'),
-    body: `The Ikaji Festival is a cultural celebration that brings together communities for music, dance, and storytelling. It honours ancestors and celebrates the richness of Igbo heritage.\n\nYoung people are introduced to cultural values and traditions during the festival, ensuring the continuity of Igbo identity across generations.`,
-  },
-];
+type Festival = {
+  id: string;
+  culture: string;
+  category: string;
+  title: string;
+  content: string;
+  sort_order: number;
+  imageSource?: any;
+};
 
-export default function FestivalsScreen({ navigation }) {
+export default function FestivalsScreen({ navigation }: any) {
+  const { user } = useAuth();
+  const [festivals, setFestivals] = useState<Festival[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAll, setShowAll] = useState(false);
 
-  const filtered = FESTIVALS.filter((f) =>
+  const tribe = user?.tribe ?? 'igbo';
+
+  useEffect(() => {
+    fetchFestivals();
+  }, [tribe]);
+
+  const fetchFestivals = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const { data, error: supabaseError } = await supabase
+        .from('culture_content')
+        .select('*')
+        .eq('category', 'festivals')
+        .eq('culture', tribe.toLowerCase())
+        .order('sort_order', { ascending: true });
+
+      if (supabaseError) throw supabaseError;
+      setFestivals(data ?? []);
+    } catch (err: any) {
+      setError(err.message ?? 'Failed to load festivals');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filtered = festivals.filter((f) =>
     f.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
   const displayed = showAll ? filtered : filtered.slice(0, 6);
@@ -79,22 +84,51 @@ export default function FestivalsScreen({ navigation }) {
       >
         <Text style={styles.title}>FESTIVALS</Text>
 
-        {/* 2-column grid */}
-        <View style={styles.grid}>
-          {displayed.map((festival) => (
-            <ImageCard
-              key={festival.id}
-              title={festival.title}
-              imageSource={festival.imageSource}
-              width={CARD_WIDTH}
-              height={120}
-              onPress={() => navigation?.navigate('FestivalDetail', { festival })}
-            />
-          ))}
-        </View>
+        {/* Loading */}
+        {loading && (
+          <View style={styles.centeredState}>
+            <ActivityIndicator size="large" color="#F5A623" />
+            <Text style={styles.stateText}>Loading {tribe} festivals...</Text>
+          </View>
+        )}
 
-        {/* View More Button */}
-        {!showAll && filtered.length > 6 && (
+        {/* Error */}
+        {!loading && error && (
+          <View style={styles.centeredState}>
+            <Ionicons name="alert-circle-outline" size={48} color="#C4A882" />
+            <Text style={styles.stateText}>Could not load festivals</Text>
+            <TouchableOpacity style={styles.retryBtn} onPress={fetchFestivals}>
+              <Text style={styles.retryBtnText}>Try again</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Empty */}
+        {!loading && !error && filtered.length === 0 && (
+          <View style={styles.centeredState}>
+            <Ionicons name="calendar-outline" size={48} color="#C4A882" />
+            <Text style={styles.stateText}>No festivals found for {tribe}</Text>
+          </View>
+        )}
+
+        {/* 2-column grid */}
+        {!loading && !error && displayed.length > 0 && (
+          <View style={styles.grid}>
+            {displayed.map((festival) => (
+              <ImageCard
+                key={festival.id}
+                title={festival.title}
+                imageSource={festival.imageSource}
+                width={CARD_WIDTH}
+                height={120}
+                onPress={() => navigation?.navigate('FestivalDetail', { festival })}
+              />
+            ))}
+          </View>
+        )}
+
+        {/* View More */}
+        {!loading && !error && !showAll && filtered.length > 6 && (
           <TouchableOpacity
             style={styles.viewMoreBtn}
             activeOpacity={0.8}
@@ -103,8 +137,7 @@ export default function FestivalsScreen({ navigation }) {
             <Text style={styles.viewMoreText}>View More</Text>
           </TouchableOpacity>
         )}
-
-        </ScrollView>
+      </ScrollView>
 
       <BottomTabBar />
     </SafeAreaView>
@@ -140,21 +173,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
-  viewMoreText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  backButton: {
-    flexDirection: 'row',
+  viewMoreText: { color: '#fff', fontSize: 15, fontWeight: '700' },
+  centeredState: {
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    backgroundColor: '#F5A623',
-    paddingVertical: 12,
-    borderRadius: 10,
-    paddingHorizontal: 32,
-    alignSelf: 'center',
+    paddingVertical: 48,
+    gap: 12,
   },
-  backButtonText: { color: '#fff', fontSize: 14, fontWeight: '700' },
+  stateText: { fontSize: 14, color: '#A08060', fontWeight: '500' },
+  retryBtn: {
+    backgroundColor: '#F5A623',
+    paddingVertical: 10,
+    paddingHorizontal: 28,
+    borderRadius: 10,
+  },
+  retryBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' },
 });

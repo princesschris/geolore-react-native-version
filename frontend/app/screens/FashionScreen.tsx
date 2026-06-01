@@ -1,87 +1,126 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-  StatusBar,
-  ScrollView,
+  View, Text, TouchableOpacity, StyleSheet,
+  SafeAreaView, StatusBar, ScrollView, ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import SearchBar from '../components/SearchBar';
 import BottomTabBar from '../components/BottomTabBar';
 import BuntingBanner from '../components/BuntingBanner';
 import FashionCard from '../components/FashionCard';
+import TopBar from '../components/TopBar';
+import { supabase } from '../config/supabase';
+import { useAuth } from '../context/AuthContext';
 
-const OUTFITS = [
-  {
-    id: '1',
-    title: 'Iru & Buba',
-    description:
-      'The Iru and Buba is a classic Yoruba attire consisting of a wrapper (Iru) tied around the waist and a loose blouse (Buba) worn on top. It is elegant, comfortable, and deeply rooted in Yoruba culture.',
-    // imageSource: require('../../assets/images/iru_buba.png'),
-  },
-  {
-    id: '2',
-    title: 'Iru & Buba',
-    description:
-      'Often worn at celebrations, weddings, and cultural festivals, this outfit is adorned with beautiful patterns and rich Aso-oke fabric. The colours chosen carry deep cultural significance.',
-    // imageSource: require('../../assets/images/iru_buba_2.png'),
-  },
-  {
-    id: '3',
-    title: 'Iru & Buba',
-    description:
-      'A timeless piece of Yoruba fashion heritage. The Buba can be styled in various ways — with a gele (head tie) and ipele (shoulder sash) for a complete traditional look.',
-    // imageSource: require('../../assets/images/iru_buba_3.png'),
-  },
-];
+type FashionOutfit = {
+  id:                    string;
+  culture:               string;
+  title:                 string;
+  subtitle?:             string;
+  content:               string;
+  fashion_description?:  string;
+  fashion_materials?:    string;
+  fashion_worn_by?:      string;
+  fashion_occasions?:    string;
+  fashion_significance?: string;
+  fashion_modern_usage?: string;
+};
 
-export default function FashionScreen({ navigation }:any) {
+export default function FashionScreen({ navigation }: any) {
+  const { user } = useAuth();
+  const [outfits, setOutfits]     = useState<FashionOutfit[]>([]);
+  const [loading, setLoading]     = useState(true);
+  const [error, setError]         = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filtered = OUTFITS.filter((o) =>
-    o.title.toLowerCase().includes(searchQuery.toLowerCase())
+  const tribe = user?.tribe
+    ? user.tribe.charAt(0).toUpperCase() + user.tribe.slice(1).toLowerCase()
+    : 'Igbo';
+
+  useEffect(() => { fetchOutfits(); }, [tribe]);
+
+  const fetchOutfits = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const { data, error: supabaseError } = await supabase
+        .from('culture_content')
+        .select('id, culture, title, subtitle, content, fashion_description, fashion_materials, fashion_worn_by, fashion_occasions, fashion_significance, fashion_modern_usage')
+        .eq('category', 'fashion')
+        .ilike('culture', tribe)
+        .order('sort_order', { ascending: true });
+      if (supabaseError) throw supabaseError;
+      setOutfits(data ?? []);
+    } catch (err: any) {
+      setError(err.message ?? 'Failed to load fashion items');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filtered = outfits.filter((o) =>
+    o.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (o.subtitle ?? '').toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Group by subtitle — items without a subtitle are excluded entirely
+  const grouped: { category: string; items: FashionOutfit[] }[] = [];
+  for (const outfit of filtered) {
+    if (!outfit.subtitle) continue;
+    const existing = grouped.find((g) => g.category === outfit.subtitle);
+    if (existing) existing.items.push(outfit);
+    else grouped.push({ category: outfit.subtitle, items: [outfit] });
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFDF5" />
-
-      {/* Top Bar */}
-      <View style={styles.topBar}>
-        <SearchBar value={searchQuery} onChangeText={setSearchQuery} placeholder="Search" />
-        <TouchableOpacity style={styles.iconBtn}>
-          <Ionicons name="person-outline" size={20} color="#5C3A00" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.iconBtn}>
-          <View>
-            <Ionicons name="notifications-outline" size={20} color="#5C3A00" />
-            <View style={styles.badge}><Text style={styles.badgeText}>5</Text></View>
-          </View>
-        </TouchableOpacity>
-      </View>
-
+      <TopBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
       <BuntingBanner />
 
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>FASHION</Text>
 
-        {filtered.map((outfit) => (
-          <FashionCard
-            key={outfit.id}
-            title={outfit.title}
-            description={outfit.description}
-            imageSource={outfit.imageSource}
-            onView={() => navigation?.navigate('FashionDetail', { outfit })}
-          />
-        ))}
+        {loading && (
+          <View style={styles.centeredState}>
+            <ActivityIndicator size="large" color="#F5A623" />
+            <Text style={styles.stateText}>Loading {tribe} fashion...</Text>
+          </View>
+        )}
 
-        
+        {!loading && error && (
+          <View style={styles.centeredState}>
+            <Ionicons name="alert-circle-outline" size={48} color="#C4A882" />
+            <Text style={styles.stateText}>Could not load fashion items</Text>
+            <TouchableOpacity style={styles.retryBtn} onPress={fetchOutfits}>
+              <Text style={styles.retryBtnText}>Try again</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {!loading && !error && grouped.length === 0 && (
+          <View style={styles.centeredState}>
+            <Ionicons name="shirt-outline" size={48} color="#C4A882" />
+            <Text style={styles.stateText}>No fashion items found for {tribe}</Text>
+          </View>
+        )}
+
+        {!loading && !error && grouped.map(({ category, items }) => (
+          <View key={category} style={styles.group}>
+            <View style={styles.groupHeader}>
+              <Text style={styles.groupTitle}>{category.toUpperCase()}</Text>
+              <View style={styles.groupDivider} />
+            </View>
+            {items.map((outfit) => (
+              <FashionCard
+                key={outfit.id}
+                title={outfit.title}
+                description={outfit.content}
+                imageSource={undefined}
+                onView={() => navigation?.navigate('FashionDetail', { outfit })}
+              />
+            ))}
+          </View>
+        ))}
       </ScrollView>
 
       <BottomTabBar />
@@ -91,50 +130,22 @@ export default function FashionScreen({ navigation }:any) {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#FFFDF5' },
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 10,
-    gap: 10,
-  },
-  iconBtn: {
-    width: 38, height: 38, borderRadius: 19,
-    backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06, shadowRadius: 3, elevation: 2,
-  },
-  badge: {
-    position: 'absolute', top: -4, right: -6,
-    backgroundColor: '#F5A623', borderRadius: 8,
-    width: 16, height: 16, alignItems: 'center', justifyContent: 'center',
-  },
-  badgeText: { color: '#fff', fontSize: 9, fontWeight: '800' },
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 32,
-  },
+  scrollContent: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 32 },
   title: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#3B1F00',
-    textAlign: 'center',
-    letterSpacing: 1.5,
-    marginBottom: 20,
+    fontSize: 20, fontWeight: '800', color: '#3B1F00',
+    textAlign: 'center', letterSpacing: 1.5, marginBottom: 20,
   },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    backgroundColor: '#F5A623',
-    paddingVertical: 12,
-    borderRadius: 10,
-    paddingHorizontal: 32,
-    alignSelf: 'center',
-    marginTop: 8,
+  group: { marginBottom: 8 },
+  groupHeader: { marginBottom: 12 },
+  groupTitle: {
+    fontSize: 15, fontWeight: '800', color: '#F5A623',
+    letterSpacing: 1, marginBottom: 6,
   },
-  backButtonText: { color: '#fff', fontSize: 14, fontWeight: '700' },
+  groupDivider: { height: 2, backgroundColor: '#F5A623', borderRadius: 1 },
+  centeredState: {
+    alignItems: 'center', justifyContent: 'center', paddingVertical: 48, gap: 12,
+  },
+  stateText: { fontSize: 14, color: '#A08060', fontWeight: '500' },
+  retryBtn: { backgroundColor: '#F5A623', paddingVertical: 10, paddingHorizontal: 28, borderRadius: 10 },
+  retryBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' },
 });

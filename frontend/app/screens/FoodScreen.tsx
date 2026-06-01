@@ -14,7 +14,7 @@ import BottomTabBar from '../components/BottomTabBar';
 import BuntingBanner from '../components/BuntingBanner';
 import TopBar from '../components/TopBar';
 import { supabase } from '../config/supabase';
-import { useRole } from '../context/RoleContext';
+import { useAuth } from '../context/AuthContext';
 
 type FoodItem = {
   id: string;
@@ -47,7 +47,7 @@ const FoodCard = ({ name, emoji, onTryIt }: { name: string; emoji?: string; onTr
 );
 
 export default function FoodScreen({ navigation }: any) {
-  const { user } = useRole();
+  const { user } = useAuth();
   const [foods, setFoods] = useState<FoodItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -68,7 +68,7 @@ export default function FoodScreen({ navigation }: any) {
       const { data, error: supabaseError } = await supabase
         .from('food_items')
         .select('*')
-        .eq('culture', tribe.toLowerCase());
+        .eq('culture', tribe);
 
       if (supabaseError) throw supabaseError;
       setFoods(data ?? []);

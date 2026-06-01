@@ -21,14 +21,8 @@ const REMINDER_OPTIONS = [
   { key: 'never',  label: 'Never' },
 ];
 
-// Colour options for the event card
 const COLOR_OPTIONS = [
-  '#F5A623', // orange
-  '#3B1F00', // dark brown
-  '#8B6F4E', // mid brown
-  '#C4A882', // light brown
-  '#F5C070', // light orange
-  '#E67E22', // deep orange
+  '#F5A623', '#3B1F00', '#8B6F4E', '#C4A882', '#F5C070', '#E67E22',
 ];
 
 const FieldRow = ({ label, sublabel, value, onChangeText, placeholder, onPress, isButton }: any) => (
@@ -62,7 +56,11 @@ const RadioOption = ({ label, selected, onPress }: any) => (
   </TouchableOpacity>
 );
 
-export default function AddEventScreen({ navigation }: any) {
+export default function AddEventScreen({ navigation, route }: any) {
+  // Pre-filled invitees passed from UserInfoScreen or GroupInfoScreen
+  // e.g. { id, name, type: 'user' | 'group' }
+  const initialInvitee = route?.params?.invitee ?? null;
+
   const [eventName,       setEventName]       = useState('');
   const [description,     setDescription]     = useState('');
   const [date,            setDate]            = useState<any>(null);
@@ -75,6 +73,11 @@ export default function AddEventScreen({ navigation }: any) {
   const [selectedColor,   setSelectedColor]   = useState('#F5A623');
   const [loading,         setLoading]         = useState(false);
 
+  // Invitees list — starts with whoever was passed in
+  const [invitees, setInvitees] = useState<{ id: string; name: string; type: 'user' | 'group' }[]>(
+    initialInvitee ? [initialInvitee] : []
+  );
+
   const [showDatePicker,  setShowDatePicker]  = useState(false);
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker,   setShowEndPicker]   = useState(false);
@@ -85,7 +88,6 @@ export default function AddEventScreen({ navigation }: any) {
   const formatDate = (d: any) => d ? `${d.day} ${d.month} ${d.year}` : '';
   const formatTime = (t: any) => t ? `${t.hour}:${t.minute} ${t.period}` : '';
 
-  // Build a friendly date label e.g. "Monday, 20th April 2026"
   const buildDateLabel = (d: any) => {
     if (!d) return '';
     const days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -96,6 +98,9 @@ export default function AddEventScreen({ navigation }: any) {
     const s = suffix[(v - 20) % 10] ?? suffix[v] ?? suffix[0];
     return `${days[dateObj.getDay()]}, ${parseInt(d.day, 10)}${s} ${months[dateObj.getMonth()]} ${d.year}`;
   };
+
+  const removeInvitee = (id: string) =>
+    setInvitees((prev) => prev.filter((i) => i.id !== id));
 
   const handleSave = async () => {
     if (!eventName.trim()) {
@@ -109,7 +114,7 @@ export default function AddEventScreen({ navigation }: any) {
 
     setLoading(true);
     try {
-      const { error } = await supabase.from('events').insert({
+      const { data: eventData, error } = await supabase.from('events').insert({
         creator_id:      user?.id,
         title:           eventName.trim(),
         description:     description.trim(),
@@ -122,11 +127,36 @@ export default function AddEventScreen({ navigation }: any) {
         allow_guests:    allowGuests,
         guests_notified: guestsNotified,
         color:           selectedColor,
-      });
+      }).select().single();
 
       if (error) throw error;
 
-      showAlert('success', 'Event saved!', `"${eventName}" has been added to your calendar.`);
+      // Send event invitations to all invitees via a chat message
+      if (eventData && invitees.length > 0) {
+        const inviteText = `📅 You've been invited to *${eventName.trim()}*${date ? ` on ${buildDateLabel(date)}` : ''}${location.trim() ? ` at ${location.trim()}` : ''}.`;
+        for (const invitee of invitees) {
+          if (invitee.type === 'user') {
+            // Find or create a DM between current user and invitee
+            await supabase.from('messages').insert({
+              sender_id:    user?.id,
+              receiver_id:  invitee.id,
+              content:      inviteText,
+              message_type: 'event_invite',
+              event_id:     eventData.id,
+            });
+          } else if (invitee.type === 'group') {
+            await supabase.from('group_messages').insert({
+              sender_id:    user?.id,
+              group_id:     invitee.id,
+              content:      inviteText,
+              message_type: 'event_invite',
+              event_id:     eventData.id,
+            });
+          }
+        }
+      }
+
+      showAlert('success', 'Event saved!', `"${eventName}" has been added to your calendar${invitees.length > 0 ? ' and invites sent' : ''}.`);
       setTimeout(() => navigation?.goBack(), 1500);
     } catch (err: any) {
       showAlert('error', 'Save failed', err.message || 'Could not save event. Please try again.');
@@ -148,23 +178,34 @@ export default function AddEventScreen({ navigation }: any) {
             <Text style={styles.titleText}>ADD EVENT</Text>
           </View>
 
-          {/* Event name */}
           <FieldRow label="Event name" value={eventName} onChangeText={setEventName} placeholder="e.g. Birthday party" />
-
-          {/* Description */}
           <FieldRow label="Description" value={description} onChangeText={setDescription} placeholder="Add details..." />
-
-          {/* Date */}
           <FieldRow label="Date" value={formatDate(date)} isButton onPress={() => setShowDatePicker(true)} />
-
-          {/* Start time */}
           <FieldRow label="Start time" value={formatTime(startTime)} isButton onPress={() => setShowStartPicker(true)} />
-
-          {/* End time */}
           <FieldRow label="End time" value={formatTime(endTime)} isButton onPress={() => setShowEndPicker(true)} />
-
-          {/* Location */}
           <FieldRow label="Location" value={location} onChangeText={setLocation} placeholder="Add a venue or address" />
+
+          {/* ── Invitees ── */}
+          {invitees.length > 0 && (
+            <View style={styles.fieldWrapper}>
+              <Text style={styles.fieldLabel}>Invited</Text>
+              <View style={styles.inviteeList}>
+                {invitees.map((inv) => (
+                  <View key={inv.id} style={styles.inviteeChip}>
+                    <Ionicons
+                      name={inv.type === 'group' ? 'people-outline' : 'person-outline'}
+                      size={14}
+                      color="#5C3A00"
+                    />
+                    <Text style={styles.inviteeChipText}>{inv.name}</Text>
+                    <TouchableOpacity onPress={() => removeInvitee(inv.id)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                      <Ionicons name="close-circle" size={16} color="#C4A882" />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
 
           {/* Color picker */}
           <View style={styles.fieldWrapper}>
@@ -173,17 +214,11 @@ export default function AddEventScreen({ navigation }: any) {
               {COLOR_OPTIONS.map((color) => (
                 <TouchableOpacity
                   key={color}
-                  style={[
-                    styles.colorDot,
-                    { backgroundColor: color },
-                    selectedColor === color && styles.colorDotSelected,
-                  ]}
+                  style={[styles.colorDot, { backgroundColor: color }, selectedColor === color && styles.colorDotSelected]}
                   onPress={() => setSelectedColor(color)}
                   activeOpacity={0.8}
                 >
-                  {selectedColor === color && (
-                    <Ionicons name="checkmark" size={16} color="#fff" />
-                  )}
+                  {selectedColor === color && <Ionicons name="checkmark" size={16} color="#fff" />}
                 </TouchableOpacity>
               ))}
             </View>
@@ -193,12 +228,7 @@ export default function AddEventScreen({ navigation }: any) {
           <View style={styles.reminderSection}>
             <Text style={styles.fieldLabel}>Reminder</Text>
             {REMINDER_OPTIONS.map((opt) => (
-              <RadioOption
-                key={opt.key}
-                label={opt.label}
-                selected={reminder === opt.key}
-                onPress={() => setReminder(opt.key)}
-              />
+              <RadioOption key={opt.key} label={opt.label} selected={reminder === opt.key} onPress={() => setReminder(opt.key)} />
             ))}
           </View>
 
@@ -208,37 +238,23 @@ export default function AddEventScreen({ navigation }: any) {
               <Text style={styles.fieldLabel}>Allow guests</Text>
               <Text style={styles.fieldSublabel}>Allow people to bring additional guests</Text>
             </View>
-            <Switch
-              value={allowGuests}
-              onValueChange={setAllowGuests}
-              trackColor={{ false: '#E0D0B8', true: '#F5A623' }}
-              thumbColor="#fff"
-            />
+            <Switch value={allowGuests} onValueChange={setAllowGuests} trackColor={{ false: '#E0D0B8', true: '#F5A623' }} thumbColor="#fff" />
           </View>
 
           {allowGuests && (
             <View style={styles.switchRow}>
               <Text style={styles.fieldLabel}>Guests also get notified</Text>
-              <Switch
-                value={guestsNotified}
-                onValueChange={setGuestsNotified}
-                trackColor={{ false: '#E0D0B8', true: '#F5A623' }}
-                thumbColor="#fff"
-              />
+              <Switch value={guestsNotified} onValueChange={setGuestsNotified} trackColor={{ false: '#E0D0B8', true: '#F5A623' }} thumbColor="#fff" />
             </View>
           )}
 
-          {/* Save */}
           <TouchableOpacity
             style={[styles.saveBtn, (!eventName.trim() || loading) && styles.saveBtnDisabled]}
             activeOpacity={0.8}
             onPress={handleSave}
             disabled={!eventName.trim() || loading}
           >
-            {loading
-              ? <ActivityIndicator color="#fff" />
-              : <Text style={styles.saveBtnText}>Save Event</Text>
-            }
+            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>Save Event</Text>}
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -282,6 +298,14 @@ const styles = StyleSheet.create({
   fieldBtn: { borderBottomWidth: 1, borderBottomColor: '#E0D0B8', paddingVertical: 8 },
   fieldBtnText: { fontSize: 13, color: '#3B1F00', fontWeight: '500' },
   fieldPlaceholder: { color: '#C4B49A' },
+  // Invitees
+  inviteeList: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 },
+  inviteeChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: '#FFF3E0', borderRadius: 20, paddingHorizontal: 12,
+    paddingVertical: 6, borderWidth: 1, borderColor: '#F5C070',
+  },
+  inviteeChipText: { fontSize: 13, fontWeight: '600', color: '#5C3A00' },
   colorRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
   colorDot: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   colorDotSelected: { borderWidth: 3, borderColor: '#3B1F00' },

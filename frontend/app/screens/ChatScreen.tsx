@@ -86,9 +86,13 @@ export default function ChatScreen({ navigation, route }: any) {
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation?.goBack()}>
           <Ionicons name="arrow-back-outline" size={22} color="#5C3A00" />
         </TouchableOpacity>
-        <View style={styles.avatarSmall}>
+        <TouchableOpacity
+          style={styles.avatarSmall}
+          onPress={() => navigation?.navigate('UserInfo', { name: contactName, id: contactId })}
+          activeOpacity={0.8}
+        >
           <Ionicons name="person" size={18} color="#C4A882" />
-        </View>
+        </TouchableOpacity>
         <Text style={styles.headerName}>{contactName}</Text>
       </View>
 

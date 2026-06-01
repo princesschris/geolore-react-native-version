@@ -924,23 +924,6 @@ It also reflects the Igbo belief that death does not completely separate individ
 8. Stir until all ingredients are evenly distributed.
 9. Allow to sit for a few minutes.
 10. Serve at room temperature.
-## Akamu (Fermented Corn Pap)
-**Igbo Name:** Akamu
-**Category:** Fermented Food
-### Ingredients
-- Corn (Ọka)
-- Water
-### Preparation
-1. Soak the corn in water for 2–3 days.
-2. Wash and grind into a smooth paste.
-3. Sieve to remove husks and coarse particles.
-4. Allow the mixture to settle overnight.
-5. Pour away excess water from the top.
-6. Store the fermented paste.
-7. To prepare, mix a portion with cold water.
-8. Add boiling water while stirring continuously.
-9. Stir until smooth and thick.
-10. Serve hot.
 ## Ogiri
 **Igbo Name:** Ogiri
 **Category:** Fermented Food / Traditional Seasoning
@@ -960,7 +943,7 @@ It also reflects the Igbo belief that death does not completely separate individ
 10. Use as seasoning in soups.
 ## Ugba na Abacha
 **Igbo Name:** Ugba na Abacha
-**Category:** Fermented Food / Salad
+**Category:** Fermented Food 
 ### Ingredients
 - Abacha
 - Ugba
@@ -1002,23 +985,6 @@ It also reflects the Igbo belief that death does not completely separate individ
 8. Allow flavors to blend.
 9. Remove from heat.
 10. Serve warm.
-## Agidi (Corn Jelly)
-**Igbo Name:** Agidi
-**Category:** Fermented Food
-### Ingredients
-- Fermented corn paste
-- Water
-### Preparation
-1. Prepare fermented corn paste.
-2. Mix the paste with water.
-3. Place over medium heat.
-4. Stir continuously to prevent lumps.
-5. Continue cooking until thick.
-6. Pour into leaves or containers.
-7. Allow to cool and set.
-8. Remove from molds when firm.
-9. Slice into portions.
-10. Serve with soup or sauce.
 ## Ogiri Okpei
 **Igbo Name:** Ogiri Okpei
 **Category:** Fermented Food / Seasoning
@@ -1138,7 +1104,7 @@ It also reflects the Igbo belief that death does not completely separate individ
 10. Serve warm.
 ## Akara
 **Igbo Name:** Akara
-**Category:** Street Food / Snack
+**Category:** Street Food 
 ### Ingredients
 - Beans
 - Onion (Eyịm)
@@ -1158,7 +1124,7 @@ It also reflects the Igbo belief that death does not completely separate individ
 10. Remove and drain excess oil.
 ## Moi-Moi
 **Igbo Name:** Moi-Moi
-**Category:** Street Food / Delicacy
+**Category:** Street Food 
 ### Ingredients
 - Beans
 - Pepper (Ose)
@@ -1180,7 +1146,7 @@ It also reflects the Igbo belief that death does not completely separate individ
 10. Serve warm.
 ## Abacha Special
 **Igbo Name:** Abacha
-**Category:** Street Food / Salad
+**Category:** Street Food
 ### Ingredients
 - Abacha
 - Ugba

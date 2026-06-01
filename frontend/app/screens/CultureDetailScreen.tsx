@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  SafeAreaView, StatusBar, ScrollView, ImageBackground,
+  SafeAreaView, StatusBar, ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import BottomTabBar from '../components/BottomTabBar';
@@ -52,13 +52,26 @@ function stripInline(text: string): string {
     .replace(/`(.*?)`/g,       '$1');
 }
 
-export default function TraditionDetailScreen({ navigation, route }: any) {
-  const tradition = route?.params?.tradition ?? {
-    title: 'Tradition',
-    content: 'No content available.',
-  };
+export default function CultureDetailScreen({ navigation, route }: any) {
+  const item = route?.params?.item;
 
-  const blocks = parseBlocks(tradition.content ?? tradition.body ?? '');
+  if (!item) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <TopBar showSearch={false} />
+        <View style={styles.centeredState}>
+          <Ionicons name="alert-circle-outline" size={48} color="#C4A882" />
+          <Text style={styles.stateText}>No content found</Text>
+          <TouchableOpacity style={styles.retryBtn} onPress={() => navigation?.goBack()}>
+            <Text style={styles.retryBtnText}>Go back</Text>
+          </TouchableOpacity>
+        </View>
+        <BottomTabBar />
+      </SafeAreaView>
+    );
+  }
+
+  const blocks = parseBlocks(item.content ?? '');
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -68,22 +81,10 @@ export default function TraditionDetailScreen({ navigation, route }: any) {
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
 
-        {/* Image or placeholder */}
+        {/* Image placeholder — same as fashion/tradition */}
         <View style={styles.imageCard}>
-          {tradition.imageSource ? (
-            <ImageBackground
-              source={typeof tradition.imageSource === 'string' ? { uri: tradition.imageSource } : tradition.imageSource}
-              style={styles.image}
-              imageStyle={styles.imageRadius}
-            >
-              <View style={styles.overlay} />
-            </ImageBackground>
-          ) : (
-            <View style={[styles.image, styles.imagePlaceholder]}>
-              <Ionicons name="book-outline" size={48} color="rgba(255,255,255,0.7)" />
-              <Text style={styles.placeholderText}>{tradition.title}</Text>
-            </View>
-          )}
+          <Ionicons name="globe-outline" size={48} color="rgba(255,255,255,0.7)" />
+          <Text style={styles.placeholderText}>{item.title}</Text>
         </View>
 
         {/* Content card */}
@@ -105,7 +106,7 @@ export default function TraditionDetailScreen({ navigation, route }: any) {
               <Text key={i} style={styles.bodyText}>{stripInline(block.text)}</Text>
             );
           }) : (
-            <Text style={styles.emptyText}>No content available for this tradition.</Text>
+            <Text style={styles.emptyText}>No content available</Text>
           )}
         </View>
 
@@ -123,12 +124,15 @@ export default function TraditionDetailScreen({ navigation, route }: any) {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#FFFDF5' },
   scrollContent: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 32 },
-  imageCard: { width: '100%', height: 200, borderRadius: 14, overflow: 'hidden', marginBottom: 16 },
-  image: { width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' },
-  imageRadius: { borderRadius: 14 },
-  imagePlaceholder: { backgroundColor: '#C4A882', gap: 8 },
-  placeholderText: { color: 'rgba(255,255,255,0.9)', fontSize: 14, fontWeight: '700', textAlign: 'center', paddingHorizontal: 16 },
-  overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.35)' },
+  imageCard: {
+    width: '100%', height: 200, borderRadius: 14, overflow: 'hidden',
+    marginBottom: 16, backgroundColor: '#C4A882',
+    alignItems: 'center', justifyContent: 'center', gap: 8,
+  },
+  placeholderText: {
+    color: 'rgba(255,255,255,0.9)', fontSize: 14, fontWeight: '700',
+    textAlign: 'center', paddingHorizontal: 16,
+  },
   card: {
     backgroundColor: '#fff', borderRadius: 14, borderWidth: 1,
     borderColor: '#E8D8C0', padding: 20, marginBottom: 20, gap: 6,
@@ -139,7 +143,11 @@ const styles = StyleSheet.create({
   subHeadingText: { fontSize: 13, fontWeight: '700', color: '#6B5040', marginTop: 8, marginBottom: 2, paddingLeft: 4 },
   bulletText: { fontSize: 13, color: '#3B2800', lineHeight: 22, paddingLeft: 4 },
   bodyText: { fontSize: 13, color: '#3B2800', lineHeight: 22 },
-  emptyText: { fontSize: 13, color: '#A08060', fontStyle: 'italic', textAlign: 'center' },
+  emptyText: { fontSize: 13, color: '#A08060', fontStyle: 'italic' },
+  centeredState: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, paddingVertical: 48 },
+  stateText: { fontSize: 14, color: '#A08060', fontWeight: '500' },
+  retryBtn: { backgroundColor: '#F5A623', paddingVertical: 10, paddingHorizontal: 28, borderRadius: 10 },
+  retryBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' },
   backButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 6, backgroundColor: '#F5A623', paddingVertical: 12,
