@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, SafeAreaView,
-  StatusBar, ScrollView, ActivityIndicator, Alert,
+  StatusBar, ScrollView, ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
@@ -10,9 +10,13 @@ import BuntingBanner from '../components/BuntingBanner';
 import TopBar from '../components/TopBar';
 import { supabase } from '../config/supabase';
 import { useAuth } from '../context/AuthContext';
+import { getPushToken, sendPushNotification } from '../services/notificationService';
 
-const PersonCard = ({ person, added, onAdd }: any) => {
+const PersonCard = ({ person, status, onAdd }: any) => {
   const name = `${person.first_name} ${person.last_name}`;
+  const isPending  = status === 'pending';
+  const isAccepted = status === 'connected';
+
   return (
     <View style={styles.personCard}>
       <View style={styles.personAvatar}>
@@ -20,42 +24,62 @@ const PersonCard = ({ person, added, onAdd }: any) => {
       </View>
       <Text style={styles.personName} numberOfLines={1}>{name}</Text>
       <TouchableOpacity
-        style={[styles.addBtn, added && styles.addedBtn]}
+        style={[
+          styles.addBtn,
+          isPending  && styles.pendingBtn,
+          isAccepted && styles.addedBtn,
+        ]}
         onPress={onAdd}
         activeOpacity={0.8}
-        disabled={added}
+        disabled={isPending || isAccepted}
       >
-        <Text style={styles.addBtnText}>{added ? 'Added' : 'Add+'}</Text>
+        <Text style={styles.addBtnText}>
+          {isAccepted ? 'Connected' : isPending ? 'Pending' : 'Add+'}
+        </Text>
       </TouchableOpacity>
     </View>
   );
 };
 
 export default function CommunityAddScreen({ navigation }: any) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [users,       setUsers]       = useState<any[]>([]);
-  const [friendIds,   setFriendIds]   = useState<Set<string>>(new Set());
-  const [loading,     setLoading]     = useState(true);
+  const [searchQuery,  setSearchQuery]  = useState('');
+  const [users,        setUsers]        = useState<any[]>([]);
+  // Map of user_id → 'pending' | 'accepted'
+  const [statusMap,    setStatusMap]    = useState<Record<string, string>>({});
+  const [loading,      setLoading]      = useState(true);
   const { user } = useAuth();
 
   const fetchData = async () => {
     if (!user?.id) return;
     setLoading(true);
     try {
-      // Fetch all users except self
       const { data: allUsers } = await supabase
         .from('users')
         .select('id, first_name, last_name, country_of_origin, tribe')
         .neq('id', user.id);
 
-      // Fetch existing friends
-      const { data: existingFriends } = await supabase
+      // Get all friend rows involving the current user (sent or received)
+      const { data: friendRows } = await supabase
         .from('friends')
-        .select('friend_id')
-        .eq('user_id', user.id);
+        .select('user_id, friend_id, status')
+        .or(`user_id.eq.${user.id},friend_id.eq.${user.id}`);
 
-      const ids = new Set((existingFriends ?? []).map((f: any) => f.friend_id));
-      setFriendIds(ids);
+      // Build a status map keyed by the OTHER person's id
+      const map: Record<string, string> = {};
+      for (const row of friendRows ?? []) {
+        const otherId = row.user_id === user.id ? row.friend_id : row.user_id;
+        const isSentByMe = row.user_id === user.id;
+        // connected always wins
+        if (row.status === 'connected') {
+          map[otherId] = 'connected';
+        }
+        // pending only counts if WE sent it — not if we received it
+        else if (row.status === 'pending' && isSentByMe && map[otherId] !== 'connected') {
+          map[otherId] = 'pending';
+        }
+      }
+
+      setStatusMap(map);
       setUsers(allUsers ?? []);
     } catch {
       setUsers([]);
@@ -66,17 +90,39 @@ export default function CommunityAddScreen({ navigation }: any) {
 
   useFocusEffect(useCallback(() => { fetchData(); }, [user?.id]));
 
-  const handleAdd = async (personId: string) => {
-    try {
-      // Add both directions so both users see each other
-      await supabase.from('friends').insert([
-        { user_id: user?.id, friend_id: personId },
-        { user_id: personId, friend_id: user?.id },
-      ]);
-      setFriendIds((prev) => new Set([...prev, personId]));
-    } catch (err: any) {
-      Alert.alert('Error', err.message || 'Could not add friend.');
+  const handleAdd = async (person: any) => {
+    setStatusMap((prev) => ({ ...prev, [person.id]: 'pending' }));
+
+    const { data, error } = await supabase
+      .from('friends')
+      .insert({ user_id: user?.id, friend_id: person.id, status: 'pending' })
+      .select()
+      .single();
+
+    console.log('[AddFriend] data:', JSON.stringify(data));
+    console.log('[AddFriend] error:', JSON.stringify(error));
+    console.log('[AddFriend] user?.id:', user?.id);
+    console.log('[AddFriend] person.id:', person.id);
+
+    if (error) {
+      // Revert button
+      setStatusMap((prev) => {
+        const next = { ...prev };
+        delete next[person.id];
+        return next;
+      });
+      return;
     }
+
+    // Push notification — fire and forget, don't let it block or revert
+    getPushToken(person.id).then((token) => {
+      if (token) {
+        const myName = user?.first_name
+          ? `${user.first_name} ${user.last_name ?? ''}`.trim()
+          : 'Someone';
+        sendPushNotification([token], 'Friend request', `${myName} sent you a friend request`);
+      }
+    });
   };
 
   const filtered = users.filter((u) => {
@@ -84,7 +130,6 @@ export default function CommunityAddScreen({ navigation }: any) {
     return name.includes(searchQuery.toLowerCase());
   });
 
-  // Split into nearby (same country) and others
   const nearby = filtered.filter((u) => u.country_of_origin === user?.country_of_origin);
   const others  = filtered.filter((u) => u.country_of_origin !== user?.country_of_origin);
 
@@ -95,7 +140,7 @@ export default function CommunityAddScreen({ navigation }: any) {
       <BuntingBanner />
 
       <View style={styles.filterRow}>
-        {['All', 'Groups', 'Add +', 'Groups +'].map((tab) => (
+        {['All', 'DMs','Groups', 'Add +', 'Groups +'].map((tab) => (
           <TouchableOpacity
             key={tab}
             style={[styles.filterTab, tab === 'Add +' && styles.filterTabActive]}
@@ -122,7 +167,12 @@ export default function CommunityAddScreen({ navigation }: any) {
               <Text style={styles.sectionTitle}>People around you</Text>
               <View style={styles.grid}>
                 {nearby.map((p) => (
-                  <PersonCard key={p.id} person={p} added={friendIds.has(p.id)} onAdd={() => handleAdd(p.id)} />
+                  <PersonCard
+                    key={p.id}
+                    person={p}
+                    status={statusMap[p.id]}
+                    onAdd={() => handleAdd(p)}
+                  />
                 ))}
               </View>
             </>
@@ -133,7 +183,12 @@ export default function CommunityAddScreen({ navigation }: any) {
               <Text style={styles.sectionTitle}>Connect with people round the world</Text>
               <View style={styles.grid}>
                 {others.map((p) => (
-                  <PersonCard key={p.id} person={p} added={friendIds.has(p.id)} onAdd={() => handleAdd(p.id)} />
+                  <PersonCard
+                    key={p.id}
+                    person={p}
+                    status={statusMap[p.id]}
+                    onAdd={() => handleAdd(p)}
+                  />
                 ))}
               </View>
             </>
@@ -141,7 +196,7 @@ export default function CommunityAddScreen({ navigation }: any) {
 
           {filtered.length === 0 && (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyEmoji}><Ionicons name="globe-outline" size={48} color="#A08060" /></Text>
+              <Ionicons name="globe-outline" size={48} color="#A08060" />
               <Text style={styles.emptyTitle}>No users found</Text>
             </View>
           )}
@@ -167,10 +222,10 @@ const styles = StyleSheet.create({
   personCard: { width: '30%', alignItems: 'center', gap: 6 },
   personAvatar: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#F5E6CC', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#F5C070' },
   personName: { fontSize: 12, fontWeight: '600', color: '#3B1F00', textAlign: 'center' },
-  addBtn: { backgroundColor: '#F5A623', paddingVertical: 4, paddingHorizontal: 14, borderRadius: 12 },
-  addedBtn: { backgroundColor: '#C4A882' },
+  addBtn:     { backgroundColor: '#F5A623', paddingVertical: 4, paddingHorizontal: 14, borderRadius: 12 },
+  pendingBtn: { backgroundColor: '#C4A882' },
+  addedBtn:   { backgroundColor: '#8B6F4E' },
   addBtnText: { color: '#fff', fontSize: 11, fontWeight: '700' },
   emptyState: { alignItems: 'center', paddingTop: 60, gap: 10 },
-  emptyEmoji: { fontSize: 48 },
   emptyTitle: { fontSize: 16, fontWeight: '700', color: '#A08060' },
 });

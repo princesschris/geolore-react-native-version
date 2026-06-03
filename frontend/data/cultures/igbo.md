@@ -2934,3 +2934,61 @@ The bridal fan is an important accessory used during modern traditional marriage
 #### Modern Usage
 A common feature of modern Igbo traditional weddings.
 
+# Stories
+## Mbe na Nnụnụ (The Tortoise and the Birds)
+
+## Category
+Folktale
+
+## Characters
+- Mbe (Tortoise)
+- Nnụnụ (Birds)
+
+## Setting
+Traditional Igbo village and the sky world.
+
+## Story
+
+Long ago, the birds received an invitation to a great feast in the sky. Every bird was excited because the hosts were known for their generosity and delicious food.
+
+Mbe the tortoise heard about the feast and wished to attend. However, he could not fly. He approached the birds and asked them to lend him feathers so he could join them.
+
+The birds agreed and each bird contributed a feather. With the feathers attached, Mbe was able to fly with the birds.
+
+As they traveled, Mbe suggested that everyone choose a new name for the feast. He chose the name **"All of You."**
+
+When they arrived, the hosts announced:
+
+> "This feast has been prepared for all of you."
+
+Mbe immediately claimed that because his name was "All of You," all the food belonged to him. He ate greedily and left very little for the birds.
+
+The birds became angry. On their journey home, they each took back their feathers. Mbe was left stranded in the sky.
+
+Unable to fly, he begged the birds for help. One bird agreed to carry a message to Mbe's wife. The message instructed her to place soft materials on the ground so that he could jump safely.
+
+The bird deliberately changed the message. Instead of soft materials, Mbe's wife placed hard objects on the ground.
+
+Mbe jumped from the sky and crashed heavily. His shell broke into many pieces.
+
+A healer gathered the pieces and joined them back together.
+
+This is why the tortoise's shell is rough and cracked today.
+
+## Moral Lessons
+
+- Greed leads to misfortune.
+- Cooperation should not be abused.
+- Dishonesty destroys trust.
+- Wisdom without good character can be dangerous.
+
+## Cultural Significance
+
+This is one of the most famous folktales in Igbo oral tradition. The tortoise (Mbe) often appears as a clever but selfish trickster whose actions teach important moral lessons.
+
+## Themes
+
+- Greed
+- Trickery
+- Justice
+- Community responsibility

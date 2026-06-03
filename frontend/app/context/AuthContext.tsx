@@ -1,13 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
-//  context/AuthContext.tsx
-//
-//  Global auth + role state powered by Supabase.
-//  Listens to Supabase's onAuthStateChange so the session is always fresh.
-//
-//  Usage anywhere in the app:
-//    const { user, isTutor, isStudent, logout } = useAuth();
-// ─────────────────────────────────────────────────────────────────────────────
-
 import React, {
   createContext,
   useContext,
@@ -22,8 +12,9 @@ import {
   UserDocument,
 } from '../services/authService';
 import { UserRole } from '../types/roles';
+import { registerPushToken } from '../services/notificationService';
 
-// ── Context shape ─────────────────────────────────────────────────────────────
+
 interface AuthContextType {
   user:       UserDocument | null;
   isLoading:  boolean;
@@ -46,7 +37,6 @@ const AuthContext = createContext<AuthContextType>({
   logout:     async () => {},
 });
 
-// ── Provider ──────────────────────────────────────────────────────────────────
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser]           = useState<UserDocument | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -72,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
     );
-
+    
     return () => subscription.unsubscribe();
   }, []);
 

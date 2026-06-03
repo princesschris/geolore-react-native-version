@@ -17,31 +17,43 @@ export default function GroupInfoScreen({ navigation, route }: any) {
   const [loading,   setLoading]   = useState(true);
   const [creatorId, setCreatorId] = useState<string | null>(null);
 
-  const { user }               = useAuth();
+  const { user }                   = useAuth();
   const { showAlert, showConfirm } = useAlert();
 
   useEffect(() => {
     if (!groupId) { setLoading(false); return; }
-    const fetch = async () => {
+    const load = async () => {
+      // Step 1: get creator_id
       const { data: groupData } = await supabase
         .from('groups')
-        .select('created_by')
+        .select('creator_id')
         .eq('id', groupId)
         .single();
-      setCreatorId(groupData?.created_by ?? null);
+      setCreatorId(groupData?.creator_id ?? null);
 
-      const { data: memberData } = await supabase
+      // Step 2: get user_ids from group_members
+      const { data: memberRows } = await supabase
         .from('group_members')
-        .select(`
-          user_id,
-          user:users!group_members_user_id_fkey (id, first_name, last_name)
-        `)
+        .select('user_id')
         .eq('group_id', groupId);
 
-      setMembers((memberData ?? []).map((m: any) => m.user).filter(Boolean));
+      if (!memberRows || memberRows.length === 0) {
+        setMembers([]);
+        setLoading(false);
+        return;
+      }
+
+      // Step 3: fetch user details separately
+      const ids = memberRows.map((m: any) => m.user_id);
+      const { data: users } = await supabase
+        .from('users')
+        .select('id, first_name, last_name')
+        .in('id', ids);
+
+      setMembers(users ?? []);
       setLoading(false);
     };
-    fetch();
+    load();
   }, [groupId]);
 
   const handleExitGroup = () => {
@@ -57,7 +69,7 @@ export default function GroupInfoScreen({ navigation, route }: any) {
             .eq('user_id', user?.id);
           navigation?.goBack();
         } catch (err: any) {
-          showAlert('error', 'Could not exit', err.message || 'Something went wrong. Please try again.');
+          showAlert('error', 'Could not exit', err.message || 'Something went wrong.');
         }
       },
       () => {},
@@ -81,7 +93,6 @@ export default function GroupInfoScreen({ navigation, route }: any) {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Group Avatar */}
         <View style={styles.avatarSection}>
           <View style={styles.groupAvatar}>
             <Ionicons name="people" size={52} color="#F5A623" />
@@ -89,7 +100,6 @@ export default function GroupInfoScreen({ navigation, route }: any) {
           <Text style={styles.groupName}>{groupName}</Text>
         </View>
 
-        {/* Action Buttons */}
         <View style={styles.actionButtons}>
           <TouchableOpacity
             style={styles.actionBtn}
@@ -107,7 +117,6 @@ export default function GroupInfoScreen({ navigation, route }: any) {
           </TouchableOpacity>
         </View>
 
-        {/* Members */}
         <View style={styles.membersSection}>
           <View style={styles.membersHeader}>
             <Text style={styles.membersCount}>

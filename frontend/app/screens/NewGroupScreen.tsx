@@ -9,35 +9,48 @@ import BottomTabBar from '../components/BottomTabBar';
 import { supabase } from '../config/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useAlert } from '../components/CustomAlert';
+import { getPushToken, sendPushNotification } from '../services/notificationService';
 
 export default function NewGroupScreen({ navigation }: any) {
-  const [groupName,  setGroupName]  = useState('');
-  const [loading,    setLoading]    = useState(false);
-  const [users,      setUsers]      = useState<any[]>([]);
-  const [usersLoading, setUsersLoading] = useState(true);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [groupName,    setGroupName]    = useState('');
+  const [loading,      setLoading]      = useState(false);
+  const [friends,      setFriends]      = useState<any[]>([]);
+  const [friendsLoading, setFriendsLoading] = useState(true);
+  const [selectedIds,  setSelectedIds]  = useState<Set<string>>(new Set());
 
-  const { user } = useAuth();
+  const { user }                   = useAuth();
   const { showAlert, showConfirm } = useAlert();
 
-  // Fetch all users except self — same pattern as CommunityAddScreen
-  const fetchUsers = async () => {
+  // Only fetch friends — not all users
+  const fetchFriends = async () => {
     if (!user?.id) return;
-    setUsersLoading(true);
+    setFriendsLoading(true);
     try {
-      const { data } = await supabase
+      const { data: friendRows } = await supabase
+        .from('friends')
+        .select('friend_id')
+        .eq('user_id', user.id);
+
+      if (!friendRows || friendRows.length === 0) {
+        setFriends([]);
+        return;
+      }
+
+      const ids = friendRows.map((f: any) => f.friend_id);
+      const { data: users } = await supabase
         .from('users')
         .select('id, first_name, last_name')
-        .neq('id', user.id);
-      setUsers(data ?? []);
+        .in('id', ids);
+
+      setFriends(users ?? []);
     } catch {
-      setUsers([]);
+      setFriends([]);
     } finally {
-      setUsersLoading(false);
+      setFriendsLoading(false);
     }
   };
 
-  useFocusEffect(useCallback(() => { fetchUsers(); }, [user?.id]));
+  useFocusEffect(useCallback(() => { fetchFriends(); }, [user?.id]));
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => {
@@ -54,7 +67,6 @@ export default function NewGroupScreen({ navigation }: any) {
     }
     setLoading(true);
     try {
-      // 1. Create the group
       const { data: newGroup, error: groupError } = await supabase
         .from('groups')
         .insert({ name: groupName.trim(), creator_id: user?.id })
@@ -63,7 +75,6 @@ export default function NewGroupScreen({ navigation }: any) {
 
       if (groupError) throw groupError;
 
-      // 2. Add creator + all selected members in one insert
       const memberRows = [
         { group_id: newGroup.id, user_id: user?.id },
         ...[...selectedIds].map((uid) => ({ group_id: newGroup.id, user_id: uid })),
@@ -74,6 +85,15 @@ export default function NewGroupScreen({ navigation }: any) {
         .insert(memberRows);
 
       if (memberError) throw memberError;
+
+      // Send push notifications to added members (not the creator)
+      if (selectedIds.size > 0) {
+        const tokenFetches = [...selectedIds].map(async (uid) => {
+          const token = await getPushToken(uid);
+          if (token) await sendPushNotification([token], 'Added to group', `You were added to "${newGroup.name}"`);
+        });
+        await Promise.allSettled(tokenFetches);
+      }
 
       const createdName = newGroup.name;
       const createdId   = newGroup.id;
@@ -105,8 +125,6 @@ export default function NewGroupScreen({ navigation }: any) {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-
-        {/* Avatar */}
         <View style={styles.avatarSection}>
           <TouchableOpacity style={styles.groupAvatar} activeOpacity={0.75}>
             <Ionicons name="people" size={52} color="#F5A623" />
@@ -114,7 +132,6 @@ export default function NewGroupScreen({ navigation }: any) {
           <Text style={styles.hint}>Tap to add a group photo</Text>
         </View>
 
-        {/* Group name */}
         <Text style={styles.label}>Group name</Text>
         <TextInput
           style={styles.input}
@@ -127,18 +144,17 @@ export default function NewGroupScreen({ navigation }: any) {
         />
         <Text style={styles.charCount}>{groupName.length}/50</Text>
 
-        {/* Member picker */}
         <Text style={styles.label}>
-          Add members{selectedIds.size > 0 ? ` (${selectedIds.size} selected)` : ''}
+          Add friends{selectedIds.size > 0 ? ` (${selectedIds.size} selected)` : ''}
         </Text>
 
-        {usersLoading ? (
+        {friendsLoading ? (
           <ActivityIndicator color="#F5A623" style={{ marginVertical: 16 }} />
-        ) : users.length === 0 ? (
-          <Text style={styles.emptyText}>No other users found.</Text>
+        ) : friends.length === 0 ? (
+          <Text style={styles.emptyText}>Add friends first to include them in a group.</Text>
         ) : (
           <View style={styles.memberGrid}>
-            {users.map((u) => {
+            {friends.map((u) => {
               const selected = selectedIds.has(u.id);
               return (
                 <TouchableOpacity
@@ -162,7 +178,6 @@ export default function NewGroupScreen({ navigation }: any) {
           </View>
         )}
 
-        {/* Create button */}
         <TouchableOpacity
           style={[styles.createBtn, (!groupName.trim() || loading) && styles.createBtnDisabled]}
           activeOpacity={0.85}

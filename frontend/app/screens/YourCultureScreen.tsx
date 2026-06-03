@@ -22,13 +22,13 @@ export default function YourCultureScreen({ navigation }: any) {
 
   const CULTURE_CATEGORIES = [
     { key: 'history',   title: 'History',    screen: 'History' },
-    {
-      key: 'language',
-      title: 'Language',
-      screen: isTutor ? 'TutorAppointments' : 'Language',
-    },
-    { key: 'food',      title: 'Food',       screen: 'Food'       },
-    { key: 'cultures',  title: 'Traditions', screen: 'Traditions' },
+    // {
+    //   key: 'language',
+    //   title: 'Language',
+    //   screen: isTutor ? 'TutorAppointments' : 'Language',
+    // },
+    // { key: 'food',      title: 'Food',       screen: 'Food'       },
+    // { key: 'cultures',  title: 'Traditions', screen: 'Traditions' },
     { key: 'fashion',   title: 'Fashion',    screen: 'Fashion'    },
     { key: 'festivals', title: 'Festivals',  screen: 'Festivals'  },
     { key: 'beliefs',   title: 'Beliefs',    screen: 'Beliefs'    },

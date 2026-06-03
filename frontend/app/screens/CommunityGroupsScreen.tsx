@@ -30,19 +30,26 @@ export default function CommunityGroupsScreen({ navigation }: any) {
     if (!user?.id) return;
     setLoading(true);
     try {
-      // Fetch groups the user is a member of
-      const { data, error } = await supabase
+      // Step 1: get group_ids the user belongs to
+      const { data: memberRows, error } = await supabase
         .from('group_members')
-        .select(`
-          group_id,
-          group:groups (
-            id, name, creator_id
-          )
-        `)
+        .select('group_id')
         .eq('user_id', user.id);
 
       if (error) throw error;
-      setGroups((data ?? []).map((d: any) => d.group).filter(Boolean));
+      if (!memberRows || memberRows.length === 0) {
+        setGroups([]);
+        return;
+      }
+
+      // Step 2: fetch group details separately — avoids FK hint issues
+      const ids = memberRows.map((m: any) => m.group_id);
+      const { data: groupData } = await supabase
+        .from('groups')
+        .select('id, name, creator_id')
+        .in('id', ids);
+
+      setGroups(groupData ?? []);
     } catch {
       setGroups([]);
     } finally {
@@ -99,9 +106,9 @@ export default function CommunityGroupsScreen({ navigation }: any) {
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={
             <View style={styles.emptyState}>
-              <Text style={styles.emptyEmoji}><Ionicons name="people-outline" size={48} color="#A08060" />  </Text>
+              <Text style={styles.emptyEmoji}><Ionicons name="people-outline" size={48} color="#A08060" /></Text>
               <Text style={styles.emptyTitle}>No groups yet</Text>
-              <Text style={styles.emptySubtitle}>Tap &quot;Groups + &qout; to join or create a group</Text>
+              <Text style={styles.emptySubtitle}>Tap "Groups +" to join or create a group</Text>
             </View>
           }
         />

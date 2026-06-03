@@ -31,30 +31,27 @@ export default function CommunityChatsScreen({ navigation }: any) {
     if (!user?.id) return;
     setLoading(true);
     try {
-      // Fetch both directions — user may appear on either side of the friendship row
-      const [{ data: asUser }, { data: asFriend }] = await Promise.all([
-        supabase
-          .from('friends')
-          .select('friend:users!friends_friend_id_fkey (id, first_name, last_name)')
-          .eq('user_id', user.id),
-        supabase
-          .from('friends')
-          .select('friend:users!friends_user_id_fkey (id, first_name, last_name)')
-          .eq('friend_id', user.id),
-      ]);
+      // Step 1: get friend_ids
+      const { data: friendRows, error } = await supabase
+        .from('friends')
+        .select('friend_id')
+        .eq('user_id', user.id)
+        .eq('status', 'connected');
 
-      // Merge and deduplicate by friend id
-      const map = new Map<string, any>();
-      for (const row of (asUser ?? [])) {
-        const f = row.friend as any;
-        if (f) map.set(f.id, { friend_id: f.id, friend: f });
-      }
-      for (const row of (asFriend ?? [])) {
-        const f = row.friend as any;
-        if (f) map.set(f.id, { friend_id: f.id, friend: f });
+      if (error) throw error;
+      if (!friendRows || friendRows.length === 0) {
+        setFriends([]);
+        return;
       }
 
-      setFriends(Array.from(map.values()));
+      // Step 2: fetch user details separately — avoids FK hint issues entirely
+      const ids = friendRows.map((f: any) => f.friend_id);
+      const { data: users } = await supabase
+        .from('users')
+        .select('id, first_name, last_name')
+        .in('id', ids);
+
+      setFriends(users ?? []);
     } catch {
       setFriends([]);
     } finally {
@@ -65,7 +62,7 @@ export default function CommunityChatsScreen({ navigation }: any) {
   useFocusEffect(useCallback(() => { fetchFriends(); }, [user?.id]));
 
   const filtered = friends.filter((f) => {
-    const name = `${f.friend?.first_name} ${f.friend?.last_name}`.toLowerCase();
+    const name = `${f.first_name} ${f.last_name}`.toLowerCase();
     return name.includes(searchQuery.toLowerCase());
   });
 
@@ -97,16 +94,16 @@ export default function CommunityChatsScreen({ navigation }: any) {
       ) : (
         <FlatList
           data={filtered}
-          keyExtractor={(item) => item.friend_id}
+          keyExtractor={(item) => item.id}
           renderItem={({ item }) => {
-            const name = `${item.friend?.first_name ?? ''} ${item.friend?.last_name ?? ''}`.trim();
+            const name = `${item.first_name ?? ''} ${item.last_name ?? ''}`.trim();
             return (
               <ChatItem
                 name={name}
                 lastMessage="Tap to start chatting"
                 time=""
                 unreadCount={0}
-                onPress={() => navigation?.navigate('Chat', { name, id: item.friend?.id })}
+                onPress={() => navigation?.navigate('Chat', { name, id: item.id })}
               />
             );
           }}
@@ -118,7 +115,7 @@ export default function CommunityChatsScreen({ navigation }: any) {
                 <Ionicons name="people-outline" size={40} color="#F5A623" />
               </View>
               <Text style={styles.emptyTitle}>No friends yet</Text>
-              <Text style={styles.emptySubtitle}>Tap &quot;Add +&quot; to connect with people</Text>
+              <Text style={styles.emptySubtitle}>Tap "Add +" to connect with people</Text>
             </View>
           }
         />

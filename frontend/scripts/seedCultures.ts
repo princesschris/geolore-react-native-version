@@ -24,20 +24,27 @@ const CULTURES_DIR = path.join(__dirname, '..', 'data', 'cultures');
 //  TYPES
 // ─────────────────────────────────────────────────────────────────────────────
 
+// One H3 item inside a fashion group
+interface FashionItem {
+  name:          string;
+  subtitle?:     string;   // **Category:** field
+  description?:  string;
+  materials?:    string;
+  worn_by?:      string;
+  occasions?:    string;
+  significance?: string;
+  modern_usage?: string;
+}
+
+// One H2 group row stored in culture_content
 interface CultureContent {
-  culture:              string;
-  category:             string;
-  title:                string;
-  subtitle?:            string;
-  content:              string;
-  // structured fashion columns
-  fashion_description?: string;
-  fashion_materials?:   string;
-  fashion_worn_by?:     string;
-  fashion_occasions?:   string;
-  fashion_significance?:string;
-  fashion_modern_usage?:string;
-  sort_order:           number;
+  culture:       string;
+  category:      string;
+  title:         string;          // H2 heading e.g. "Clothing"
+  subtitle?:     string;
+  content:       string;          // flat text summary (for search)
+  fashion_items?: FashionItem[];  // structured H3 items (fashion only)
+  sort_order:    number;
 }
 
 interface FoodItem {
@@ -148,48 +155,39 @@ function extractNumberedSteps(text: string): string[] {
     .filter(Boolean);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  FASHION SECTION EXTRACTOR
-//  Returns each sub-section as its own field so the UI can render headings.
-// ─────────────────────────────────────────────────────────────────────────────
-
-interface FashionSections {
-  description?:  string;
-  materials?:    string;
-  worn_by?:      string;
-  occasions?:    string;
-  significance?: string;
-  modern_usage?: string;
-  /** Flat fallback used as the content column — summary of all fields */
-  summary:       string;
+// Extract a single #### sub-section from an H3 body
+function getSubSection(body: string, pattern: RegExp): string | undefined {
+  const match = body.match(pattern);
+  if (!match) return undefined;
+  const raw      = match[1];
+  const numbered = extractNumberedSteps(raw);
+  if (numbered.length) return numbered.map((s, i) => `${i + 1}. ${s}`).join('\n');
+  const bullets  = extractBullets(raw);
+  if (bullets.length) return bullets.join('\n');
+  return stripMarkdown(raw).trim() || undefined;
 }
 
-function extractFashionSections(body: string): FashionSections {
-  const get = (pattern: RegExp): string | undefined => {
-    const match = body.match(pattern);
-    if (!match) return undefined;
-    const raw = match[1];
-    // numbered list → joined sentences; bullet list → comma-joined; plain text → stripped
-    const numbered = extractNumberedSteps(raw);
-    if (numbered.length) return numbered.map((s, i) => `${i + 1}. ${s}`).join('\n');
-    const bullets = extractBullets(raw);
-    if (bullets.length) return bullets.join('\n');
-    return stripMarkdown(raw).trim() || undefined;
+// Parse one H3 block into a structured FashionItem
+function parseH3Item(title: string, body: string): FashionItem | null {
+  const categoryMatch = body.match(/\*\*Category[:\s]+\*?\*?\s*(.+)/i);
+
+  const description  = getSubSection(body, /####\s*Description\s*([\s\S]*?)(?=####|$)/i);
+  const materials    = getSubSection(body, /####\s*Materials\s*([\s\S]*?)(?=####|$)/i);
+  const worn_by      = getSubSection(body, /####\s*Who (?:Wore|Wears) It\s*([\s\S]*?)(?=####|$)/i);
+  const occasions    = getSubSection(body, /####\s*Occasions\s*([\s\S]*?)(?=####|$)/i);
+  const significance = getSubSection(body, /####\s*Cultural Significance\s*([\s\S]*?)(?=####|$)/i);
+  const modern_usage = getSubSection(body, /####\s*Modern Usage\s*([\s\S]*?)(?=####|$)/i);
+
+  // Skip if nothing meaningful was extracted
+  if (!description && !materials && !worn_by && !occasions && !significance && !modern_usage) {
+    return null;
+  }
+
+  return {
+    name:        stripMarkdown(title),
+    subtitle:    categoryMatch ? categoryMatch[1].trim() : undefined,
+    description, materials, worn_by, occasions, significance, modern_usage,
   };
-
-  const description  = get(/####\s*Description\s*([\s\S]*?)(?=####|$)/i);
-  const materials    = get(/####\s*Materials\s*([\s\S]*?)(?=####|$)/i);
-  const worn_by      = get(/####\s*Who (?:Wore|Wears) It\s*([\s\S]*?)(?=####|$)/i);
-  const occasions    = get(/####\s*Occasions\s*([\s\S]*?)(?=####|$)/i);
-  const significance = get(/####\s*Cultural Significance\s*([\s\S]*?)(?=####|$)/i);
-  const modern_usage = get(/####\s*Modern Usage\s*([\s\S]*?)(?=####|$)/i);
-
-  // Flat summary for the content column (used for search / fallback)
-  const parts = [description, materials, worn_by, occasions, significance, modern_usage]
-    .filter(Boolean) as string[];
-  const summary = parts.join('\n\n');
-
-  return { description, materials, worn_by, occasions, significance, modern_usage, summary };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -226,49 +224,117 @@ function parseCultureContent(
   return rows;
 }
 
+/**
+ * Parse the Fashion H1 section.
+ *
+ * One culture_content row per H2 group (e.g. "Clothing", "Hair").
+ * Each row's fashion_items column is an array of the H3 items under it.
+ * H3 items are never stored as their own rows.
+ */
+const DETAIL_SECTION_NAMES = new Set([
+  'description', 'materials', 'how it is used', 'how it is worn',
+  'who wears it', 'who wore it', 'occasions', 'cultural significance',
+  'modern usage', 'styles', 'types', 'varieties', 'significance',
+]);
+
+function isDetailSection(title: string): boolean {
+  return DETAIL_SECTION_NAMES.has(title.toLowerCase().trim());
+}
+
+/**
+ * Parse the Fashion H1 section.
+ *
+ * Handles two .md structures automatically:
+ *   Igbo-style:   ## Group (Clothing/Hair) → ### OutfitName → #### Detail
+ *   Yoruba-style: ## OutfitName            → ### Detail (no outfit-level H3)
+ *
+ * Detection: if a H2's H3 children are ALL detail section names, it's Yoruba-style.
+ */
 function parseFashionContent(culture: string, md: string): CultureContent[] {
-  const rows: CultureContent[]  = [];
-  const seen = new Set<string>();
+  const rows: CultureContent[] = [];
+  const seenNames = new Set<string>();
   let globalIndex = 0;
 
   const h2Sections = splitByH2(md);
+  if (h2Sections.length === 0) return rows;
 
-  for (const { title: h2Title, body: h2Body } of h2Sections) {
-    const h3Items = splitByH3(h2Body);
+  // Detect structure from the first H2 that has H3 children
+  const firstWithH3 = h2Sections.find(s => splitByH3(s.body).length > 0);
+  const isYorubaStyle = firstWithH3
+    ? splitByH3(firstWithH3.body).every(h3 => isDetailSection(h3.title))
+    : false;
 
-    // No H3 items — H2 is just a section header, skip it entirely
-    if (h3Items.length === 0) {
-      console.log(`    Skipping H2-only section (no items): "${stripMarkdown(h2Title)}"`);
-      continue;
-    }
+  if (isYorubaStyle) {
+    // ── Yoruba style: H2 = outfit name, H3 = detail sections ─────────────────
+    for (const { title: h2Title, body: h2Body } of h2Sections) {
+      const cleanTitle = stripMarkdown(h2Title);
+      if (seenNames.has(cleanTitle.toLowerCase())) continue;
+      seenNames.add(cleanTitle.toLowerCase());
 
-    for (const { title: h3Title, body: h3Body } of h3Items) {
-      const cleanTitle = stripMarkdown(h3Title);
-      if (seen.has(cleanTitle.toLowerCase())) {
-        console.log(`    Skipping duplicate fashion item: "${cleanTitle}"`);
-        continue;
-      }
-      seen.add(cleanTitle.toLowerCase());
+      const categoryMatch = h2Body.match(/\*\*Category[:\s]+\*?\*?\s*(.+)/i);
+      const subtitle = categoryMatch ? categoryMatch[1].trim() : undefined;
 
-      // H2 title becomes the grouping subtitle (e.g. "Clothing", "Hair")
-      const h2Category = stripMarkdown(h2Title);
+      // Use parseH3Item with H3-level regex patterns adapted for H3 sections
+      const get = (pattern: RegExp): string | undefined => {
+        const match = h2Body.match(pattern);
+        if (!match) return undefined;
+        const raw      = match[1];
+        const numbered = extractNumberedSteps(raw);
+        if (numbered.length) return numbered.map((s, i) => `${i + 1}. ${s}`).join('\n');
+        const bullets  = extractBullets(raw);
+        if (bullets.length) return bullets.join('\n');
+        return stripMarkdown(raw).trim() || undefined;
+      };
 
-      const sections = extractFashionSections(h3Body);
-      if (!sections.summary.trim()) continue;
+      const description  = get(/###\s*Description\s*([\s\S]*?)(?=###|$)/i);
+      const materials    = get(/###\s*Materials\s*([\s\S]*?)(?=###|$)/i);
+      const worn_by      = get(/###\s*Who (?:Wears|Wore) It\s*([\s\S]*?)(?=###|$)/i);
+      const occasions    = get(/###\s*Occasions\s*([\s\S]*?)(?=###|$)/i);
+      const significance = get(/###\s*(?:Cultural Significance|Significance)\s*([\s\S]*?)(?=###|$)/i);
+      const modern_usage = get(/###\s*(?:Modern Usage|How It Is Used)\s*([\s\S]*?)(?=###|$)/i);
+
+      const content = [description, materials, worn_by, occasions, significance, modern_usage]
+        .filter(Boolean).join('\n\n');
+
+      if (!content.trim()) continue;
+
+      const item: FashionItem = {
+        name: cleanTitle, subtitle, description, materials,
+        worn_by, occasions, significance, modern_usage,
+      };
 
       rows.push({
-        culture,
-        category:              'fashion',
-        title:                 cleanTitle,
-        subtitle:              h2Category,
-        content:               sections.summary,
-        fashion_description:   sections.description,
-        fashion_materials:     sections.materials,
-        fashion_worn_by:       sections.worn_by,
-        fashion_occasions:     sections.occasions,
-        fashion_significance:  sections.significance,
-        fashion_modern_usage:  sections.modern_usage,
-        sort_order:            globalIndex++,
+        culture, category: 'fashion',
+        title: cleanTitle, subtitle, content,
+        fashion_items: [item],
+        sort_order: globalIndex++,
+      });
+    }
+  } else {
+    // ── Igbo style: H2 = group, H3 = outfit name, H4 = detail sections ───────
+    for (const { title: h2Title, body: h2Body } of h2Sections) {
+      const cleanTitle = stripMarkdown(h2Title);
+      const h3List     = splitByH3(h2Body);
+      const fashionItems: FashionItem[] = [];
+
+      for (const { title: h3Title, body: h3Body } of h3List) {
+        const cleanName = stripMarkdown(h3Title);
+        if (seenNames.has(cleanName.toLowerCase())) continue;
+        seenNames.add(cleanName.toLowerCase());
+        const item = parseH3Item(cleanName, h3Body);
+        if (item) fashionItems.push(item);
+      }
+
+      const contentSummary = fashionItems.length > 0
+        ? fashionItems.map(i => [i.name, i.description].filter(Boolean).join(': ')).join('\n\n')
+        : stripMarkdown(h2Body);
+
+      rows.push({
+        culture, category: 'fashion',
+        title:         cleanTitle,
+        content:       contentSummary,
+        fashion_items: fashionItems.length > 0 ? fashionItems : undefined,
+        sort_order:    globalIndex++,
       });
     }
   }

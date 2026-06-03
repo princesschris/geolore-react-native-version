@@ -19,7 +19,12 @@
         "monochromeImage": "./assets/images/logo.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "NOTIFICATIONS",
+        "NOTIFICATIONS"
+      ],
+      "package": "com.the_real_teee.geolore"
     },
     "web": {
       "output": "static",
@@ -30,13 +35,21 @@
       [
         "expo-splash-screen",
         {
-          "image": "../frontend/assets/images/logo.png",
+          "image": "./assets/images/logo.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
           "dark": {
             "backgroundColor": "#000000"
           }
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#F5A623",
+          "sounds": []
         }
       ]
     ],

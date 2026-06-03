@@ -10,6 +10,7 @@ import TopBar from '../components/TopBar';
 import NotificationCard from '../components/NotificationCard';
 import { supabase } from '../config/supabase';
 import { useAuth } from '../context/AuthContext';
+import { getPushToken, sendPushNotification } from '../services/notificationService';
 
 interface Notification {
   id:         string;
@@ -29,7 +30,7 @@ function timeAgo(dateStr: string): string {
   if (mins  < 60) return `${mins}min`;
   if (hours < 24) return `${hours}hr`;
   if (days  < 7)  return `${days}d`;
-  return `${weeks}week`;
+  return `${weeks}wk`;
 }
 
 export default function NotificationsScreen({ navigation }: any) {
@@ -59,9 +60,72 @@ export default function NotificationsScreen({ navigation }: any) {
 
   useFocusEffect(useCallback(() => { fetchNotifications(); }, [user?.id]));
 
-  const handleMarkDone = async (id: string) => {
+  const dismiss = async (id: string) => {
     setNotifications((prev) => prev.filter((n) => n.id !== id));
     await supabase.from('notifications').update({ is_done: true }).eq('id', id);
+  };
+
+  const handleAcceptFriend = async (notification: Notification) => {
+    // Extract sender from message — "X sent you a friend request"
+    // The cleanest way is to find the pending friend row where friend_id = current user
+    try {
+      // Find the pending request sent TO the current user
+      const { data: requests } = await supabase
+        .from('friends')
+        .select('id, user_id')
+        .eq('friend_id', user?.id)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (!requests || requests.length === 0) {
+        dismiss(notification.id);
+        return;
+      }
+
+      // Accept the most recent matching request
+      const request = requests[0];
+
+      // Update to accepted
+      await supabase
+        .from('friends')
+        .update({ status: 'connected' })
+        .eq('id', request.id);
+
+      // Insert the reverse row so both sides see each other
+      await supabase
+        .from('friends')
+        .insert({ user_id: user?.id, friend_id: request.user_id, status: 'connected' });
+
+      // Send push to the original requester
+      const token = await getPushToken(request.user_id);
+      if (token) {
+        const myName = user?.first_name
+          ? `${user.first_name} ${user.last_name ?? ''}`.trim()
+          : 'Someone';
+        await sendPushNotification([token], 'Friend request accepted', `${myName} accepted your friend request`);
+      }
+
+      dismiss(notification.id);
+    } catch (err) {
+      console.error('[AcceptFriend]', err);
+      dismiss(notification.id);
+    }
+  };
+
+  const handleDeclineFriend = async (notification: Notification) => {
+    try {
+      // Delete the pending request sent TO the current user
+      await supabase
+        .from('friends')
+        .delete()
+        .eq('friend_id', user?.id)
+        .eq('status', 'pending');
+
+      dismiss(notification.id);
+    } catch {
+      dismiss(notification.id);
+    }
   };
 
   const filtered = notifications.filter((n) =>
@@ -83,12 +147,11 @@ export default function NotificationsScreen({ navigation }: any) {
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {filtered.length === 0 ? (
             <View style={styles.emptyState}>
-              {/* Icon instead of emoji */}
               <View style={styles.bellCircle}>
                 <Ionicons name="notifications-outline" size={52} color="#F5A623" />
               </View>
               <Text style={styles.emptyTitle}>You&apos;re all caught up</Text>
-              <Text style={styles.emptySubtitle}>Come back later for reminders</Text>
+              <Text style={styles.emptySubtitle}>Come back later for updates</Text>
             </View>
           ) : (
             filtered.map((n) => (
@@ -98,9 +161,11 @@ export default function NotificationsScreen({ navigation }: any) {
                 title={n.title}
                 timeAgo={timeAgo(n.created_at)}
                 message={n.message}
-                onMarkDone={() => handleMarkDone(n.id)}
+                onMarkDone={() => dismiss(n.id)}
                 onUpdate={() => {}}
                 onView={() => navigation?.navigate('IncomingClass')}
+                onAccept={() => handleAcceptFriend(n)}
+                onDecline={() => handleDeclineFriend(n)}
               />
             ))
           )}

@@ -33,11 +33,6 @@ const TraditionCard = ({
     </View>
     <View style={styles.cardBody}>
       <Text style={styles.cardTitle}>{title}</Text>
-      {description ? (
-        <Text style={styles.cardPreview} numberOfLines={3}>
-          {description}
-        </Text>
-      ) : null}
     </View>
     <TouchableOpacity style={styles.viewBtn} activeOpacity={0.8} onPress={onView}>
       <Text style={styles.viewBtnText}>VIEW</Text>

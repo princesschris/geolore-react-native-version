@@ -7,11 +7,11 @@ import { useRole } from '../context/AuthContext';
 // ── Tab definitions ────────────────────────────────────────────────────────
 // Base tabs shown to all users.
 const BASE_TABS = [
-  { key: 'Chat',      icon: 'chatbubble-outline', activeIcon: 'chatbubble', screen: 'AIChat' },
+  { key: 'Chat',      icon: 'sparkles-outline', activeIcon: 'sparkles', screen: 'AIChat' },
   { key: 'Learn',     icon: 'book-outline',        activeIcon: 'book',       screen: 'YourCulture' },
   { key: 'Home',      icon: 'home-outline',         activeIcon: 'home',       screen: 'Home' },
+  { key: 'Community', icon: 'chatbubble-outline',       activeIcon: 'chatbubble',     screen: 'Community' },
   { key: 'Profile',   icon: 'person-outline',       activeIcon: 'person',     screen: 'Profile' },
-  { key: 'Community', icon: 'people-outline',       activeIcon: 'people',     screen: 'Community' },
 ];
 
 // Extra tab injected for tutors (replaces nothing — sits between Learn and Home).

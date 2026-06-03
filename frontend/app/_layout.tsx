@@ -59,6 +59,7 @@ import PrivacyPolicyScreen from './screens/PrivacyPolicyScreen';
 import LanguageSelectScreen from './screens/LanguageSelectScreen';
 import LocationScreen from './screens/LocationScreen';
 import ClearCacheScreen from './screens/ClearCacheScreen';
+import ProverbsScreen from './screens/ProverbsScreen';
 
 // ── Tutor onboarding & management screens ─────────────────────────────────────
 import RequirementsScreen from './screens/RequirementsScreen';
@@ -121,6 +122,7 @@ function Navigator() {
       <Stack.Screen name="YourCulture"      component={YourCultureScreen} />
       <Stack.Screen name="History"          component={HistoryScreen} />
       <Stack.Screen name="Language"         component={LanguageScreen} />
+      <Stack.Screen name="Proverbs" component={ProverbsScreen} />
       <Stack.Screen name="Teacher"          component={TeacherScreen} />
       <Stack.Screen name="Food"             component={FoodScreen} />
       <Stack.Screen name="FoodDetails"      component={FoodDetailsScreen} />

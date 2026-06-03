@@ -1048,7 +1048,7 @@ Dòdò — fried ripe plantain — is one of the most ubiquitous and universally
 
 ---
 
-# Fashion _(Aṣọ Yorùbá)_
+# Fashion 
 
 ## Aso-Oke
 **Yoruba Name:** Aṣọ Òkè ("Cloth from Up Country" or "High-Status Cloth")
