@@ -79,8 +79,6 @@ export default function ClearCacheScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFDF5" />
-
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation?.goBack()}>
           <Ionicons name="arrow-back-outline" size={22} color="#5C3A00" />
@@ -92,24 +90,17 @@ export default function ClearCacheScreen({ navigation }) {
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-      >
-        {/* Title */}
-        <Text style={styles.title}>Storage</Text>
+      >        <Text style={styles.title}>Storage</Text>
 
-        {/* Storage usage */}
         <Text style={styles.usageText}>
           <Text style={styles.usageBold}>{cleared ? USED_GB - CACHE_GB : USED_GB} GB </Text>
           used of {TOTAL_GB} GB
         </Text>
-
-        {/* Progress bar */}
         <View style={styles.progressBar}>
           <View style={[styles.progressSegment, { width: `${systemPercent}%`, backgroundColor: '#F5A623' }]} />
           <View style={[styles.progressSegment, { width: `${appPercent}%`, backgroundColor: '#3B1F00' }]} />
           <View style={[styles.progressSegment, { flex: 1, backgroundColor: '#F5E6CC' }]} />
         </View>
-
-        {/* Legend */}
         <View style={styles.legend}>
           <View style={styles.legendItem}>
             <View style={[styles.legendDot, { backgroundColor: '#F5A623' }]} />
@@ -125,7 +116,6 @@ export default function ClearCacheScreen({ navigation }) {
           </View>
         </View>
 
-        {/* App storage list */}
         <View style={styles.appList}>
           {items.map((item) => (
             <View key={item.id} style={styles.appRow}>
@@ -143,7 +133,6 @@ export default function ClearCacheScreen({ navigation }) {
           ))}
         </View>
 
-        {/* Clear cached data */}
         <TouchableOpacity
           style={[styles.clearRow, cleared && styles.clearRowDone]}
           activeOpacity={0.7}

@@ -9,8 +9,7 @@ export interface UserDocument {
   username:         string;
   role:             UserRole;
   created_at:       string;
-  // Profile fields added in WhereAreYouFromScreen
-  country_of_origin?: string;
+    country_of_origin?: string;
   country_flag?:      string;
   tribe?:             string;
   current_location?:  string;

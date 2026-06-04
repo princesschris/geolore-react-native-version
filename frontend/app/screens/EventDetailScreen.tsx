@@ -65,31 +65,22 @@ export default function EventDetailScreen({ navigation, route }: any) {
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
 
-        {/* Event Card */}
         <View style={[styles.eventCard, { backgroundColor: event.color ?? '#F5A623' }]}>
-
-          {/* Title */}
           <Text style={styles.eventTitle}>{event.title}</Text>
 
           <View style={styles.divider} />
-
-          {/* Date */}
           {event.date_label ? (
             <View style={styles.infoRow}>
               <Ionicons name="calendar-outline" size={16} color="rgba(255,255,255,0.8)" />
               <Text style={styles.eventDate}>{event.date_label}</Text>
             </View>
           ) : null}
-
-          {/* Time */}
           {timeLabel ? (
             <View style={styles.infoRow}>
               <Ionicons name="time-outline" size={16} color="rgba(255,255,255,0.8)" />
               <Text style={styles.eventTime}>{timeLabel}</Text>
             </View>
           ) : null}
-
-          {/* Location */}
           {event.location ? (
             <>
               <View style={styles.divider} />
@@ -102,8 +93,6 @@ export default function EventDetailScreen({ navigation, route }: any) {
               </View>
             </>
           ) : null}
-
-          {/* Description */}
           {event.description ? (
             <>
               <View style={styles.divider} />
@@ -114,7 +103,6 @@ export default function EventDetailScreen({ navigation, route }: any) {
             </>
           ) : null}
 
-          {/* Reminder */}
           {event.reminder && event.reminder !== 'never' ? (
             <View style={styles.reminderBadge}>
               <Ionicons name="notifications-outline" size={13} color="#3B1F00" />
@@ -124,7 +112,6 @@ export default function EventDetailScreen({ navigation, route }: any) {
 
           <View style={styles.divider} />
 
-          {/* Buttons */}
           <View style={styles.btnRow}>
             <TouchableOpacity
               style={styles.closeBtn}
@@ -133,8 +120,6 @@ export default function EventDetailScreen({ navigation, route }: any) {
             >
               <Text style={styles.closeBtnText}>Close</Text>
             </TouchableOpacity>
-
-            {/* Only the creator can delete */}
             {isOwner && (
               <TouchableOpacity
                 style={styles.deleteBtn}

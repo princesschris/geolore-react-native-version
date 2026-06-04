@@ -66,10 +66,7 @@ export default function NotificationsScreen({ navigation }: any) {
   };
 
   const handleAcceptFriend = async (notification: Notification) => {
-    // Extract sender from message — "X sent you a friend request"
-    // The cleanest way is to find the pending friend row where friend_id = current user
     try {
-      // Find the pending request sent TO the current user
       const { data: requests } = await supabase
         .from('friends')
         .select('id, user_id')
@@ -82,22 +79,16 @@ export default function NotificationsScreen({ navigation }: any) {
         dismiss(notification.id);
         return;
       }
-
-      // Accept the most recent matching request
       const request = requests[0];
 
-      // Update to accepted
       await supabase
         .from('friends')
         .update({ status: 'connected' })
         .eq('id', request.id);
-
-      // Insert the reverse row so both sides see each other
       await supabase
         .from('friends')
         .insert({ user_id: user?.id, friend_id: request.user_id, status: 'connected' });
 
-      // Send push to the original requester
       const token = await getPushToken(request.user_id);
       if (token) {
         const myName = user?.first_name
@@ -115,7 +106,6 @@ export default function NotificationsScreen({ navigation }: any) {
 
   const handleDeclineFriend = async (notification: Notification) => {
     try {
-      // Delete the pending request sent TO the current user
       await supabase
         .from('friends')
         .delete()

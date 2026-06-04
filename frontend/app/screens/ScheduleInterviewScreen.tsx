@@ -45,7 +45,6 @@ export default function ScheduleInterviewScreen({ navigation }: any) {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Orange title bar */}
         <View style={styles.titleBar}>
           <Text style={styles.titleText}>SCHEDULE AN INTERVIEW</Text>
         </View>

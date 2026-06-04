@@ -31,8 +31,6 @@ export default function HistoryScreen({ navigation, route }: any) {
 
       if (supabaseError) throw supabaseError;
       if (!data || data.length === 0) throw new Error('No content found');
-
-      // Combine all rows into one markdown string
       const combined = data
         .map((row) => `## ${row.title}\n\n${row.content}`)
         .join('\n\n');
@@ -44,8 +42,6 @@ export default function HistoryScreen({ navigation, route }: any) {
       setLoading(false);
     }
   };
-
-  // Loading state
   if (loading) {
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -59,8 +55,6 @@ export default function HistoryScreen({ navigation, route }: any) {
       </SafeAreaView>
     );
   }
-
-  // Error state
   if (error) {
     return (
       <SafeAreaView style={styles.safeArea}>

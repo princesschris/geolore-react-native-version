@@ -56,15 +56,13 @@ export default function ProfileScreen({ navigation }: any) {
       <TopBar showSearch={false} />
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Avatar */}
-        <View style={styles.avatarSection}>
+                <View style={styles.avatarSection}>
           <View style={styles.avatarPlaceholder}>
             <Ionicons name="person" size={52} color="#C4A882" />
           </View>
           <Text style={styles.name}>{user.name}</Text>
           <Text style={styles.email}>{user.email}</Text>
 
-          {/* Role badge */}
           <View style={[styles.roleBadge, isTutor ? styles.roleBadgeTutor : styles.roleBadgeStudent]}>
             <Ionicons name={isTutor ? 'school-outline' : 'book-outline'} size={13} color={isTutor ? '#3B1F00' : '#F5A623'} />
             <Text style={[styles.roleBadgeText, isTutor ? styles.roleBadgeTextTutor : styles.roleBadgeTextStudent]}>
@@ -77,7 +75,6 @@ export default function ProfileScreen({ navigation }: any) {
           </TouchableOpacity>
         </View>
 
-        {/* Settings */}
         <View style={styles.settingsList}>
           {STATIC_SETTINGS.map((s) => (
             <SettingRow key={s.key} icon={s.icon} label={s.label} onPress={() => navigation?.navigate(s.screen)} />

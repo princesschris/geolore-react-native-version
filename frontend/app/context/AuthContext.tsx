@@ -42,7 +42,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for an existing session on mount (handles app restarts)
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         const profile = await fetchUserDocument(session.user.id);
@@ -51,7 +50,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
     });
 
-    // Listen for auth changes (login, logout, token refresh)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (session?.user) {
@@ -94,12 +92,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// ── Hooks ─────────────────────────────────────────────────────────────────────
 export function useAuth(): AuthContextType {
   return useContext(AuthContext);
 }
 
-/** Drop-in replacement for the old useRole() hook */
 export function useRole() {
   const { role, isTutor, isStudent } = useContext(AuthContext);
   return { role, isTutor, isStudent };

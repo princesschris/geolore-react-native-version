@@ -26,8 +26,7 @@ const ClassCard = ({ item, onPress }: { item: ClassItem; onPress: () => void }) 
 
   return (
     <TouchableOpacity style={styles.classCard} onPress={onPress} activeOpacity={0.85}>
-      {/* Top row: badge + price */}
-      <View style={styles.classCardTop}>
+         <View style={styles.classCardTop}>
         <View style={[styles.typePill, isGroup ? styles.typePillGroup : styles.typePillOne]}>
           <Ionicons name={isGroup ? 'people' : 'person'} size={11} color="#fff" />
           <Text style={styles.typePillText}>{isGroup ? 'Group' : '1-on-1'}</Text>
@@ -122,8 +121,6 @@ export default function LanguageScreen({ navigation }: any) {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFDF5" />
       <TopBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
-
-      {/* Hero banner */}
       <LinearGradient
         colors={['#F5A623', '#E8891A']}
         start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
@@ -138,8 +135,6 @@ export default function LanguageScreen({ navigation }: any) {
           <Ionicons name="language" size={36} color="rgba(255,255,255,0.9)" />
         </View>
       </LinearGradient>
-
-      {/* Tab switcher */}
       <View style={styles.tabRow}>
         <TouchableOpacity
           style={[styles.tab, activeTab === 'tutors' && styles.tabActive]}
@@ -179,8 +174,6 @@ export default function LanguageScreen({ navigation }: any) {
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-
-          {/* Section label */}
           {activeTab !== 'myClasses' && (
             <View style={styles.sectionRow}>
               <Text style={styles.sectionLabel}>
@@ -191,8 +184,6 @@ export default function LanguageScreen({ navigation }: any) {
               </Text>
             </View>
           )}
-
-          {/* Tutors tab */}
           {activeTab === 'tutors' && (
             filteredTutors.length === 0 ? (
               <View style={styles.emptyState}>
@@ -260,8 +251,6 @@ export default function LanguageScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#FFFDF5' },
-
-  // Hero
   heroBanner: {
     flexDirection: 'row', alignItems: 'center',
     marginHorizontal: 16, marginBottom: 12,
@@ -276,8 +265,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center', justifyContent: 'center',
   },
-
-  // Tabs
   tabRow: { flexDirection: 'row', paddingHorizontal: 16, paddingBottom: 12, gap: 10 },
   tab: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
@@ -289,16 +276,11 @@ const styles = StyleSheet.create({
   tabTextActive: { color: '#fff' },
   countBadge:     { backgroundColor: '#F5A623', borderRadius: 10, paddingHorizontal: 6, paddingVertical: 2 },
   countBadgeText: { fontSize: 10, fontWeight: '800', color: '#fff' },
-
-  // Content
   loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   scrollContent:    { paddingHorizontal: 16, paddingTop: 4, paddingBottom: 28 },
-
   sectionRow:  { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
   sectionLabel: { fontSize: 13, fontWeight: '700', color: '#3B1F00', textTransform: 'uppercase', letterSpacing: 0.8 },
   sectionCount: { fontSize: 12, color: '#A08060', fontWeight: '600' },
-
-  // Class card
   classCard: {
     backgroundColor: '#fff', borderRadius: 16,
     borderWidth: 1, borderColor: '#F0E6D6',
@@ -326,9 +308,7 @@ const styles = StyleSheet.create({
   },
   joinBtnFull: { backgroundColor: '#C4A882', shadowOpacity: 0 },
   joinBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' },
-
-  // Empty states
-  emptyState:    { alignItems: 'center', paddingTop: 48, gap: 12 },
+    emptyState:    { alignItems: 'center', paddingTop: 48, gap: 12 },
   emptyIconWrap: {
     width: 72, height: 72, borderRadius: 20,
     backgroundColor: '#FFF3E0', alignItems: 'center', justifyContent: 'center',

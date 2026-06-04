@@ -52,8 +52,6 @@ export default function FoodScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Tribe from auth context — falls back to 'igbo'
   const tribe = user?.tribe ?? 'igbo';
 
   useEffect(() => {

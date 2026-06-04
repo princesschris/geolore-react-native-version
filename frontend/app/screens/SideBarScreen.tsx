@@ -22,7 +22,7 @@ const HISTORY_ITEMS = [
   { id: '9', text: 'New Yam Festival date 20' },
 ];
 
-const HistoryItem = ({ text, onPress }) => (
+const HistoryItem = ({ text, onPress }:any) => (
   <TouchableOpacity style={styles.historyItem} onPress={onPress} activeOpacity={0.7}>
     <Ionicons name="chatbubble-outline" size={16} color="#A08060" />
     <Text style={styles.historyText} numberOfLines={1}>{text}</Text>
@@ -35,7 +35,6 @@ export default function SideBarScreen({ navigation }) {
       <StatusBar barStyle="dark-content" backgroundColor="#FFFDF5" />
 
       <View style={styles.container}>
-        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.closeBtn}
@@ -43,8 +42,6 @@ export default function SideBarScreen({ navigation }) {
           >
             <Ionicons name="close-outline" size={26} color="#5C3A00" />
           </TouchableOpacity>
-
-          {/* New Chat Button */}
           <TouchableOpacity
             style={styles.newChatBtn}
             activeOpacity={0.8}
@@ -57,8 +54,6 @@ export default function SideBarScreen({ navigation }) {
             <Text style={styles.newChatText}>New chat</Text>
           </TouchableOpacity>
         </View>
-
-        {/* Chat History */}
         <ScrollView
           style={styles.historyScroll}
           showsVerticalScrollIndicator={false}
@@ -74,8 +69,6 @@ export default function SideBarScreen({ navigation }) {
             />
           ))}
         </ScrollView>
-
-        {/* Bottom settings */}
         <View style={styles.bottomSection}>
           <View style={styles.divider} />
           <TouchableOpacity

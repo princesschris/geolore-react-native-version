@@ -25,8 +25,7 @@ export default function AwaitResponseScreen({ navigation }: any) {
       <BuntingBanner />
 
       <View style={styles.content}>
-        {/* Logo placeholder — icon instead of emoji */}
-        <View style={styles.logoPlaceholder}>
+          <View style={styles.logoPlaceholder}>
           <Ionicons name="leaf-outline" size={60} color="#F5A623" />
         </View>
 

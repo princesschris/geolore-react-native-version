@@ -30,8 +30,6 @@ export default function ChatScreen({ navigation, route }: any) {
 
   const contactName = route?.params?.name ?? 'User';
   const contactId   = route?.params?.id   ?? null;
-
-  // Chat ID is always the two user IDs sorted so both sides get the same chat
   const chatId = [user?.id, contactId].filter(Boolean).sort().join('_');
 
   const fetchMessages = async () => {
@@ -46,8 +44,6 @@ export default function ChatScreen({ navigation, route }: any) {
 
   useEffect(() => {
     fetchMessages();
-
-    // Real-time subscription — new messages appear instantly
     const channel = supabase
       .channel(`chat_${chatId}`)
       .on('postgres_changes', {
@@ -75,7 +71,7 @@ export default function ChatScreen({ navigation, route }: any) {
       text,
     });
 
-    if (error) setInputText(text); // restore on failure
+    if (error) setInputText(text); 
   };
 
   return (

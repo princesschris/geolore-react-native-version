@@ -79,8 +79,7 @@ export default function ClassInfoScreen({ navigation, route }: any) {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor="#F5A623" />
 
-      {/* Gradient header */}
-      <LinearGradient
+     <LinearGradient
         colors={['#F5A623', '#E8891A']}
         start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
         style={styles.heroHeader}
@@ -101,7 +100,6 @@ export default function ClassInfoScreen({ navigation, route }: any) {
 
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
 
-        {/* Session detail chips */}
         <View style={styles.chipsRow}>
           <View style={styles.chip}>
             <Ionicons name="person-outline" size={14} color="#F5A623" />
@@ -117,7 +115,6 @@ export default function ClassInfoScreen({ navigation, route }: any) {
           </View>
         </View>
 
-        {/* Reschedule section */}
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeader}>
             <View style={styles.sectionIconWrap}>
@@ -156,7 +153,6 @@ export default function ClassInfoScreen({ navigation, route }: any) {
           </TouchableOpacity>
         </View>
 
-        {/* Cancel section */}
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeader}>
             <View style={[styles.sectionIconWrap, { backgroundColor: '#FFF0F0' }]}>

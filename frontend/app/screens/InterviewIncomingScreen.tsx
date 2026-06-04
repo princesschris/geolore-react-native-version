@@ -32,8 +32,7 @@ export default function InterviewIncomingScreen({ navigation, route }: any) {
       <BuntingBanner />
 
       <View style={styles.content}>
-        {/* Interviewer photo placeholder */}
-        <View style={styles.photoFrame}>
+          <View style={styles.photoFrame}>
           <Ionicons name="person" size={64} color="#C4A882" />
         </View>
 
@@ -42,11 +41,9 @@ export default function InterviewIncomingScreen({ navigation, route }: any) {
 
         <View style={styles.messageBubble}>
           <Text style={styles.messageText}>
-            It's time for your interview
+            It&apos;s time for your interview
           </Text>
         </View>
-
-        {/* Call action buttons */}
         <View style={styles.actionRow}>
           <TouchableOpacity
             style={[styles.actionBtn, styles.declineBtn]}

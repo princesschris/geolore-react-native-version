@@ -26,7 +26,6 @@ export default function ImageCard({ title, imageSource, onPress, width, height =
           <Text style={styles.title}>{title}</Text>
         </ImageBackground>
       ) : (
-        // Placeholder when no image
         <View style={[styles.image, styles.placeholder]}>
           <View style={styles.overlay} />
           <Text style={styles.title}>{title}</Text>

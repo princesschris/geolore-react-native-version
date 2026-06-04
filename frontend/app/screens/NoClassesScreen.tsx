@@ -5,31 +5,27 @@ import {
   StyleSheet,
   SafeAreaView,
   StatusBar,
+  Image,
 } from 'react-native';
 import BottomTabBar from '../components/BottomTabBar';
 import BuntingBanner from '../components/BuntingBanner';
 
-export default function NoClassesScreen({ navigation }) {
+export default function NoClassesScreen({ navigation }:any) {
   const [activeTab, setActiveTab] = useState('Home');
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFDF5" />
 
-      {/* Bunting Banner — no top bar on this screen */}
       <View style={styles.bannerWrapper}>
         <BuntingBanner />
       </View>
 
       <View style={styles.container}>
-        {/* Tiger Mascot */}
-        <View style={styles.mascotPlaceholder}>
-          {/* Replace with actual image:
-          <Image source={require('../assets/tiger.png')} style={styles.mascot} /> */}
-          <Text style={styles.mascotEmoji}>🐯</Text>
+              <View style={styles.mascotPlaceholder}>
+              <Image source={require('../../assets/images/logo.png')} style={styles.mascot} /> 
+              
         </View>
-
-        {/* Message */}
         <Text style={styles.title}>You&apos;re all caught up</Text>
         <Text style={styles.subtitle}>
           You currently have no{'\n'}scheduled classes

@@ -61,8 +61,6 @@ export default function FashionScreen({ navigation }: any) {
     o.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (o.subtitle ?? '').toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  // Group by subtitle — items without a subtitle are excluded entirely
   const grouped: { category: string; items: FashionOutfit[] }[] = [];
   for (const outfit of filtered) {
     if (!outfit.subtitle) continue;

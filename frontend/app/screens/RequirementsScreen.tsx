@@ -49,7 +49,6 @@ export default function RequirementsScreen({ navigation }: any) {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Orange title bar */}
         <View style={styles.titleBar}>
           <Text style={styles.titleText}>REQUIREMENTS</Text>
         </View>

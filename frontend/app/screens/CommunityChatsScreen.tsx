@@ -31,7 +31,6 @@ export default function CommunityChatsScreen({ navigation }: any) {
     if (!user?.id) return;
     setLoading(true);
     try {
-      // Step 1: get friend_ids
       const { data: friendRows, error } = await supabase
         .from('friends')
         .select('friend_id')
@@ -43,8 +42,6 @@ export default function CommunityChatsScreen({ navigation }: any) {
         setFriends([]);
         return;
       }
-
-      // Step 2: fetch user details separately — avoids FK hint issues entirely
       const ids = friendRows.map((f: any) => f.friend_id);
       const { data: users } = await supabase
         .from('users')

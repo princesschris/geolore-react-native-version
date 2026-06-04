@@ -23,7 +23,6 @@ export default function TermsAndConditionsScreen({ navigation }) {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Orange card */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>TERMS AND{'\n'}CONDITIONS</Text>
 

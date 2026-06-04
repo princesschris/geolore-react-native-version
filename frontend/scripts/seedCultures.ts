@@ -6,19 +6,13 @@ import { createClient } from '@supabase/supabase-js';
 const SUPABASE_URL      = 'https://ypoumpucjsauimirpoil.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlwb3VtcHVjanNhdWltaXJwb2lsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNjMwOTcsImV4cCI6MjA5NDgzOTA5N30.LyF2elLk8cnBsGDA_Y0LLaB8weOJC7Vn-4sISO6FufQ';
 
-// ── Get your free HF token at huggingface.co → Settings → Access Tokens ──────
 const HF_TOKEN = process.env.HF_TOKEN ?? '';
 
 const supabase     = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const CULTURES_DIR = path.join(__dirname, '..', 'data', 'cultures');
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  EMBEDDING — Hugging Face Inference API (free, no local model needed)
-//  Model: all-MiniLM-L6-v2 → 384-dim vectors, matches your pgvector column
-// ─────────────────────────────────────────────────────────────────────────────
-
 async function generateEmbedding(text: string): Promise<number[] | null> {
-  const truncated = text.slice(0, 500); // keep well under token limit
+  const truncated = text.slice(0, 500); 
   try {
     const res = await fetch(
       'https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-MiniLM-L6-v2',
@@ -39,7 +33,6 @@ async function generateEmbedding(text: string): Promise<number[] | null> {
     }
 
     const json = await res.json() as number[] | number[][];
-    // API returns either a flat array or a nested array — flatten to 1D
     const flat = Array.isArray(json[0]) ? (json as number[][])[0] : (json as number[]);
     return flat;
   } catch (e: any) {
@@ -48,12 +41,8 @@ async function generateEmbedding(text: string): Promise<number[] | null> {
   }
 }
 
-// Small delay to avoid rate-limiting on the free tier
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  TYPES
-// ─────────────────────────────────────────────────────────────────────────────
 
 interface CultureContent {
   culture:               string;
@@ -89,9 +78,6 @@ interface Proverb {
   explanation?: string;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  HELPERS
-// ─────────────────────────────────────────────────────────────────────────────
 
 function tribeFromFilename(filename: string): string {
   const base = path.basename(filename, '.md');
@@ -178,9 +164,6 @@ function extractNumberedSteps(text: string): string[] {
     .map((l)  => l.replace(/^\d+\.\s*/, '').trim())
     .filter(Boolean);
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  FASHION SECTION EXTRACTOR
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface FashionSections {
@@ -217,10 +200,6 @@ function extractFashionSections(body: string): FashionSections {
 
   return { description, materials, worn_by, occasions, significance, modern_usage, summary };
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  PARSERS
-// ─────────────────────────────────────────────────────────────────────────────
 
 function parseCultureContent(culture: string, category: string, md: string): CultureContent[] {
   const rows: CultureContent[] = [];
@@ -312,10 +291,6 @@ function parseProverbs(culture: string, md: string): Proverb[] {
   return proverbs;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  SEED FUNCTIONS
-// ─────────────────────────────────────────────────────────────────────────────
-
 async function seedCultureContent(rows: CultureContent[]): Promise<void> {
   if (rows.length === 0) return;
   console.log(`  Generating embeddings for ${rows.length} rows via HF API...`);
@@ -326,7 +301,7 @@ async function seedCultureContent(rows: CultureContent[]): Promise<void> {
     process.stdout.write(`    [${i + 1}/${rows.length}] ${row.title.slice(0, 40)}...`);
     row.embedding = await generateEmbedding(text);
     console.log(row.embedding ? ' ✓' : ' ✗ (skipped)');
-    await sleep(300); // respect free-tier rate limit
+    await sleep(300); 
   }
 
   console.log(`  Seeding ${rows.length} culture_content rows...`);
@@ -352,10 +327,6 @@ async function seedProverbs(rows: Proverb[]): Promise<void> {
   if (error) console.error('  proverbs error:', error.message);
   else       console.log ('  proverbs done ✓');
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  MAIN
-// ─────────────────────────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
   console.log('\nGeoLore Culture Seeder\n' + '-'.repeat(40));

@@ -22,7 +22,6 @@ type Proverb = {
   explanation?: string;
 };
 
-// ── Expandable proverb card ───────────────────────────────────────────────────
 const ProverbCard = ({ item, index }: { item: Proverb; index: number }) => {
   const [expanded, setExpanded] = useState(false);
   const anim = useRef(new Animated.Value(0)).current;
@@ -35,8 +34,6 @@ const ProverbCard = ({ item, index }: { item: Proverb; index: number }) => {
     }).start();
     setExpanded(!expanded);
   };
-
-  // Alternate card accent colours
   const accents = ['#F5A623', '#3B1F00', '#8B6F4E', '#C4853A'];
   const accent  = accents[index % accents.length];
 
@@ -47,8 +44,6 @@ const ProverbCard = ({ item, index }: { item: Proverb; index: number }) => {
 
   return (
     <View style={[styles.card, { borderLeftColor: accent }]}>
-
-      {/* Quote mark + native text */}
       <TouchableOpacity onPress={toggle} activeOpacity={0.75} style={styles.cardTop}>
         <Text style={[styles.quoteSymbol, { color: accent }]}>"</Text>
         <View style={styles.cardTopText}>
@@ -59,8 +54,6 @@ const ProverbCard = ({ item, index }: { item: Proverb; index: number }) => {
           <Ionicons name="chevron-down" size={18} color="#A08060" />
         </Animated.View>
       </TouchableOpacity>
-
-      {/* Expandable detail */}
       {expanded && (
         <View style={styles.expandedSection}>
           <View style={styles.divider} />
@@ -87,8 +80,6 @@ const ProverbCard = ({ item, index }: { item: Proverb; index: number }) => {
     </View>
   );
 };
-
-// ── Screen ────────────────────────────────────────────────────────────────────
 export default function ProverbsScreen() {
   const { user }   = useAuth();
   const [proverbs, setProverbs]     = useState<Proverb[]>([]);
@@ -129,8 +120,6 @@ export default function ProverbsScreen() {
       <StatusBar barStyle="dark-content" backgroundColor="#FFFDF5" />
       <TopBar searchQuery={search} onSearchChange={setSearch} />
       <BuntingBanner />
-
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>PROVERBS</Text>
         <Text style={styles.headerSub}>
@@ -199,8 +188,6 @@ const styles = StyleSheet.create({
   retryBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' },
 
   listContent: { paddingHorizontal: 16, paddingTop: 4 },
-
-  // ── Card ───────────────────────────────────────────────────────────────────
   card: {
     backgroundColor: '#fff',
     borderRadius: 14,
@@ -240,8 +227,6 @@ const styles = StyleSheet.create({
     color: '#8B6F4E',
     lineHeight: 18,
   },
-
-  // ── Expanded ───────────────────────────────────────────────────────────────
   expandedSection: { marginTop: 12, gap: 12 },
   divider:         { height: 1, backgroundColor: '#F0E6D6' },
 

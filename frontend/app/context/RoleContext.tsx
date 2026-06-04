@@ -9,7 +9,6 @@ const RoleContext = createContext<RoleContextType>({
 });
 
 export function RoleProvider({ children }: { children: ReactNode }) {
-  // Default to 'student' – will be updated after onboarding or login
   const [role, setRole] = useState<UserRole | null>('student');
 
   const isTutor = role === 'tutor' || role === 'both';

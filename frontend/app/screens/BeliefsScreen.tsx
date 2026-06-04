@@ -90,8 +90,6 @@ export default function BeliefsScreen({ navigation }: any) {
       <BuntingBanner />
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-
-        {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Text style={styles.headerEyebrow}>{tribe} Heritage</Text>
@@ -101,8 +99,6 @@ export default function BeliefsScreen({ navigation }: any) {
             <Ionicons name="eye" size={28} color="#F5A623" />
           </View>
         </View>
-
-        {/* Count pill */}
         {!loading && !error && filtered.length > 0 && (
           <View style={styles.countRow}>
             <View style={styles.countPill}>
@@ -110,8 +106,6 @@ export default function BeliefsScreen({ navigation }: any) {
             </View>
           </View>
         )}
-
-        {/* Loading */}
         {loading && (
           <View style={styles.centeredState}>
             <ActivityIndicator size="large" color="#F5A623" />
@@ -119,7 +113,6 @@ export default function BeliefsScreen({ navigation }: any) {
           </View>
         )}
 
-        {/* Error */}
         {!loading && error && (
           <View style={styles.centeredState}>
             <Ionicons name="alert-circle-outline" size={48} color="#C4A882" />
@@ -130,7 +123,6 @@ export default function BeliefsScreen({ navigation }: any) {
           </View>
         )}
 
-        {/* Empty */}
         {!loading && !error && filtered.length === 0 && (
           <View style={styles.centeredState}>
             <Ionicons name="eye-outline" size={48} color="#C4A882" />
@@ -138,7 +130,6 @@ export default function BeliefsScreen({ navigation }: any) {
           </View>
         )}
 
-        {/* List */}
         {!loading && !error && filtered.map((belief, index) => (
           <BeliefCard
             key={belief.id}

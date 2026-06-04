@@ -88,7 +88,6 @@ export default function LanguageSelectScreen({ navigation }) {
 
   const handleSelect = (language) => {
     setSelected(language);
-    // Save language preference here
     setTimeout(() => navigation?.goBack(), 300);
   };
 
@@ -98,13 +97,8 @@ export default function LanguageSelectScreen({ navigation }) {
 
       <TopBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
       <BuntingBanner />
-
-      {/* Language Card */}
       <View style={styles.card}>
-        {/* Title */}
         <Text style={styles.cardTitle}>LANGUAGE</Text>
-
-        {/* Use system language */}
         <TouchableOpacity
           style={styles.systemLanguageBtn}
           activeOpacity={0.8}
@@ -115,8 +109,6 @@ export default function LanguageSelectScreen({ navigation }) {
             <Ionicons name="checkmark" size={18} color="#fff" />
           )}
         </TouchableOpacity>
-
-        {/* Language list */}
         <FlatList
           data={filtered}
           keyExtractor={(item) => item}
@@ -143,8 +135,6 @@ export default function LanguageSelectScreen({ navigation }) {
           showsVerticalScrollIndicator={false}
           style={styles.list}
         />
-
-        {/* Cancel Button */}
         <TouchableOpacity
           style={styles.cancelBtn}
           activeOpacity={0.8}

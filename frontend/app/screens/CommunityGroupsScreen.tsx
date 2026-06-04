@@ -30,7 +30,6 @@ export default function CommunityGroupsScreen({ navigation }: any) {
     if (!user?.id) return;
     setLoading(true);
     try {
-      // Step 1: get group_ids the user belongs to
       const { data: memberRows, error } = await supabase
         .from('group_members')
         .select('group_id')
@@ -41,8 +40,6 @@ export default function CommunityGroupsScreen({ navigation }: any) {
         setGroups([]);
         return;
       }
-
-      // Step 2: fetch group details separately — avoids FK hint issues
       const ids = memberRows.map((m: any) => m.group_id);
       const { data: groupData } = await supabase
         .from('groups')

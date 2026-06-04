@@ -38,7 +38,6 @@ export default function GroupChatScreen({ navigation, route }: any) {
   const groupId   = route?.params?.id   ?? 'default_group';
 
   useEffect(() => {
-    // Initial fetch
     supabase
       .from('group_messages')
       .select('*')
@@ -48,8 +47,6 @@ export default function GroupChatScreen({ navigation, route }: any) {
         setMessages(data ?? []);
         setLoading(false);
       });
-
-    // Real-time subscription
     const channel = supabase
       .channel(`group_${groupId}`)
       .on('postgres_changes', {
@@ -81,7 +78,7 @@ export default function GroupChatScreen({ navigation, route }: any) {
       text,
     });
 
-    if (error) setInputText(text); // restore on failure
+    if (error) setInputText(text); 
   };
 
   return (

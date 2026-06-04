@@ -38,7 +38,7 @@ const ROLE_OPTIONS: {
     description: 'I want to teach my language and manage student sessions.',
     icon:        'school-outline',
     iconColor:   '#fff',
-    iconBg:      '#3B1F00',
+    iconBg:      '#a35802',
   },
   {
     role:        'both',
@@ -92,11 +92,10 @@ export default function RegisterScreen({ navigation }: any) {
     try {
       const userDoc = await registerUser(firstName, lastName, email, username, password, selectedRole);
       setUser(userDoc);
-      if (selectedRole === 'tutor' || selectedRole === 'both') {
-        navigation?.navigate('Requirements');
-      } else {
-        navigation?.navigate('GetStarted');
-      }
+      const nextScreen = (selectedRole === 'tutor' || selectedRole === 'both')
+        ? 'Requirements'
+        : 'GetStarted';
+      navigation?.navigate('WhereAreYouFrom', { nextScreen });
     } catch (err: any) {
       let message = 'Something went wrong. Please try again.';
       if (err.message?.includes('already registered')) message = 'That email is already registered. Try logging in.';
@@ -156,7 +155,6 @@ export default function RegisterScreen({ navigation }: any) {
             onPress={() => setSelectedRole(role)}
             activeOpacity={0.8}
           >
-            {/* Icon replaces emoji */}
             <View style={[styles.roleIconCircle, { backgroundColor: isSelected ? '#F5A623' : iconBg }]}>
               <Ionicons name={icon as any} size={24} color={isSelected ? '#fff' : iconColor} />
             </View>

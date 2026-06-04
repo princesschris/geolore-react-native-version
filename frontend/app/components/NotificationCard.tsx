@@ -114,19 +114,12 @@ const styles = StyleSheet.create({
   title:   { fontSize: 14, fontWeight: '800', color: '#3B1F00', flex: 1 },
   timeAgo: { fontSize: 11, color: '#A08060', fontWeight: '500', marginLeft: 8 },
   message: { fontSize: 12, color: '#5C4A30', lineHeight: 18 },
-
   actionsRow: { flexDirection: 'row', gap: 10, marginTop: 4 },
-
-  // Accept / Decline
   acceptBtn:  { flex: 1, backgroundColor: '#F5A623', paddingVertical: 9, borderRadius: 10, alignItems: 'center' },
   acceptBtnText: { color: '#fff', fontSize: 13, fontWeight: '800' },
   declineBtn: { flex: 1, backgroundColor: '#F5E6CC', paddingVertical: 9, borderRadius: 10, alignItems: 'center', borderWidth: 1, borderColor: '#E0D0B8' },
   declineBtnText: { color: '#5C3A00', fontSize: 13, fontWeight: '700' },
-
-  // Dismiss
   dismissBtn: { paddingVertical: 7, paddingHorizontal: 16, borderRadius: 10, backgroundColor: '#F5E6CC', borderWidth: 1, borderColor: '#E0D0B8' },
   dismissBtnText: { color: '#5C3A00', fontSize: 12, fontWeight: '700' },
-
-  // Text links (reminder/lesson)
   actionLink: { fontSize: 13, fontWeight: '700', color: '#F5A623' },
 });

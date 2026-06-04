@@ -68,7 +68,6 @@ export default function EditProfileScreen({ navigation }: any) {
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={80}>
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
 
-          {/* Avatar */}
           <View style={styles.avatarSection}>
             <View style={styles.avatarWrapper}>
               <View style={styles.avatarPlaceholder}>
@@ -80,12 +79,10 @@ export default function EditProfileScreen({ navigation }: any) {
             </View>
           </View>
 
-          {/* Form */}
           <View style={styles.form}>
             <LabeledInput label="First Name" value={firstName} onChangeText={setFirstName} autoCapitalize="words" />
             <LabeledInput label="Last Name"  value={lastName}  onChangeText={setLastName}  autoCapitalize="words" />
 
-            {/* Email — read only */}
             <View style={styles.readOnlyWrapper}>
               <Text style={styles.readOnlyLabel}>Email</Text>
               <View style={styles.readOnlyField}>
@@ -99,7 +96,6 @@ export default function EditProfileScreen({ navigation }: any) {
             <LabeledInput label="Phone number" value={phone}    onChangeText={setPhone}    keyboardType="phone-pad" />
           </View>
 
-          {/* Save */}
           <TouchableOpacity
             style={[styles.saveBtn, loading && styles.saveBtnDisabled]}
             activeOpacity={0.8}

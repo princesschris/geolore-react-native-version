@@ -24,7 +24,6 @@ export default function TopBar({
   const insets     = useSafeAreaInsets();
   const [unread, setUnread] = useState(0);
 
-  // Stable unique channel name per component instance — never collides across screens
   const channelName = useRef(`topbar_notifs_${user?.id}_${Math.random().toString(36).slice(2)}`);
 
   const fetchCount = async () => {
@@ -42,7 +41,6 @@ export default function TopBar({
 
     fetchCount();
 
-    // Remove any stale channel with this name before subscribing
     const existing = supabase.getChannels().find(c => c.topic === `realtime:${channelName.current}`);
     if (existing) supabase.removeChannel(existing);
 
@@ -65,7 +63,6 @@ export default function TopBar({
     return () => { supabase.removeChannel(channel); };
   }, [user?.id]);
 
-  // Refetch on focus so badge stays accurate after visiting Notifications screen
   useEffect(() => {
     if (isFocused) fetchCount();
   }, [isFocused]);
@@ -116,7 +113,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingTop: 20, // overridden dynamically via insets
+    paddingTop: 20, 
     paddingBottom: 10,
     gap: 10,
   },

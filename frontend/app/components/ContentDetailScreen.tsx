@@ -6,7 +6,6 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import BottomTabBar from '../components/BottomTabBar';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 type InlineSegment = { text: string; bold: boolean; italic: boolean };
 
@@ -37,7 +36,6 @@ export type ContentDetailScreenProps = {
   label?:       string;
 };
 
-// ─── Inline parser — handles **bold**, *italic*, _italic_ ─────────────────────
 
 function parseInline(text: string): InlineSegment[] {
   const segments: InlineSegment[] = [];
@@ -64,20 +62,16 @@ function parseInline(text: string): InlineSegment[] {
   return segments.filter(s => s.text.length > 0);
 }
 
-// ─── Block parser ─────────────────────────────────────────────────────────────
-
 function parseBlocks(raw: string): Block[] {
   if (!raw || typeof raw !== 'string') return [];
 
   const blocks: Block[] = [];
 
-  // Normalise all newline variants and JSON-escaped sequences
   const normalised = raw
     .replace(/\\r\\n/g, '\n')
     .replace(/\\n/g, '\n')
     .replace(/\r\n/g, '\n')
     .replace(/\r/g, '\n')
-    // Strip UTF-8 BOM
     .replace(/^\uFEFF/, '');
 
   const lines = normalised.split('\n');
@@ -90,11 +84,8 @@ function parseBlocks(raw: string): Block[] {
   };
 
   for (const line of lines) {
-    // Trim ALL trailing whitespace including the trailing spaces the .md file uses
-    // e.g. "- trade    " becomes "- trade"
     const t = line.trim();
 
-    // Skip horizontal rules
     if (/^[-*_]{3,}$/.test(t)) {
       flushPara();
       continue;
@@ -130,8 +121,6 @@ function parseBlocks(raw: string): Block[] {
   return blocks;
 }
 
-// ─── Inline renderer ──────────────────────────────────────────────────────────
-
 function InlineText({ segments, style }: { segments: InlineSegment[]; style: any }) {
   return (
     <Text style={style}>
@@ -150,7 +139,6 @@ function InlineText({ segments, style }: { segments: InlineSegment[]; style: any
   );
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function ContentDetailScreen({
   navigation,
@@ -271,8 +259,6 @@ export default function ContentDetailScreen({
     </SafeAreaView>
   );
 }
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   safeArea:      { flex: 1, backgroundColor: '#FFFDF5' },

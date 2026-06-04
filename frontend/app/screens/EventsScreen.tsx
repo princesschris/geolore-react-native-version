@@ -48,8 +48,6 @@ const buildMarkedDates = (events: Event[], selectedDate: string) => {
   }
   return marked;
 };
-
-// Parse "YYYY-MM-DD" → { day, month abbr }
 const parseDateBadge = (dateStr: string) => {
   if (!dateStr) return { day: '', month: '' };
   const [, m, d] = dateStr.split('-');
@@ -73,13 +71,10 @@ const EventCard = ({
 
   return (
     <View style={styles.eventCard}>
-      {/* Left accent strip + date badge */}
       <View style={[styles.accentStrip, { backgroundColor: accent }]}>
         <Text style={styles.badgeDay}>{day}</Text>
         <Text style={styles.badgeMonth}>{month}</Text>
       </View>
-
-      {/* Main content */}
       <TouchableOpacity style={styles.cardBody} onPress={onPress} activeOpacity={0.75}>
         <Text style={styles.cardTitle} numberOfLines={1}>{event.title}</Text>
 
@@ -101,8 +96,6 @@ const EventCard = ({
           ) : null}
         </View>
       </TouchableOpacity>
-
-      {/* Delete button */}
       <TouchableOpacity style={styles.deleteBtn} onPress={onDelete} activeOpacity={0.7}>
         <Ionicons name="trash-outline" size={16} color="#E74C3C" />
       </TouchableOpacity>
@@ -148,7 +141,6 @@ export default function EventsScreen({ navigation }: any) {
             .delete()
             .eq('id', event.id);
           if (error) throw error;
-          // Remove from local state instantly — no refetch needed
           setEvents((prev) => prev.filter((e) => e.id !== event.id));
           showAlert('success', 'Deleted', 'Event removed from your calendar.');
         } catch (err: any) {
@@ -266,19 +258,14 @@ const styles = StyleSheet.create({
     borderRadius: 16, borderWidth: 1, borderColor: '#F5C070',
     marginBottom: 20, overflow: 'hidden',
   },
-
   sectionRow: {
     flexDirection: 'row', alignItems: 'center',
     justifyContent: 'space-between', marginBottom: 12,
   },
   sectionTitle: { fontSize: 13, fontWeight: '800', color: '#3B1F00', letterSpacing: 1.2 },
   clearFilter:  { fontSize: 13, fontWeight: '700', color: '#F5A623' },
-
   loadingContainer: { alignItems: 'center', paddingVertical: 32 },
-
-  // ── Modern list cards ──────────────────────────────────────────────────────
   eventsList: { gap: 10, marginBottom: 20 },
-
   eventCard: {
     flexDirection: 'row',
     alignItems: 'stretch',
@@ -287,15 +274,12 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: '#F0E6D6',
-    // shadow
     shadowColor: '#3B1F00',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.07,
     shadowRadius: 6,
     elevation: 3,
   },
-
-  // Coloured left strip with date
   accentStrip: {
     width: 52,
     alignItems: 'center',
@@ -316,8 +300,6 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
-
-  // Card body — takes all remaining space
   cardBody: {
     flex: 1,
     paddingVertical: 12,
@@ -335,8 +317,6 @@ const styles = StyleSheet.create({
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   metaText: { fontSize: 11, color: '#A08060', fontWeight: '500', flex: 1 },
   cardDesc: { fontSize: 11, color: '#A08060', fontStyle: 'italic' },
-
-  // Trash button on the right
   deleteBtn: {
     width: 44,
     alignItems: 'center',
@@ -344,8 +324,6 @@ const styles = StyleSheet.create({
     borderLeftWidth: 1,
     borderLeftColor: '#F0E6D6',
   },
-
-  // ── Empty state ────────────────────────────────────────────────────────────
   emptyState: { alignItems: 'center', paddingVertical: 32, gap: 10 },
   emptyIconCircle: {
     width: 72, height: 72, borderRadius: 36,
@@ -354,8 +332,6 @@ const styles = StyleSheet.create({
   },
   emptyTitle:    { fontSize: 16, fontWeight: '800', color: '#3B1F00' },
   emptySubtitle: { fontSize: 13, color: '#A08060' },
-
-  // ── Add button ─────────────────────────────────────────────────────────────
   addEventBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 8, backgroundColor: '#F5A623', paddingVertical: 13, borderRadius: 12,

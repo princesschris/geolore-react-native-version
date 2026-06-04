@@ -8,17 +8,10 @@ export default function GetStartedScreen({ navigation }:any) {
 
       <View style={styles.container}>
         <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
-        
-
-        {/* Title */}
         <Text style={styles.title}>Welcome</Text>
-
-        {/* Tagline */}
         <Text style={styles.tagline}>
          Where Heritage lives, breathes and speaks - through stories passed down, memeories held close and traditions that never fade
         </Text>
-
-        {/* Get Started Button */}
         <TouchableOpacity
           style={styles.button}
           activeOpacity={0.8}

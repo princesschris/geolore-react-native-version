@@ -93,7 +93,6 @@ export default function StoriesScreen({ navigation }: any) {
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
 
-        {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Text style={styles.headerEyebrow}>{tribe} Heritage</Text>
@@ -103,8 +102,6 @@ export default function StoriesScreen({ navigation }: any) {
             <Ionicons name="book" size={28} color="#F5A623" />
           </View>
         </View>
-
-        {/* Count pill */}
         {!loading && !error && filtered.length > 0 && (
           <View style={styles.countRow}>
             <View style={styles.countPill}>
@@ -112,16 +109,12 @@ export default function StoriesScreen({ navigation }: any) {
             </View>
           </View>
         )}
-
-        {/* Loading */}
         {loading && (
           <View style={styles.centeredState}>
             <ActivityIndicator size="large" color="#F5A623" />
             <Text style={styles.stateText}>Loading {tribe} stories...</Text>
           </View>
         )}
-
-        {/* Error */}
         {!loading && error && (
           <View style={styles.centeredState}>
             <Ionicons name="alert-circle-outline" size={48} color="#C4A882" />
@@ -131,16 +124,12 @@ export default function StoriesScreen({ navigation }: any) {
             </TouchableOpacity>
           </View>
         )}
-
-        {/* Empty */}
         {!loading && !error && filtered.length === 0 && (
           <View style={styles.centeredState}>
             <Ionicons name="book-outline" size={48} color="#C4A882" />
             <Text style={styles.stateText}>No stories found for {tribe}</Text>
           </View>
         )}
-
-        {/* List */}
         {!loading && !error && filtered.map((item, index) => (
           <StoryCard
             key={item.id}

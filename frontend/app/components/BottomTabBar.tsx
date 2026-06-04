@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useRole } from '../context/AuthContext';
 
-// ── Tab definitions ────────────────────────────────────────────────────────
 const BASE_TABS = [
   { key: 'Chat',      icon: 'sparkles-outline', activeIcon: 'sparkles', screen: 'AIChat' },
   { key: 'Learn',     icon: 'book-outline',        activeIcon: 'book',       screen: 'YourCulture' },
@@ -20,7 +19,6 @@ const TUTOR_TAB = {
   screen: 'TutorAppointments',
 };
 
-// ── Screen → active tab mapping ───────────────────────────────────────────
 const SCREEN_TO_TAB: Record<string, string> = {
   Home:    'Home',
   Events:  'Home',

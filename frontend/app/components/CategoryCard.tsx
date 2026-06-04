@@ -23,8 +23,7 @@ export default function CategoryCard({
     );
   }
 
-  // 339x241 — title top left, image right, button bottom left (Home screen)
-  return (
+   return (
     <View style={styles.card}>
       <View style={styles.left}>
         <Text style={styles.title}>{title}</Text>
@@ -103,7 +102,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
-  // ── YourCulture card: 339x138 ────────────────────────────────────────────────
   centeredCard: {
     backgroundColor: '#FFF3E0',
     borderRadius: 16,

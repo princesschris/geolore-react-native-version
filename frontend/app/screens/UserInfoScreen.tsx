@@ -84,15 +84,13 @@ export default function UserInfoScreen({ navigation, route }: any) {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Avatar */}
+      
         <View style={styles.avatarSection}>
           <View style={styles.avatar}>
             <Ionicons name="person" size={64} color="#F5A623" />
           </View>
           <Text style={styles.userName}>{userName}</Text>
         </View>
-
-        {/* Action Buttons */}
         <View style={styles.actionButtons}>
           <TouchableOpacity
             style={styles.actionBtn}
@@ -123,8 +121,6 @@ export default function UserInfoScreen({ navigation, route }: any) {
             <Text style={[styles.actionBtnText, { color: '#E74C3C' }]}>Unadd</Text>
           </TouchableOpacity>
         </View>
-
-        {/* Groups in common */}
         <View style={styles.groupsSection}>
           <View style={styles.groupsHeader}>
             <Text style={styles.groupsCount}>
@@ -163,7 +159,6 @@ export default function UserInfoScreen({ navigation, route }: any) {
           )}
         </View>
 
-        {/* Remove friend */}
         <TouchableOpacity style={styles.removeFriendRow} activeOpacity={0.7} onPress={handleRemoveFriend}>
           <Ionicons name="person-remove-outline" size={20} color="#E74C3C" />
           <Text style={styles.removeFriendText}>Remove friend</Text>

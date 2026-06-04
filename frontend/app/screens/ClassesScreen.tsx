@@ -104,8 +104,6 @@ export default function ClassesScreen({ navigation }: any) {
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-
-          {/* Hero header */}
           <LinearGradient
             colors={['#F5A623', '#E8891A']}
             start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}

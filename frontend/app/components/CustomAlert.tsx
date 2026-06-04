@@ -19,7 +19,6 @@ interface AlertContextType {
   showConfirm: (title: string, message: string, onConfirm: () => void, onCancel?: () => void, confirmText?: string, cancelText?: string) => void;
 }
 
-// ── All types use the app's brown / orange palette ────────────────────────────
 const ALERT_THEME: Record<AlertType, {
   icon:       string;
   iconColor:  string;
@@ -29,7 +28,6 @@ const ALERT_THEME: Record<AlertType, {
   cardBg:     string;
   confirmBg:  string;
 }> = {
-  // ✅ Success — deep brown icon on warm orange background
   success: {
     icon:       'checkmark-circle',
     iconColor:  '#3B1F00',
@@ -39,7 +37,6 @@ const ALERT_THEME: Record<AlertType, {
     cardBg:     '#FFFDF5',
     confirmBg:  '#F5A623',
   },
-  // ❌ Error — white icon on dark brown background
   error: {
     icon:       'close-circle',
     iconColor:  '#fff',
@@ -49,7 +46,6 @@ const ALERT_THEME: Record<AlertType, {
     cardBg:     '#FFFDF5',
     confirmBg:  '#3B1F00',
   },
-  // ⚠️ Warning — dark brown icon on light orange background
   warning: {
     icon:       'warning',
     iconColor:  '#3B1F00',
@@ -57,9 +53,8 @@ const ALERT_THEME: Record<AlertType, {
     titleColor: '#3B1F00',
     border:     '#F5C070',
     cardBg:     '#FFFDF5',
-    confirmBg:  '#F5A623',
+    confirmBg:  '#985100',
   },
-  // ℹ️ Info — orange icon on warm cream background
   info: {
     icon:       'information-circle',
     iconColor:  '#F5A623',
@@ -69,7 +64,6 @@ const ALERT_THEME: Record<AlertType, {
     cardBg:     '#FFFDF5',
     confirmBg:  '#F5A623',
   },
-  // ❓ Confirm — dark brown icon on warm cream
   confirm: {
     icon:       'help-circle',
     iconColor:  '#F5A623',
@@ -77,7 +71,7 @@ const ALERT_THEME: Record<AlertType, {
     titleColor: '#3B1F00',
     border:     '#F5A623',
     cardBg:     '#FFFDF5',
-    confirmBg:  '#3B1F00',
+    confirmBg:  '#985100',
   },
 };
 
@@ -200,7 +194,6 @@ function AlertModal({ visible, config, onDismiss, onConfirm, onCancel }: {
                 </TouchableOpacity>
               </View>
             ) : (
-              // Single full-width OK button
               <TouchableOpacity
                 style={[styles.okBtn, { backgroundColor: theme.confirmBg }]}
                 onPress={onDismiss}
@@ -219,8 +212,7 @@ function AlertModal({ visible, config, onDismiss, onConfirm, onCancel }: {
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(59, 31, 0, 0.55)', // dark brown tint instead of black
-    alignItems: 'center',
+    backgroundColor: '#cc6d008c', 
     justifyContent: 'center',
     paddingHorizontal: 28,
   },
@@ -263,7 +255,6 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
 
-  // ── Single OK button ──────────────────────────────────────────────────────
   okBtn: {
     width: '100%',
     paddingVertical: 16,
@@ -279,7 +270,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 
-  // ── Confirm two-button row ────────────────────────────────────────────────
   btnRow: {
     flexDirection: 'row',
     gap: 12,

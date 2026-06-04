@@ -39,12 +39,10 @@ export default function CommunityAddGroupsScreen({ navigation }: any) {
     if (!user?.id) return;
     setLoading(true);
     try {
-      // All groups
       const { data: allGroups } = await supabase
         .from('groups')
         .select('id, name, creator_id');
 
-      // Groups user already joined
       const { data: myMemberships } = await supabase
         .from('group_members')
         .select('group_id')
@@ -78,7 +76,6 @@ export default function CommunityAddGroupsScreen({ navigation }: any) {
     g.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Split into groups created by friends vs others
   const myGroups    = filtered.filter((g) => joinedIds.has(g.id));
   const otherGroups = filtered.filter((g) => !joinedIds.has(g.id));
 

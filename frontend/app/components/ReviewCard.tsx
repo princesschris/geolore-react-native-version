@@ -15,7 +15,7 @@ const StarRating = ({ rating = 5 }) => (
   </View>
 );
 
-export default function ReviewCard({ reviewerName, date, rating, review, helpfulCount }) {
+export default function ReviewCard({ reviewerName, date, rating, review, helpfulCount }:any) {
   const [helpful, setHelpful] = useState(null);
 
   return (

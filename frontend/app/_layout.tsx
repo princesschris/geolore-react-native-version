@@ -2,10 +2,7 @@ import React, { useEffect } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
-
 import { AuthProvider, useAuth } from './context/AuthContext';
-
-// ── Existing screens ──────────────────────────────────────────────────────────
 import SplashScreen from './screens/SplashScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import LoginScreen from './screens/LogInScreen';
@@ -60,8 +57,6 @@ import LanguageSelectScreen from './screens/LanguageSelectScreen';
 import LocationScreen from './screens/LocationScreen';
 import ClearCacheScreen from './screens/ClearCacheScreen';
 import ProverbsScreen from './screens/ProverbsScreen';
-
-// ── Tutor onboarding & management screens ─────────────────────────────────────
 import RequirementsScreen from './screens/RequirementsScreen';
 import TellUsAboutYourselfScreen from './screens/TellUsAboutYourselfScreen';
 import ScheduleInterviewScreen from './screens/ScheduleInterviewScreen';
@@ -79,7 +74,6 @@ import AddGroupMembersScreen from './screens/AddGroupMembersScreen';
 
 const Stack = createNativeStackNavigator();
 
-// ── Spinner shown while Firebase restores AsyncStorage session ────────────────
 function LoadingScreen() {
   return (
     <View style={styles.loadingContainer}>
@@ -88,7 +82,6 @@ function LoadingScreen() {
   );
 }
 
-// ── Auto-redirect logged-in users away from Splash on startup ─────────────────
 function AuthGate() {
   const { isLoggedIn, isLoading } = useAuth();
   const navigation = useNavigation<any>();
@@ -100,24 +93,18 @@ function AuthGate() {
 
   return null;
 }
-
-// ── Navigator ─────────────────────────────────────────────────────────────────
 function Navigator() {
   const { isLoading } = useAuth();
   if (isLoading) return <LoadingScreen />;
 
   return (
     <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
-
-      {/* Auth & onboarding */}
       <Stack.Screen name="Splash"          component={SplashScreen} />
       <Stack.Screen name="Register"        component={RegisterScreen} />
       <Stack.Screen name="Login"           component={LoginScreen} />
       <Stack.Screen name="GetStarted"      component={GetStartedScreen} />
       <Stack.Screen name="AddGroupMembers"        component={AddGroupMembersScreen} />
       <Stack.Screen name="WhereAreYouFrom" component={WhereAreYouFromScreen} />
-
-      {/* Core app */}
       <Stack.Screen name="Home"             component={HomeScreen} />
       <Stack.Screen name="YourCulture"      component={YourCultureScreen} />
       <Stack.Screen name="History"          component={HistoryScreen} />
@@ -136,8 +123,6 @@ function Navigator() {
       <Stack.Screen name="BeliefDetail"     component={BeliefDetailScreen} />
       <Stack.Screen name="Stories"          component={StoriesScreen} />
       <Stack.Screen name="StoryDetail"      component={StoryDetailScreen} />
-
-      {/* Student class flow */}
       <Stack.Screen name="BookAppointment" component={BookAppointmentScreen} />
       <Stack.Screen name="IncomingClass"   component={IncomingClassScreen} />
       <Stack.Screen name="ClassSession"    component={ClassSessionScreen} />
@@ -145,8 +130,6 @@ function Navigator() {
       <Stack.Screen name="Classes"         component={ClassesScreen} />
       <Stack.Screen name="ClassInfo"       component={ClassInfoScreen} />
       <Stack.Screen name="NoClasses"       component={NoClassesScreen} />
-
-      {/* Tutor onboarding flow */}
       <Stack.Screen name="Requirements"        component={RequirementsScreen} />
       <Stack.Screen name="TellUsAboutYourself" component={TellUsAboutYourselfScreen} />
       <Stack.Screen name="ScheduleInterview"   component={ScheduleInterviewScreen} />
@@ -154,13 +137,9 @@ function Navigator() {
       <Stack.Screen name="AwaitResponse"       component={AwaitResponseScreen} />
       <Stack.Screen name ="Culture" component={CultureScreen}/>
       <Stack.Screen name = "CultureDetail" component ={CultureDetailScreen}/>
-
-      {/* Tutor management (RoleGate enforced inside each screen) */}
       <Stack.Screen name="TutorAppointments"       component={TutorAppointmentsScreen} />
       <Stack.Screen name="TutorAppointmentDetails" component={TutorAppointmentDetailsScreen} />
       <Stack.Screen name="TutorNoAppointment"      component={TutorNoAppointmentScreen} />
-
-      {/* AI & social */}
       <Stack.Screen name="AIChat"             component={AIChatBotScreen} />
       <Stack.Screen name="Community"          component={CommunityChatsScreen} />
       <Stack.Screen name="Chat"               component={ChatScreen} />
@@ -171,8 +150,6 @@ function Navigator() {
       <Stack.Screen name="NewGroup"           component={NewGroupScreen} />
       <Stack.Screen name="GroupInfo"          component={GroupInfoScreen} />
       <Stack.Screen name="UserInfo"           component={UserInfoScreen} />
-
-      {/* Profile & settings */}
       <Stack.Screen name="Profile"            component={ProfileScreen} />
       <Stack.Screen name="SideBar"            component={SideBarScreen} />
       <Stack.Screen name="EditProfile"        component={EditProfileScreen} />
@@ -184,19 +161,15 @@ function Navigator() {
       <Stack.Screen name="LanguageSelect"     component={LanguageSelectScreen} />
       <Stack.Screen name="Location"           component={LocationScreen} />
       <Stack.Screen name="ClearCache"         component={ClearCacheScreen} />
-
-      {/* Events */}
       <Stack.Screen name="Events"      component={EventsScreen} />
       <Stack.Screen name="EventDetail" component={EventDetailScreen} />
       <Stack.Screen name="AddEvent"    component={AddEventScreen} />
       <Stack.Screen name="ClassDetail" component={ClassDetailScreen} />
       <Stack.Screen name="CreateClass" component={CreateClassScreen} />
-
     </Stack.Navigator>
   );
 }
 
-// ── Root export ───────────────────────────────────────────────────────────────
 export default function AppNavigator() {
   return (
     <AuthProvider>

@@ -6,8 +6,6 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { WebView } from 'react-native-webview';
 
-// ─── Timer helpers ────────────────────────────────────────────────────────────
-
 const getTimerColor = (totalSeconds: number) => {
   const minutes = Math.floor(totalSeconds / 60);
   if (minutes < 30) return '#F5A623';
@@ -25,8 +23,6 @@ const formatTime = (totalSeconds: number) => {
     String(s).padStart(2, '0'),
   ].join(':');
 };
-
-// ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function ClassSessionScreen({ navigation, route }: any) {
   const teacherName    = route?.params?.teacherName    ?? 'Teacher';
@@ -61,7 +57,6 @@ export default function ClassSessionScreen({ navigation, route }: any) {
     ]);
   };
 
-  // Inject JS into Daily WebView to mute/unmute mic
   const toggleMute = () => {
     const next = !isMuted;
     setIsMuted(next);
@@ -78,7 +73,6 @@ export default function ClassSessionScreen({ navigation, route }: any) {
     `);
   };
 
-  // Inject JS to toggle camera
   const toggleCamera = () => {
     const next = !isCameraOff;
     setIsCameraOff(next);
@@ -115,15 +109,12 @@ export default function ClassSessionScreen({ navigation, route }: any) {
 
       <View style={styles.videoContainer}>
 
-        {/* Header */}
         <View style={styles.header}>
           <Text style={styles.teacherName}>{teacherName}</Text>
           <Text style={[styles.timerText, { color: timerColor }]}>
             {formatTime(elapsed)}
           </Text>
         </View>
-
-        {/* Daily.co WebView */}
         <View style={styles.videoFeed}>
           {!webViewReady && (
             <View style={styles.loadingOverlay}>
@@ -141,7 +132,6 @@ export default function ClassSessionScreen({ navigation, route }: any) {
             onError={() => Alert.alert('Connection Error', 'Could not load the class room. Please check your connection.')}
             javaScriptEnabled
             domStorageEnabled
-            // Store Daily call object for JS injection
             injectedJavaScript={`
               (function() {
                 const interval = setInterval(() => {
@@ -156,7 +146,6 @@ export default function ClassSessionScreen({ navigation, route }: any) {
           />
         </View>
 
-        {/* Captions area */}
         {isCCOn && (
           <View style={styles.captionsContainer}>
             <View style={styles.ccBadge}>
@@ -166,9 +155,8 @@ export default function ClassSessionScreen({ navigation, route }: any) {
           </View>
         )}
 
-        {/* Controls */}
-        <View style={styles.controlsRow}>
-          {/* Mic */}
+            <View style={styles.controlsRow}>
+          
           <TouchableOpacity
             style={[styles.controlBtn, isMuted && styles.controlBtnActive]}
             activeOpacity={0.8}
@@ -177,7 +165,6 @@ export default function ClassSessionScreen({ navigation, route }: any) {
             <Ionicons name={isMuted ? 'mic-off' : 'mic'} size={22} color="#fff" />
           </TouchableOpacity>
 
-          {/* Camera */}
           <TouchableOpacity
             style={[styles.controlBtn, isCameraOff && styles.controlBtnActive]}
             activeOpacity={0.8}
@@ -186,7 +173,6 @@ export default function ClassSessionScreen({ navigation, route }: any) {
             <Ionicons name={isCameraOff ? 'videocam-off' : 'videocam'} size={22} color="#fff" />
           </TouchableOpacity>
 
-          {/* CC */}
           <TouchableOpacity
             style={[styles.controlBtn, isCCOn && styles.controlBtnActive]}
             activeOpacity={0.8}
@@ -194,8 +180,6 @@ export default function ClassSessionScreen({ navigation, route }: any) {
           >
             <Text style={styles.ccIcon}>CC</Text>
           </TouchableOpacity>
-
-          {/* End Call */}
           <TouchableOpacity
             style={[styles.controlBtn, styles.endCallBtn]}
             activeOpacity={0.8}
@@ -209,9 +193,6 @@ export default function ClassSessionScreen({ navigation, route }: any) {
     </SafeAreaView>
   );
 }
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#1A1A1A' },
 

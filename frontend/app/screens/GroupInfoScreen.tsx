@@ -23,15 +23,12 @@ export default function GroupInfoScreen({ navigation, route }: any) {
   useEffect(() => {
     if (!groupId) { setLoading(false); return; }
     const load = async () => {
-      // Step 1: get creator_id
       const { data: groupData } = await supabase
         .from('groups')
         .select('creator_id')
         .eq('id', groupId)
         .single();
       setCreatorId(groupData?.creator_id ?? null);
-
-      // Step 2: get user_ids from group_members
       const { data: memberRows } = await supabase
         .from('group_members')
         .select('user_id')
@@ -42,8 +39,6 @@ export default function GroupInfoScreen({ navigation, route }: any) {
         setLoading(false);
         return;
       }
-
-      // Step 3: fetch user details separately
       const ids = memberRows.map((m: any) => m.user_id);
       const { data: users } = await supabase
         .from('users')

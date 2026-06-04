@@ -43,8 +43,6 @@ export default function LocationScreen({ navigation }) {
         latitudeDelta: 0.05,
         longitudeDelta: 0.05,
       });
-
-      // Reverse geocode to get address
       const geocode = await Location.reverseGeocodeAsync({
         latitude: loc.coords.latitude,
         longitude: loc.coords.longitude,
@@ -72,7 +70,6 @@ export default function LocationScreen({ navigation }) {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
 
-      {/* Map fills the screen */}
       <MapView
         style={styles.map}
         provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
@@ -91,8 +88,6 @@ export default function LocationScreen({ navigation }) {
           />
         )}
       </MapView>
-
-      {/* Search bar floating over map */}
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
           <Ionicons name="search-outline" size={18} color="#A08060" />
@@ -122,8 +117,6 @@ export default function LocationScreen({ navigation }) {
           </View>
         </TouchableOpacity>
       </View>
-
-      {/* Location card at the bottom */}
       <View style={styles.locationCard}>
         <View style={styles.locationAvatar}>
           <Ionicons name="person" size={22} color="#C4A882" />
@@ -150,10 +143,8 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#FFFDF5' },
   map: {
     ...StyleSheet.absoluteFillObject,
-    bottom: 80, // leave room for bottom tab bar
+    bottom: 80, 
   },
-
-  // Floating search bar
   searchContainer: {
     position: 'absolute',
     top: Platform.OS === 'ios' ? 50 : 40,
@@ -209,8 +200,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   badgeText: { color: '#fff', fontSize: 9, fontWeight: '800' },
-
-  // Location card
   locationCard: {
     position: 'absolute',
     bottom: 80,

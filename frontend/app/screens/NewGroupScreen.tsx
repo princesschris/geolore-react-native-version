@@ -20,8 +20,6 @@ export default function NewGroupScreen({ navigation }: any) {
 
   const { user }                   = useAuth();
   const { showAlert, showConfirm } = useAlert();
-
-  // Only fetch friends — not all users
   const fetchFriends = async () => {
     if (!user?.id) return;
     setFriendsLoading(true);
@@ -85,8 +83,6 @@ export default function NewGroupScreen({ navigation }: any) {
         .insert(memberRows);
 
       if (memberError) throw memberError;
-
-      // Send push notifications to added members (not the creator)
       if (selectedIds.size > 0) {
         const tokenFetches = [...selectedIds].map(async (uid) => {
           const token = await getPushToken(uid);

@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 import ScrollPicker from './ScrollPicker';
 
-// ── Data generators ──────────────────────────────────────────────────────────
 const DAYS = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0'));
 const MONTHS = [
   'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
@@ -18,7 +17,6 @@ const HOURS = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'
 const MINUTES = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'));
 const PERIODS = ['AM', 'PM'];
 
-// ── Date Picker ───────────────────────────────────────────────────────────────
 export function DatePickerModal({ visible, onConfirm, onCancel, initialValue }:any) {
   const [day, setDay] = useState(initialValue?.day ?? '01');
   const [month, setMonth] = useState(initialValue?.month ?? 'Jan');
@@ -87,7 +85,6 @@ export function DatePickerModal({ visible, onConfirm, onCancel, initialValue }:a
   );
 }
 
-// ── Time Picker ───────────────────────────────────────────────────────────────
 export function TimePickerModal({ visible, onConfirm, onCancel, initialValue, title = 'Select Time' }:any) {
   const [hour, setHour] = useState(initialValue?.hour ?? '12');
   const [minute, setMinute] = useState(initialValue?.minute ?? '00');

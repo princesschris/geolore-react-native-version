@@ -29,7 +29,7 @@ const GlobeWithTree = () => (
   </Svg>
 );
 
-export default function ClassEndScreen({ navigation }) {
+export default function ClassEndScreen({ navigation }:any) {
   const [activeTab, setActiveTab] = useState('Home');
 
   return (

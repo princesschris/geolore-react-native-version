@@ -88,15 +88,12 @@ export default function TraditionsScreen({ navigation }: any) {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>TRADITIONS</Text>
 
-        {/* Loading */}
         {loading && (
           <View style={styles.centeredState}>
             <ActivityIndicator size="large" color="#F5A623" />
             <Text style={styles.stateText}>Loading traditions...</Text>
           </View>
         )}
-
-        {/* Error */}
         {!loading && error && (
           <View style={styles.centeredState}>
             <Ionicons name="alert-circle-outline" size={48} color="#C4A882" />
@@ -133,7 +130,6 @@ export default function TraditionsScreen({ navigation }: any) {
           />
         ))}
 
-        {/* View More */}
         {!loading && !error && !showAll && filtered.length > 10 && (
           <TouchableOpacity
             style={styles.viewMoreBtn}

@@ -30,13 +30,11 @@ export default function AddGroupMembersScreen({ navigation, route }: any) {
     if (!user?.id || !groupId) return;
     setLoading(true);
     try {
-      // Step 1: get friend_ids
       const { data: friendRows } = await supabase
         .from('friends')
         .select('friend_id')
         .eq('user_id', user.id);
 
-      // Step 2: get existing group member ids
       const { data: memberRows } = await supabase
         .from('group_members')
         .select('user_id')
@@ -50,7 +48,6 @@ export default function AddGroupMembersScreen({ navigation, route }: any) {
         return;
       }
 
-      // Step 3: fetch friend user details
       const ids = friendRows.map((f: any) => f.friend_id);
       const { data: users } = await supabase
         .from('users')
@@ -87,7 +84,6 @@ export default function AddGroupMembersScreen({ navigation, route }: any) {
       const { error } = await supabase.from('group_members').insert(rows);
       if (error) throw error;
 
-      // Send push notifications to each added member
       const tokenFetches = [...selectedIds].map(async (uid) => {
         const token = await getPushToken(uid);
         if (token) await sendPushNotification([token], 'Added to group', `You were added to "${groupName}"`);

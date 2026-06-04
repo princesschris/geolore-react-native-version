@@ -69,8 +69,6 @@ export default function ClassDetailScreen({ navigation, route }: any) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor="#F5A623" />
-
-      {/* Gradient hero header */}
       <LinearGradient
         colors={['#F5A623', '#E8891A']}
         start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
@@ -93,8 +91,6 @@ export default function ClassDetailScreen({ navigation, route }: any) {
       </LinearGradient>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-
-        {/* Info grid */}
         <View style={styles.infoGrid}>
           {[
             { icon: 'person-outline',   label: 'Tutor',  value: classItem.tutor_name },
@@ -111,8 +107,6 @@ export default function ClassDetailScreen({ navigation, route }: any) {
             </View>
           ))}
         </View>
-
-        {/* Capacity bar */}
         {isGroup && (
           <View style={styles.capacityCard}>
             <View style={styles.capacityHeader}>
@@ -127,8 +121,6 @@ export default function ClassDetailScreen({ navigation, route }: any) {
             <Text style={styles.capacitySub}>{classItem.enrolled ?? 0} of {classItem.capacity} enrolled</Text>
           </View>
         )}
-
-        {/* CTA */}
         {loading ? (
           <ActivityIndicator color="#F5A623" style={{ marginTop: 24 }} />
         ) : enrolled ? (
@@ -136,7 +128,7 @@ export default function ClassDetailScreen({ navigation, route }: any) {
             <View style={styles.enrolledIcon}>
               <Ionicons name="checkmark" size={18} color="#27AE60" />
             </View>
-            <Text style={styles.enrolledText}>You're enrolled in this class</Text>
+            <Text style={styles.enrolledText}>You&apos;re enrolled in this class</Text>
           </View>
         ) : (
           <TouchableOpacity

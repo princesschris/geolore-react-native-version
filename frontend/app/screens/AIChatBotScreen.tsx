@@ -9,24 +9,19 @@ import BottomTabBar from '../components/BottomTabBar';
 import BuntingBanner from '../components/BuntingBanner';
 import { createClient } from '@supabase/supabase-js';
 
-// ─── Config ───────────────────────────────────────────────────────────────────
-
 const SUPABASE_URL      = 'https://ypoumpucjsauimirpoil.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlwb3VtcHVjanNhdWltaXJwb2lsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNjMwOTcsImV4cCI6MjA5NDgzOTA5N30.LyF2elLk8cnBsGDA_Y0LLaB8weOJC7Vn-4sISO6FufQ';
 const GROQ_API_KEY      = process.env.EXPO_PUBLIC_GROQ_API_KEY;
-const HF_TOKEN          = process.env.EXPO_PUBLIC_HF_TOKEN; // optional but recommended
+const HF_TOKEN          = process.env.EXPO_PUBLIC_HF_TOKEN; 
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ─── Suggestions ──────────────────────────────────────────────────────────────
 
 const SUGGESTIONS = [
   { id: '1', label: 'What are popular cultural festivals?' },
   { id: '2', label: 'What traditional foods exist?' },
   { id: '3', label: 'Tell me about cultural traditions' },
 ];
-
-// ─── Embedding via HF API (same model used in seeder) ────────────────────────
 
 async function getEmbedding(text: string): Promise<number[] | null> {
   try {
@@ -49,8 +44,6 @@ async function getEmbedding(text: string): Promise<number[] | null> {
   }
 }
 
-// ─── RAG: search Supabase for relevant context ────────────────────────────────
-
 async function searchContext(query: string): Promise<string> {
   try {
     const embedding = await getEmbedding(query);
@@ -71,7 +64,6 @@ async function searchContext(query: string): Promise<string> {
   }
 }
 
-// ─── Groq LLM call ────────────────────────────────────────────────────────────
 
 async function askGroq(question: string, context: string): Promise<string> {
   const systemPrompt = context
@@ -106,7 +98,6 @@ You don't have specific data for this question. Politely let the user know and s
     ?? "I couldn't find an answer. Please try rephrasing your question.";
 }
 
-// ─── Message bubble ───────────────────────────────────────────────────────────
 
 const MessageBubble = ({ message }: any) => (
   <View style={[styles.bubble, message.isUser ? styles.userBubble : styles.botBubble]}>
@@ -120,7 +111,6 @@ const MessageBubble = ({ message }: any) => (
   </View>
 );
 
-// ─── Main screen ──────────────────────────────────────────────────────────────
 
 export default function AIChatBotScreen({ navigation }: any) {
   const [inputText, setInputText] = useState('');
@@ -250,8 +240,6 @@ export default function AIChatBotScreen({ navigation }: any) {
     </SafeAreaView>
   );
 }
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#FFFDF5' },

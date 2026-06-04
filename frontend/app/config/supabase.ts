@@ -17,9 +17,9 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
-    storage:          AsyncStorage,   // persists session across app restarts
+    storage:          AsyncStorage,  
     autoRefreshToken: true,
     persistSession:   true,
-    detectSessionInUrl: false,        // required for React Native
+    etectSessionInUrl: false,        // required for React Native
   },
 });

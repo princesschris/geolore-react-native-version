@@ -44,7 +44,6 @@ const PersonCard = ({ person, status, onAdd }: any) => {
 export default function CommunityAddScreen({ navigation }: any) {
   const [searchQuery,  setSearchQuery]  = useState('');
   const [users,        setUsers]        = useState<any[]>([]);
-  // Map of user_id → 'pending' | 'accepted'
   const [statusMap,    setStatusMap]    = useState<Record<string, string>>({});
   const [loading,      setLoading]      = useState(true);
   const { user } = useAuth();
@@ -57,23 +56,17 @@ export default function CommunityAddScreen({ navigation }: any) {
         .from('users')
         .select('id, first_name, last_name, country_of_origin, tribe')
         .neq('id', user.id);
-
-      // Get all friend rows involving the current user (sent or received)
       const { data: friendRows } = await supabase
         .from('friends')
         .select('user_id, friend_id, status')
         .or(`user_id.eq.${user.id},friend_id.eq.${user.id}`);
-
-      // Build a status map keyed by the OTHER person's id
       const map: Record<string, string> = {};
       for (const row of friendRows ?? []) {
         const otherId = row.user_id === user.id ? row.friend_id : row.user_id;
         const isSentByMe = row.user_id === user.id;
-        // connected always wins
         if (row.status === 'connected') {
           map[otherId] = 'connected';
         }
-        // pending only counts if WE sent it — not if we received it
         else if (row.status === 'pending' && isSentByMe && map[otherId] !== 'connected') {
           map[otherId] = 'pending';
         }
@@ -105,7 +98,6 @@ export default function CommunityAddScreen({ navigation }: any) {
     console.log('[AddFriend] person.id:', person.id);
 
     if (error) {
-      // Revert button
       setStatusMap((prev) => {
         const next = { ...prev };
         delete next[person.id];
@@ -114,7 +106,6 @@ export default function CommunityAddScreen({ navigation }: any) {
       return;
     }
 
-    // Push notification — fire and forget, don't let it block or revert
     getPushToken(person.id).then((token) => {
       if (token) {
         const myName = user?.first_name

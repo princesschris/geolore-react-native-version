@@ -57,9 +57,7 @@ const RadioOption = ({ label, selected, onPress }: any) => (
 );
 
 export default function AddEventScreen({ navigation, route }: any) {
-  // Pre-filled invitees passed from UserInfoScreen or GroupInfoScreen
-  // e.g. { id, name, type: 'user' | 'group' }
-  const initialInvitee = route?.params?.invitee ?? null;
+   const initialInvitee = route?.params?.invitee ?? null;
 
   const [eventName,       setEventName]       = useState('');
   const [description,     setDescription]     = useState('');
@@ -73,7 +71,6 @@ export default function AddEventScreen({ navigation, route }: any) {
   const [selectedColor,   setSelectedColor]   = useState('#F5A623');
   const [loading,         setLoading]         = useState(false);
 
-  // Invitees list — starts with whoever was passed in
   const [invitees, setInvitees] = useState<{ id: string; name: string; type: 'user' | 'group' }[]>(
     initialInvitee ? [initialInvitee] : []
   );
@@ -131,12 +128,10 @@ export default function AddEventScreen({ navigation, route }: any) {
 
       if (error) throw error;
 
-      // Send event invitations to all invitees via a chat message
       if (eventData && invitees.length > 0) {
         const inviteText = `📅 You've been invited to *${eventName.trim()}*${date ? ` on ${buildDateLabel(date)}` : ''}${location.trim() ? ` at ${location.trim()}` : ''}.`;
         for (const invitee of invitees) {
           if (invitee.type === 'user') {
-            // Find or create a DM between current user and invitee
             await supabase.from('messages').insert({
               sender_id:    user?.id,
               receiver_id:  invitee.id,
@@ -298,7 +293,6 @@ const styles = StyleSheet.create({
   fieldBtn: { borderBottomWidth: 1, borderBottomColor: '#E0D0B8', paddingVertical: 8 },
   fieldBtnText: { fontSize: 13, color: '#3B1F00', fontWeight: '500' },
   fieldPlaceholder: { color: '#C4B49A' },
-  // Invitees
   inviteeList: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 },
   inviteeChip: {
     flexDirection: 'row', alignItems: 'center', gap: 6,

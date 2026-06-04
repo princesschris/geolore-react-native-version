@@ -6,43 +6,13 @@ import {
   StyleSheet,
   SafeAreaView,
   StatusBar,
+  Image,
   Animated,
   Vibration,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Svg, {
-  Circle,
-  Ellipse,
-  Line,
-  Path,
-  Rect,
-  Polygon,
-} from 'react-native-svg';
 
-// Globe + Tree logo
-const GlobeWithTree = () => (
-  <Svg width="160" height="160" viewBox="0 0 70 70" fill="none">
-    <Circle cx="35" cy="35" r="32" stroke="#F5A623" strokeWidth="2" fill="none" />
-    <Ellipse cx="35" cy="35" rx="14" ry="32" stroke="#F5A623" strokeWidth="1.2" fill="none" />
-    <Line x1="3" y1="35" x2="67" y2="35" stroke="#F5A623" strokeWidth="1.2" />
-    <Line x1="7" y1="23" x2="63" y2="23" stroke="#F5A623" strokeWidth="0.8" />
-    <Line x1="7" y1="47" x2="63" y2="47" stroke="#F5A623" strokeWidth="0.8" />
-    <Path
-      d="M28 22 Q30 20 33 21 Q36 22 37 25 Q38 29 36 33 Q34 37 33 40 Q32 43 30 42 Q27 40 26 36 Q24 31 25 27 Z"
-      fill="#F5A623"
-      opacity="0.85"
-    />
-    <Rect x="33.5" y="15" width="2.5" height="10" rx="1.2" fill="#D97706" />
-    <Polygon points="34.5,4 40,13 29,13" fill="#F5A623" />
-    <Polygon points="34.5,8 41,17 28,17" fill="#F5A623" />
-    <Polygon points="34.5,12 42,21 27,21" fill="#D97706" opacity="0.75" />
-    <Path d="M34.5 25 Q30 29 26 29" stroke="#D97706" strokeWidth="1.2" fill="none" strokeLinecap="round" />
-    <Path d="M34.5 25 Q39 29 43 29" stroke="#D97706" strokeWidth="1.2" fill="none" strokeLinecap="round" />
-  </Svg>
-);
-
-// Pulsing ring animation around call buttons
-const PulseRing = ({ color }) => {
+const PulseRing = ({ color }:any) => {
   const scale = useRef(new Animated.Value(1)).current;
   const opacity = useRef(new Animated.Value(0.6)).current;
 
@@ -73,7 +43,7 @@ const PulseRing = ({ color }) => {
   );
 };
 
-export default function IncomingClassScreen({ navigation, route }) {
+export default function IncomingClassScreen({ navigation, route }:any) {
   const teacherName = route?.params?.teacher?.name ?? 'Princess';
 
   const handleAccept = () => {
@@ -85,7 +55,6 @@ export default function IncomingClassScreen({ navigation, route }) {
   };
 
   const handleDelay = () => {
-    // Could set a reminder and go back
     navigation?.goBack();
   };
 
@@ -94,22 +63,16 @@ export default function IncomingClassScreen({ navigation, route }) {
       <StatusBar barStyle="dark-content" backgroundColor="#FFFDF5" />
 
       <View style={styles.container}>
-        {/* Top section — Logo */}
         <View style={styles.topSection}>
           <View style={styles.logoWrapper}>
-            <GlobeWithTree />
+           <Image source={require('../../assets/images/logo.png')} style={styles.logo}/>
           </View>
         </View>
-
-        {/* Middle section — Message */}
         <View style={styles.middleSection}>
           <Text style={styles.lessonText}>It&apos;s time for your lesson with</Text>
           <Text style={styles.teacherName}>{teacherName}</Text>
         </View>
-
-        {/* Call Buttons */}
         <View style={styles.callButtonsRow}>
-          {/* Accept */}
           <View style={styles.callButtonWrapper}>
             <PulseRing color="#2ECC71" />
             <TouchableOpacity
@@ -183,6 +146,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: '500',
   },
+  logo: {
+  width: 240,
+  height: 240,
+  // resizeMode: 'contain',
+},
   teacherName: {
     fontSize: 22,
     fontWeight: '800',

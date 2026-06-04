@@ -1,15 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
-//  components/CountryPicker.tsx
-//
-//  Searchable country dropdown with flag emojis.
-//  Usage:
-//    <CountryPicker
-//      label="Country of origin"
-//      selected={country}
-//      onSelect={(c) => setCountry(c)}
-//    />
-// ─────────────────────────────────────────────────────────────────────────────
-
 import React, { useState, useMemo } from 'react';
 import {
   View,
@@ -173,7 +161,6 @@ const styles = StyleSheet.create({
     fontWeight: '400',
   },
 
-  // Modal
   modalContainer: {
     flex: 1,
     backgroundColor: '#FFFDF5',

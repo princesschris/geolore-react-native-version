@@ -13,7 +13,6 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import BuntingBanner from '../components/BuntingBanner';
 
-// Flag grid data — same palette as mockup
 const FLAGS = ['🇳🇬', '🇬🇧', '🇺🇸', '🇫🇷', '🇩🇪', '🇯🇵', '🇧🇷', '🇿🇦', '🇮🇳', '🇨🇳', '🇪🇸', '🇮🇹'];
 
 export default function TellUsAboutYourselfScreen({ navigation }: any) {
@@ -26,8 +25,6 @@ export default function TellUsAboutYourselfScreen({ navigation }: any) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFDF5" />
-
-      {/* Top bar icons */}
       <View style={styles.topBar}>
         <View style={styles.topBarRight}>
           <TouchableOpacity style={styles.iconBtn}>
@@ -48,14 +45,11 @@ export default function TellUsAboutYourselfScreen({ navigation }: any) {
       >
         <Text style={styles.heading}>Tell us about yourself</Text>
 
-        {/* Avatar placeholder */}
         <View style={styles.avatarRow}>
           <View style={styles.avatarCircle}>
             <Ionicons name="person" size={40} color="#C4A882" />
           </View>
         </View>
-
-        {/* Flag grid */}
         <View style={styles.flagGrid}>
           {FLAGS.map((flag) => (
             <TouchableOpacity

@@ -3,7 +3,7 @@
 export interface Country {
   name: string;
   flag: string;
-  code: string; // ISO 3166-1 alpha-2
+  code: string; 
 }
 
 export const COUNTRIES: Country[] = [

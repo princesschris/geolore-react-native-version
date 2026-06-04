@@ -15,7 +15,7 @@ import TopBar from '../components/TopBar';
 import BuntingBanner from '../components/BuntingBanner';
 import TopTabBar from '../components/TopTabBar';
 
-const SettingRow = ({ icon, label, value, onPress, isSwitch, switchValue, onSwitchChange }) => (
+const SettingRow = ({ icon, label, value, onPress, isSwitch, switchValue, onSwitchChange }:any) => (
   <TouchableOpacity
     style={styles.settingRow}
     onPress={onPress}
@@ -41,7 +41,7 @@ const SettingRow = ({ icon, label, value, onPress, isSwitch, switchValue, onSwit
   </TouchableOpacity>
 );
 
-export default function SettingsScreen({ navigation }) {
+export default function SettingsScreen({ navigation }:any) {
   const [searchQuery, setSearchQuery] = useState('');
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
@@ -59,7 +59,6 @@ export default function SettingsScreen({ navigation }) {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Account */}
         <Text style={styles.sectionHeader}>Account</Text>
         <View style={styles.settingsGroup}>
           <SettingRow
@@ -84,8 +83,6 @@ export default function SettingsScreen({ navigation }) {
             onPress={() => {}}
           />
         </View>
-
-        {/* Notifications */}
         <Text style={styles.sectionHeader}>Notifications</Text>
         <View style={styles.settingsGroup}>
           <SettingRow
@@ -103,8 +100,6 @@ export default function SettingsScreen({ navigation }) {
             onSwitchChange={setNotifications}
           />
         </View>
-
-        {/* Privacy */}
         <Text style={styles.sectionHeader}>Privacy</Text>
         <View style={styles.settingsGroup}>
           <SettingRow
@@ -122,8 +117,6 @@ export default function SettingsScreen({ navigation }) {
             onSwitchChange={setDarkMode}
           />
         </View>
-
-        {/* Support */}
         <Text style={styles.sectionHeader}>Support</Text>
         <View style={styles.settingsGroup}>
           <SettingRow
@@ -142,8 +135,6 @@ export default function SettingsScreen({ navigation }) {
             onPress={() => {}}
           />
         </View>
-
-        {/* Log Out */}
         <TouchableOpacity
           style={styles.logoutBtn}
           activeOpacity={0.8}

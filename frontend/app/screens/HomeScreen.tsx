@@ -68,8 +68,6 @@ const CATEGORIES = [
 
 export default function HomeScreen({ navigation }: any) {
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Filter categories based on search query
   const filtered = CATEGORIES.filter((cat) =>
     cat.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -77,18 +75,13 @@ export default function HomeScreen({ navigation }: any) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFDF5" />
-
-      {/* Top Bar */}
       <TopBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
-
-      {/* Bunting Banner */}
       <BuntingBanner />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Banner */}
         <View style={styles.banner}>
           <Text style={styles.bannerText}>There&apos;s a whole world{'\n'}to discover</Text>
           <Image
@@ -96,8 +89,6 @@ export default function HomeScreen({ navigation }: any) {
             style={styles.logo}
           />
         </View>
-
-        {/* Category Cards */}
         {filtered.map((cat) => (
           <CategoryCard
             key={cat.key}
@@ -106,8 +97,6 @@ export default function HomeScreen({ navigation }: any) {
             onDiscover={() => navigation?.navigate(cat.screen)}
           />
         ))}
-
-        {/* Empty search state */}
         {filtered.length === 0 && (
           <View style={styles.emptyState}>
             <Ionicons name="search-outline" size={40} color="#C4A882" />
@@ -115,8 +104,6 @@ export default function HomeScreen({ navigation }: any) {
           </View>
         )}
       </ScrollView>
-
-      {/* Bottom Tab Bar — no props needed, uses useRoute internally */}
       <BottomTabBar />
     </SafeAreaView>
   );

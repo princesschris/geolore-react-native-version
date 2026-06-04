@@ -23,7 +23,6 @@ export default function PrivacyPolicyScreen({ navigation }) {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Orange card */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>PRIVACY POLICY</Text>
 
@@ -78,8 +77,6 @@ export default function PrivacyPolicyScreen({ navigation }) {
             significant changes by sending a notification through the app.
           </Text>
         </View>
-
-        {/* Back Button */}
         <TouchableOpacity
           style={styles.backButton}
           activeOpacity={0.8}
