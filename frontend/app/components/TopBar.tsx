@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import SearchBar from './SearchBar';
@@ -20,6 +21,7 @@ export default function TopBar({
   const navigation = useNavigation<any>();
   const isFocused  = useIsFocused();
   const { user }   = useAuth();
+  const insets     = useSafeAreaInsets();
   const [unread, setUnread] = useState(0);
 
   // Stable unique channel name per component instance — never collides across screens
@@ -69,7 +71,7 @@ export default function TopBar({
   }, [isFocused]);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top + 10 }]}>
       {showSearch && (
         <SearchBar
           value={searchQuery}
@@ -114,7 +116,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingTop: 20,
+    paddingTop: 20, // overridden dynamically via insets
     paddingBottom: 10,
     gap: 10,
   },

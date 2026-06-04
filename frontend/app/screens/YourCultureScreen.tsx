@@ -63,7 +63,6 @@ export default function YourCultureScreen({ navigation }: any) {
     }
   };
 
-  // Tutor (or anyone) hasn't set a tribe yet — show setup prompt
   if (!cultureName) {
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -72,7 +71,7 @@ export default function YourCultureScreen({ navigation }: any) {
 
         <ScrollView contentContainerStyle={styles.setupContent} keyboardShouldPersistTaps="handled">
           <Text style={styles.setupEmoji}>🌍</Text>
-          <Text style={styles.setupTitle}>What's your culture?</Text>
+          <Text style={styles.setupTitle}>What&apos;s your culture?</Text>
           <Text style={styles.setupSubtitle}>
             Enter your tribe or ethnicity so we can personalise your experience.
           </Text>
@@ -117,14 +116,13 @@ export default function YourCultureScreen({ navigation }: any) {
         </View>
 
         {filtered.map((cat) => (
-          <View key={cat.key} style={styles.cardWrapper}>
-            <CategoryCard
-              title={cat.title}
-              imageSource={(cat as any).imageSource}
-              centered
-              onDiscover={() => navigation?.navigate(cat.screen)}
-            />
-          </View>
+          <CategoryCard
+            key={cat.key}
+            title={cat.title}
+            imageSource={(cat as any).imageSource}
+            centered
+            onDiscover={() => navigation?.navigate(cat.screen)}
+          />
         ))}
       </ScrollView>
 
@@ -163,5 +161,4 @@ const styles = StyleSheet.create({
   },
   saveBtnDisabled: { backgroundColor: '#E0C49A' },
   saveBtnText: { color: '#fff', fontWeight: '800', fontSize: 15 },
-  cardWrapper: { width: '100%', alignSelf: 'stretch' },
 });
