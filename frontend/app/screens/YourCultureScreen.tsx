@@ -115,6 +115,22 @@ export default function YourCultureScreen({ navigation }: any) {
     fetchCountries();
   }, []);
 
+  
+  
+  useEffect(() => {
+    const preloadTribes = async () => {
+      const country = user?.country_of_origin;
+      if (!country) return;
+      setSelectedCountry(country);
+      setLoadingTribes(true);
+      const { data } = await supabase
+        .from('tribes').select('tribe').eq('country', country).order('tribe');
+      setTribes((data ?? []).map((r: any) => r.tribe));
+      setLoadingTribes(false);
+    };
+    preloadTribes();
+  }, [user?.country_of_origin]);
+
   const handleSelectCountry = async (country: string) => {
     setSelectedCountry(country);
     setSelectedTribe('');
@@ -160,7 +176,7 @@ export default function YourCultureScreen({ navigation }: any) {
             <Text style={styles.setupHeroSub}>Select your country and tribe to personalise your experience.</Text>
           </LinearGradient>
 
-          {/* Country selector */}
+          {}
           <View style={styles.selectorCard}>
             <View style={styles.selectorHeader}>
               <View style={[styles.selectorIconWrap, selectedCountry && styles.selectorIconDone]}>
@@ -180,7 +196,7 @@ export default function YourCultureScreen({ navigation }: any) {
             </TouchableOpacity>
           </View>
 
-          {/* Tribe selector */}
+          {}
           {selectedCountry ? (
             <View style={styles.selectorCard}>
               <View style={styles.selectorHeader}>
@@ -264,7 +280,7 @@ export default function YourCultureScreen({ navigation }: any) {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <TouchableOpacity
           style={styles.cultureHeader}
-          onPress={() => setShowCountryPicker(true)}
+          onPress={() => setShowTribePicker(true)}
           activeOpacity={0.8}
         >
           <Text style={styles.cultureName}>{cultureName.toUpperCase()}</Text>

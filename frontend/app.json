@@ -8,6 +8,7 @@
     "scheme": "geolore",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+     "assetBundlePatterns": ["assets/**"],
     "ios": {
       "supportsTablet": true
     },
@@ -22,7 +23,6 @@
       "predictiveBackGestureEnabled": false,
       "permissions": [
         "NOTIFICATIONS",
-        "NOTIFICATIONS"
       ],
       "package": "com.the_real_teee.geolore"
     },
@@ -50,6 +50,11 @@
           // "icon": "./assets/notification-icon.png",
           // "color": "#F5A623",
           // "sounds": []
+        }
+      ],
+      [
+        "expo-asset",{
+          "assets":["data/cultures/igbo.md","data/cultures/yoruba.md"]
         }
       ]
     ],

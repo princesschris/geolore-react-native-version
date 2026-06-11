@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #1A1A1A; width: 100vw; height: 100vh; overflow: hidden; }
+    #remote-video { width: 100%; height: 100%; object-fit: cover; }
+    #local-video  { position: absolute; bottom: 12px; right: 12px;
+                    width: 100px; height: 140px; object-fit: cover;
+                    border-radius: 10px; border: 2px solid #F5A623; }
+  </style>
+</head>
+<body>
+  <div id="remote-video"></div>
+  <div id="local-video"></div>
+
+  <script>
+    const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+    let localAudioTrack, localVideoTrack;
+
+    // Receive commands from React Native
+    window.addEventListener('message', async (e) => {
+      const { type, appId, channel, token, uid } = JSON.parse(e.data);
+
+      if (type === 'JOIN') {
+        await client.join(appId, channel, token ?? null, uid ?? null);
+        [localAudioTrack, localVideoTrack] = await AgoraRTC.createMicrophoneAndCameraTracks();
+        localVideoTrack.play('local-video');
+        await client.publish([localAudioTrack, localVideoTrack]);
+        notify('JOINED');
+      }
+      if (type === 'MUTE')        { await localAudioTrack?.setMuted(true);  notify('MUTED'); }
+      if (type === 'UNMUTE')      { await localAudioTrack?.setMuted(false); notify('UNMUTED'); }
+      if (type === 'CAM_OFF')     { await localVideoTrack?.setMuted(true);  notify('CAM_OFF'); }
+      if (type === 'CAM_ON')      { await localVideoTrack?.setMuted(false); notify('CAM_ON'); }
+      if (type === 'LEAVE') {
+        localAudioTrack?.close(); localVideoTrack?.close();
+        await client.leave();
+        notify('LEFT');
+      }
+    });
+
+    // Remote user joined
+    client.on('user-published', async (user, mediaType) => {
+      await client.subscribe(user, mediaType);
+      if (mediaType === 'video') user.videoTrack?.play('remote-video');
+      if (mediaType === 'audio') user.audioTrack?.play();
+    });
+
+    client.on('user-unpublished', (user) => {
+      // handle remote leaving
+    });
+
+    function notify(type, payload = {}) {
+      window.ReactNativeWebView?.postMessage(JSON.stringify({ type, ...payload }));
+    }
+
+    // Signal ready to React Native
+    window.onload = () => notify('READY');
+  </script>
+</body>
+</html>

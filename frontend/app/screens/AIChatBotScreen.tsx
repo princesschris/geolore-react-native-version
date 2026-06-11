@@ -5,17 +5,16 @@ import {
   Platform, ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { createClient } from '@supabase/supabase-js';
 import BottomTabBar from '../components/BottomTabBar';
 import BuntingBanner from '../components/BuntingBanner';
-import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL      = 'https://ypoumpucjsauimirpoil.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlwb3VtcHVjanNhdWltaXJwb2lsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNjMwOTcsImV4cCI6MjA5NDgzOTA5N30.LyF2elLk8cnBsGDA_Y0LLaB8weOJC7Vn-4sISO6FufQ';
-const GROQ_API_KEY      = process.env.EXPO_PUBLIC_GROQ_API_KEY;
-const HF_TOKEN          = process.env.EXPO_PUBLIC_HF_TOKEN; 
+const GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+const supabase = createClient(
+  process.env.EXPO_PUBLIC_SUPABASE_URL!,
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 const SUGGESTIONS = [
   { id: '1', label: 'What are popular cultural festivals?' },
@@ -23,81 +22,80 @@ const SUGGESTIONS = [
   { id: '3', label: 'Tell me about cultural traditions' },
 ];
 
-async function getEmbedding(text: string): Promise<number[] | null> {
-  try {
-    const res = await fetch(
-      'https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-MiniLM-L6-v2',
-      {
-        method:  'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(HF_TOKEN ? { Authorization: `Bearer ${HF_TOKEN}` } : {}),
-        },
-        body: JSON.stringify({ inputs: text.slice(0, 500), options: { wait_for_model: true } }),
-      }
-    );
-    if (!res.ok) return null;
-    const json = await res.json() as number[] | number[][];
-    return Array.isArray(json[0]) ? (json as number[][])[0] : (json as number[]);
-  } catch {
-    return null;
-  }
+// ── RAG helpers ───────────────────────────────────────────────────────────────
+
+async function getEmbedding(text: string): Promise<number[]> {
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2:embedContent?key=${GEMINI_API_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'models/gemini-embedding-2',
+        content: { parts: [{ text }] },
+      }),
+    }
+  );
+  const data = await response.json();
+  if ((data as any)?.error) throw new Error((data as any).error.message);
+  return (data as any).embedding.values;
 }
 
-async function searchContext(query: string): Promise<string> {
-  try {
-    const embedding = await getEmbedding(query);
-    if (!embedding) return '';
+async function getRelevantContext(question: string): Promise<string> {
+  const embedding = await getEmbedding(question);
 
-    const { data, error } = await supabase.rpc('match_culture_content', {
-      query_embedding: embedding,
-      match_count: 5,
-    });
-
-    if (error || !data || data.length === 0) return '';
-
-    return data
-      .map((row: any) => `[${row.culture} — ${row.category}] ${row.title}:\n${row.content}`)
-      .join('\n\n');
-  } catch {
-    return '';
-  }
-}
-
-
-async function askGroq(question: string, context: string): Promise<string> {
-  const systemPrompt = context
-    ? `You are a friendly and knowledgeable African cultural assistant for the GeoLore app.
-Answer questions ONLY using the cultural context provided below.
-If the answer is not in the context, say: "I don't have information on that in my cultural database."
-Be clear, warm, and informative. Keep answers concise.
-
-CULTURAL CONTEXT:
-${context}`
-    : `You are a friendly African cultural assistant for the GeoLore app.
-You don't have specific data for this question. Politely let the user know and suggest they ask about Nigerian tribes, traditions, food, fashion, or festivals.`;
-
-  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type':  'application/json',
-      'Authorization': `Bearer ${GROQ_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model:      'llama3-8b-8192',
-      max_tokens: 512,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user',   content: question },
-      ],
-    }),
+  const { data, error } = await supabase.rpc('match_culture_chunks', {
+    query_embedding: embedding,
+    match_count: 5,
   });
 
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content
-    ?? "I couldn't find an answer. Please try rephrasing your question.";
+  if (error || !data?.length) return '';
+
+  return data
+    .map((row: any) => `[${row.tribe.toUpperCase()}]\n${row.content}`)
+    .join('\n\n');
 }
 
+async function askGemini(question: string): Promise<string> {
+  const context = await getRelevantContext(question);
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: {
+          parts: [{
+            text: `You are a friendly and knowledgeable African cultural assistant for the GeoLore app.
+Answer questions using ONLY the cultural data provided below.
+If the answer is not in the data, say: "I don't have information on that in my cultural database."
+Be clear, warm, and informative. Keep answers concise and easy to read.
+
+RELEVANT CULTURAL DATA:
+${context}`,
+          }],
+        },
+        contents: [{ parts: [{ text: question }] }],
+        generationConfig: {
+          temperature:     0.4,
+          maxOutputTokens: 512,
+        },
+      }),
+    }
+  );
+
+  const data = await response.json();
+  if ((data as any)?.error) {
+    console.error('Gemini error:', (data as any).error.message);
+    return "Something went wrong with the AI. Please try again.";
+  }
+
+  return (data as any).candidates?.[0]?.content?.parts?.[0]?.text
+    ?? "I couldn't find an answer. Please try again.";
+}
+
+// ── components ────────────────────────────────────────────────────────────────
 
 const MessageBubble = ({ message }: any) => (
   <View style={[styles.bubble, message.isUser ? styles.userBubble : styles.botBubble]}>
@@ -111,6 +109,7 @@ const MessageBubble = ({ message }: any) => (
   </View>
 );
 
+// ── screen ────────────────────────────────────────────────────────────────────
 
 export default function AIChatBotScreen({ navigation }: any) {
   const [inputText, setInputText] = useState('');
@@ -127,19 +126,18 @@ export default function AIChatBotScreen({ navigation }: any) {
     setIsLoading(true);
     setInputText('');
 
-    
     const userId    = `user-${Date.now()}-${Math.random()}`;
-  const loadingId = `bot-${Date.now()}-${Math.random()}`;
-  setMessages(prev => [
-    ...prev,
-    { id: userId,    text: msg, isUser: true },
-    { id: loadingId, text: '', isUser: false, isLoading: true },
-  ]);
+    const loadingId = `bot-${Date.now()}-${Math.random()}`;
+
+    setMessages(prev => [
+      ...prev,
+      { id: userId,    text: msg, isUser: true },
+      { id: loadingId, text: '',  isUser: false, isLoading: true },
+    ]);
     setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
 
     try {
-      const context  = await searchContext(msg);
-      const botReply = await askGroq(msg, context);
+      const botReply = await askGemini(msg);
       setMessages(prev =>
         prev.map(m => m.id === loadingId ? { ...m, text: botReply, isLoading: false } : m)
       );
@@ -191,7 +189,12 @@ export default function AIChatBotScreen({ navigation }: any) {
             <Text style={styles.welcomeTitle}>What can I help with?</Text>
             <View style={styles.chipsRow}>
               {SUGGESTIONS.map(s => (
-                <TouchableOpacity key={s.id} style={styles.chip} activeOpacity={0.8} onPress={() => handleSend(s.label)}>
+                <TouchableOpacity
+                  key={s.id}
+                  style={styles.chip}
+                  activeOpacity={0.8}
+                  onPress={() => handleSend(s.label)}
+                >
                   <Ionicons name="chatbubble-outline" size={13} color="#F5A623" />
                   <Text style={styles.chipText}>{s.label}</Text>
                 </TouchableOpacity>
@@ -199,7 +202,11 @@ export default function AIChatBotScreen({ navigation }: any) {
             </View>
           </ScrollView>
         ) : (
-          <ScrollView ref={scrollRef} contentContainerStyle={styles.chatContent} showsVerticalScrollIndicator={false}>
+          <ScrollView
+            ref={scrollRef}
+            contentContainerStyle={styles.chatContent}
+            showsVerticalScrollIndicator={false}
+          >
             {messages.map(msg => <MessageBubble key={msg.id} message={msg} />)}
           </ScrollView>
         )}
